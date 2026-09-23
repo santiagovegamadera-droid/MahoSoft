@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import {
-  ArrowLeftRight,
   ChartColumn,
   ChevronDown,
   LayoutDashboard,
@@ -19,12 +18,11 @@ const nav = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, group: 'Principal' },
   { id: 'pos', label: 'Punto de Venta', icon: ShoppingCart, group: 'Operaciones' },
   {
-    id: 'compras',
+    id: 'purchases',
     label: 'Compras',
     icon: ShoppingBasket,
     group: 'Operaciones',
     children: [
-      { id: 'purchases', label: 'Movimientos', icon: ArrowLeftRight },
       { id: 'products', label: 'Productos', icon: Shirt, match: ['product-detail'] },
       { id: 'categories', label: 'Categorías', icon: Tags },
     ],
@@ -37,13 +35,13 @@ const nav = [
 
 const isActive = (item, current) => item.id === current || (item.match?.includes(current) ?? false);
 
-function NavButton({ item, active, onClick, nested = false, children }) {
+function NavButton({ item, active, onClick, nested = false }) {
   const Icon = item.icon;
   return (
     <button
       onClick={onClick}
-      className={`w-full flex items-center gap-3 px-3 rounded-lg mb-0.5 text-sm font-medium transition-all duration-150 text-left border-l-2 ${
-        nested ? 'py-2' : 'py-2.5'
+      className={`w-full flex items-center gap-3 pl-3 rounded-lg mb-0.5 text-sm font-medium transition-all duration-150 text-left border-l-2 ${
+        nested ? 'py-2 pr-3' : 'py-2.5 pr-10'
       } ${
         active
           ? 'bg-white/12 text-white border-brand-400'
@@ -52,7 +50,6 @@ function NavButton({ item, active, onClick, nested = false, children }) {
     >
       <Icon size={nested ? 16 : 18} strokeWidth={1.75} className={active ? 'opacity-100' : 'opacity-70'} />
       {item.label}
-      {children}
     </button>
   );
 }
@@ -92,16 +89,21 @@ export default function Sidebar({ current, onChange, onLogout }) {
                 const open = openMenus[item.id] ?? childActive;
                 return (
                   <div key={item.id}>
-                    <NavButton
-                      item={item}
-                      active={childActive && !open}
-                      onClick={() => setOpenMenus((prev) => ({ ...prev, [item.id]: !open }))}
-                    >
-                      <ChevronDown
-                        size={16}
-                        className={`ml-auto opacity-70 transition-transform ${open ? 'rotate-180' : ''}`}
+                    <div className="relative">
+                      <NavButton
+                        item={item}
+                        active={isActive(item, current) || (childActive && !open)}
+                        onClick={() => onChange(item.id)}
                       />
-                    </NavButton>
+                      <button
+                        onClick={() => setOpenMenus((prev) => ({ ...prev, [item.id]: !open }))}
+                        className="absolute right-1.5 top-1/2 -translate-y-1/2 p-1 rounded-md text-brand-200/75 transition-colors hover:bg-white/10 hover:text-white"
+                        aria-label={open ? `Ocultar opciones de ${item.label}` : `Mostrar opciones de ${item.label}`}
+                        aria-expanded={open}
+                      >
+                        <ChevronDown size={16} className={`transition-transform ${open ? 'rotate-180' : ''}`} />
+                      </button>
+                    </div>
                     {open && (
                       <div className="ml-4 pl-2 border-l border-white/10">
                         {item.children.map((child) => (
