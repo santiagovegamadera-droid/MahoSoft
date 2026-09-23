@@ -34,10 +34,15 @@ export default function App() {
     setEditingProduct(undefined);
     setView('product-detail');
   }
+  function logout() {
+    setAuthenticated(false);
+    setView('dashboard');
+    setEditingProduct(undefined);
+  }
 
   return (
     <div className="flex min-h-screen bg-canvas">
-      <Sidebar current={view} onChange={setView} />
+      <Sidebar current={view} onChange={setView} onLogout={logout} />
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <Header current={view} onNewProduct={newProduct} />
         <main className="flex-1 overflow-y-auto">

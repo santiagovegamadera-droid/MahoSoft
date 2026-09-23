@@ -24,7 +24,7 @@ const nav = [
   { id: 'reports', label: 'Reportes', icon: ChartColumn, group: 'Análisis' },
 ];
 
-export default function Sidebar({ current, onChange }) {
+export default function Sidebar({ current, onChange, onLogout }) {
   const groups = [...new Set(nav.map((n) => n.group))];
 
   return (
@@ -74,6 +74,7 @@ export default function Sidebar({ current, onChange }) {
             <p className="text-[10px] truncate text-brand-200/55">Admin · Maho Boutique</p>
           </div>
           <button
+            onClick={onLogout}
             className="p-1 rounded transition-colors text-brand-200/55 hover:text-white"
             title="Cerrar sesión"
             aria-label="Cerrar sesión"
