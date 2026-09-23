@@ -3,7 +3,7 @@ import { Banknote, Check, CreditCard, Landmark, Minus, Plus, ShoppingBag, X } fr
 import saleTotals from '@/features/sales/saleTotals';
 import { registerSale as saveSale } from '@/features/sales/store';
 import useProducts, { totalStock } from '@/features/products/store';
-import useCategories from '@/features/categories/store';
+import useCategories, { isActiveCategory } from '@/features/categories/store';
 
 export default function POS() {
   const { items: products } = useProducts();
@@ -15,7 +15,10 @@ export default function POS() {
   const [completed, setCompleted] = useState(null);
   const [customer, setCustomer] = useState('');
 
-  const catalog = products.filter((p) => p.estado === 'Activo');
+  // Only active products from active categories can be sold
+  const catalog = products.filter(
+    (p) => p.estado === 'Activo' && isActiveCategory(categories.find((c) => c.id === p.catId)),
+  );
   const catName = (id) => categories.find((c) => c.id === id)?.name ?? 'Otros';
   const cats = ['Todos', ...Array.from(new Set(catalog.map((p) => catName(p.catId))))];
   const filtered = catFilter === 'Todos' ? catalog : catalog.filter((p) => catName(p.catId) === catFilter);

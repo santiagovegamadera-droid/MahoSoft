@@ -1,15 +1,15 @@
 import { useState } from 'react';
 import { Plus } from 'lucide-react';
-import useCategories from '@/features/categories/store';
+import useCategories, { isActiveCategory } from '@/features/categories/store';
 import useProducts from '@/features/products/store';
 import Modal from '@/shared/components/Modal';
 import ConfirmDialog from '@/shared/components/ConfirmDialog';
-import { Button, Field, RowActions, inputClass } from '@/shared/components/Form';
+import { Button, Field, RowActions, StatusToggle, inputClass } from '@/shared/components/Form';
 
-const emptyCategory = { name: '', descripcion: '', temporada: '', img: '' };
+const emptyCategory = { name: '', descripcion: '', temporada: '', img: '', estado: 'Activo' };
 
 function CategoryForm({ category, onSave, onClose }) {
-  const [form, setForm] = useState(category ?? emptyCategory);
+  const [form, setForm] = useState(category ? { estado: 'Activo', ...category } : emptyCategory);
   const [error, setError] = useState('');
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
 
@@ -57,6 +57,9 @@ function CategoryForm({ category, onSave, onClose }) {
         <Field label="URL de la imagen">
           <input value={form.img} onChange={set('img')} placeholder="https://..." className={inputClass} />
         </Field>
+        <Field label="Estado" group>
+          <StatusToggle value={form.estado} onChange={(estado) => setForm((f) => ({ ...f, estado }))} />
+        </Field>
       </form>
     </Modal>
   );
@@ -91,7 +94,7 @@ export default function Categories() {
         <table className="w-full text-sm">
           <thead>
             <tr className="bg-brand-50">
-              {['Categoría', 'Temporada', 'Productos', 'Activos', 'Inactivos', ''].map((h) => (
+              {['Categoría', 'Temporada', 'Productos', 'Activos', 'Inactivos', 'Estado', ''].map((h) => (
                 <th
                   key={h}
                   className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-brand-600"
@@ -130,6 +133,13 @@ export default function Categories() {
                   <td className="px-5 py-3 font-semibold text-brand-800">{catProducts.length}</td>
                   <td className="px-5 py-3 font-semibold text-success">{activos}</td>
                   <td className="px-5 py-3 font-semibold text-danger">{catProducts.length - activos}</td>
+                  <td className="px-5 py-3">
+                    <StatusToggle
+                      value={isActiveCategory(cat) ? 'Activo' : 'Inactivo'}
+                      label={cat.name}
+                      onChange={(estado) => update(cat.id, { estado })}
+                    />
+                  </td>
                   <td className="px-5 py-3">
                     <RowActions label={cat.name} onEdit={() => setEditing(cat)} onDelete={() => setDeleting(cat)} />
                   </td>

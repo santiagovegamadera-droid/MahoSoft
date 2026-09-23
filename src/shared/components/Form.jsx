@@ -63,12 +63,13 @@ export function StatusToggle({ value, onChange, label }) {
       type="button"
       role="switch"
       aria-checked={active}
-      aria-label={label ? `Estado de ${label}` : 'Estado'}
+      aria-label={label ? `${label} activo` : 'Activo'}
       onClick={(e) => {
         e.stopPropagation();
         onChange(active ? 'Inactivo' : 'Activo');
       }}
-      className="group inline-flex items-center gap-2"
+      title={value}
+      className="inline-flex items-center"
     >
       <span
         className={`relative inline-flex h-5 w-9 shrink-0 rounded-full transition-colors ${
@@ -81,7 +82,6 @@ export function StatusToggle({ value, onChange, label }) {
           }`}
         />
       </span>
-      <span className={`text-xs font-semibold ${active ? 'text-success' : 'text-muted'}`}>{value}</span>
     </button>
   );
 }

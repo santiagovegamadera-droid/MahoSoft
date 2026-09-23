@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ArrowLeft, Plus, Trash2, X } from 'lucide-react';
 import useProducts, { SIZE_GROUPS } from '@/features/products/store';
-import useCategories from '@/features/categories/store';
+import useCategories, { isActiveCategory } from '@/features/categories/store';
 import useSuppliers from '@/features/suppliers/store';
 import ConfirmDialog from '@/shared/components/ConfirmDialog';
 import { Button, Field, StatusToggle, inputClass } from '@/shared/components/Form';
@@ -119,11 +119,13 @@ export default function ProductDetail({ productId, onBack }) {
                   <Field label="Categoría" error={errors.catId}>
                     <select value={form.catId ?? ''} onChange={setId('catId')} className={inputClass}>
                       <option value="">Elegir…</option>
-                      {categories.map((c) => (
-                        <option key={c.id} value={c.id}>
-                          {c.name}
-                        </option>
-                      ))}
+                      {categories
+                        .filter((c) => isActiveCategory(c) || c.id === form.catId)
+                        .map((c) => (
+                          <option key={c.id} value={c.id}>
+                            {c.name}
+                          </option>
+                        ))}
                     </select>
                   </Field>
                   <Field label="Proveedor">
