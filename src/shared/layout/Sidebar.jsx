@@ -32,10 +32,10 @@ const nav = [
     children: [
       { id: 'products', label: 'Productos', icon: Shirt, match: ['product-detail'] },
       { id: 'categories', label: 'Categorías', icon: Tags },
+      { id: 'suppliers', label: 'Proveedores', icon: Truck },
     ],
   },
   { id: 'customers', label: 'Clientes', icon: Users, group: 'Relaciones' },
-  { id: 'suppliers', label: 'Proveedores', icon: Truck, group: 'Relaciones' },
   { id: 'users', label: 'Usuarios', icon: UserCog, group: 'Relaciones' },
   { id: 'reports', label: 'Reportes', icon: ChartColumn, group: 'Análisis' },
 ];
