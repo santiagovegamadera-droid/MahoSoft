@@ -35,6 +35,9 @@ export default function Login({ onLogin }) {
             Gestiona tu boutique con elegancia y precisión.
           </p>
         </div>
+
+        {/* Spacer: keeps the headline vertically centered */}
+        <div />
       </div>
 
       {/* Right panel */}
