@@ -178,68 +178,6 @@ export default function Reports() {
           </tbody>
         </table>
       </div>
-
-      {/* Empleado performance */}
-      <div className="bg-white rounded-2xl border overflow-hidden border-brand-150">
-        <div className="px-5 py-4 border-b border-brand-50">
-          <h3 className="text-sm font-semibold text-brand-800">Rendimiento por vendedor — {period}</h3>
-        </div>
-        <div className="p-5 grid grid-cols-3 gap-4">
-          {[
-            {
-              name: 'Carla Rodríguez',
-              ventas: '$8.450.000',
-              trans: 98,
-            },
-            {
-              name: 'Sofía Parra',
-              ventas: '$6.320.000',
-              trans: 74,
-            },
-            {
-              name: 'Valentina Ruiz',
-              ventas: '$5.280.000',
-              trans: 99,
-            },
-          ].map((e, i) => (
-            <div
-              key={e.name}
-              className={`p-4 rounded-xl border border-brand-150 ${i === 0 ? 'bg-brand-50' : 'bg-white'}`}
-            >
-              <div className="flex items-center gap-3 mb-3">
-                <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0 ${
-                    i === 0 ? 'bg-brand-800' : 'bg-brand-600'
-                  }`}
-                >
-                  {e.name
-                    .split(' ')
-                    .map((n) => n[0])
-                    .join('')}
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-brand-800">{e.name}</p>
-                  {i === 0 && (
-                    <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-brand-200 text-brand-800">
-                      Top vendedora
-                    </span>
-                  )}
-                </div>
-              </div>
-              <div className="space-y-1">
-                <div className="flex justify-between text-xs">
-                  <span className="text-brand-600">Ventas</span>
-                  <span className="font-mono font-semibold text-brand-800">{e.ventas}</span>
-                </div>
-                <div className="flex justify-between text-xs">
-                  <span className="text-brand-600">Transacciones</span>
-                  <span className="font-semibold text-brand-800">{e.trans}</span>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
     </div>
   );
 }
