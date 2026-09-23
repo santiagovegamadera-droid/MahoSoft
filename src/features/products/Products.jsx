@@ -117,7 +117,7 @@ export default function Products({ onEdit }) {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Buscar producto..."
-          className="px-4 py-2.5 text-sm rounded-xl border outline-none border-brand-200 bg-white text-brand-800 w-[220px]"
+          className="px-4 py-2.5 text-sm rounded-xl border outline-none border-brand-200 bg-white text-brand-800 w-55"
         />
         <div className="flex gap-1 flex-wrap">
           {categories.map((c) => (

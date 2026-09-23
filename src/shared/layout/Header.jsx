@@ -32,7 +32,7 @@ export default function Header({ current, onNewProduct }) {
         <div className="relative hidden md:block">
           <input
             placeholder="Buscar..."
-            className="w-[200px] pl-8 pr-4 py-2 text-sm rounded-lg border border-brand-200 bg-brand-50 text-brand-800 outline-none transition-all focus:border-brand-600 focus:ring-3 focus:ring-brand-600/15"
+            className="w-50 pl-8 pr-4 py-2 text-sm rounded-lg border border-brand-200 bg-brand-50 text-brand-800 outline-none transition-all focus:border-brand-600 focus:ring-3 focus:ring-brand-600/15"
           />
           <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-brand-400" />
         </div>

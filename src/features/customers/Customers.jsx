@@ -92,7 +92,7 @@ export default function Customers() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Buscar por nombre o email..."
-            className="px-4 py-2.5 text-sm rounded-xl border outline-none border-brand-200 bg-white text-brand-800 w-[260px]"
+            className="px-4 py-2.5 text-sm rounded-xl border outline-none border-brand-200 bg-white text-brand-800 w-65"
           />
           <select className="px-3 py-2.5 text-sm rounded-xl border outline-none border-brand-200 text-brand-800">
             <option>Todos los niveles</option>
