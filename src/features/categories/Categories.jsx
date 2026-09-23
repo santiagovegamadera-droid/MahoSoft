@@ -6,7 +6,7 @@ import Modal from '@/shared/components/Modal';
 import ConfirmDialog from '@/shared/components/ConfirmDialog';
 import { Button, Field, RowActions, StatusToggle, inputClass } from '@/shared/components/Form';
 
-const emptyCategory = { name: '', descripcion: '', temporada: '', img: '', estado: 'Activo' };
+const emptyCategory = { name: '', descripcion: '', img: '', estado: 'Activo' };
 
 function CategoryForm({ category, onSave, onClose }) {
   const [form, setForm] = useState(category ? { estado: 'Activo', ...category } : emptyCategory);
@@ -44,14 +44,6 @@ function CategoryForm({ category, onSave, onClose }) {
             value={form.descripcion}
             onChange={set('descripcion')}
             className={`${inputClass} resize-none`}
-          />
-        </Field>
-        <Field label="Temporada">
-          <input
-            value={form.temporada}
-            onChange={set('temporada')}
-            placeholder="Ej. Verano 2026"
-            className={inputClass}
           />
         </Field>
         <Field label="URL de la imagen">
@@ -94,7 +86,7 @@ export default function Categories() {
         <table className="w-full text-sm">
           <thead>
             <tr className="bg-brand-50">
-              {['Categoría', 'Temporada', 'Productos', 'Activos', 'Inactivos', 'Estado', ''].map((h) => (
+              {['Categoría', 'Productos', 'Activos', 'Inactivos', 'Estado', ''].map((h) => (
                 <th
                   key={h}
                   className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-brand-600"
@@ -120,15 +112,6 @@ export default function Categories() {
                         <p className="text-xs truncate text-brand-400">{cat.descripcion || 'Sin descripción'}</p>
                       </div>
                     </div>
-                  </td>
-                  <td className="px-5 py-3">
-                    {cat.temporada ? (
-                      <span className="text-xs px-2 py-0.5 rounded-full bg-brand-200 text-brand-800">
-                        {cat.temporada}
-                      </span>
-                    ) : (
-                      <span className="text-xs text-brand-400">—</span>
-                    )}
                   </td>
                   <td className="px-5 py-3 font-semibold text-brand-800">{catProducts.length}</td>
                   <td className="px-5 py-3 font-semibold text-success">{activos}</td>
