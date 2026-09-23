@@ -34,20 +34,6 @@ export default function Login({ onLogin }) {
           >
             Gestiona tu boutique con elegancia y precisión.
           </p>
-          <p className="text-sm" style={{ color: 'rgba(218,201,223,0.7)' }}>
-            Sistema integral de administración para tu tienda de moda femenina.
-          </p>
-        </div>
-
-        <div className="flex gap-4">
-          {['Inventario en tiempo real', 'POS integrado', 'Reportes detallados'].map((f) => (
-            <div key={f} className="flex-1">
-              <div className="w-5 h-0.5 mb-2 rounded" style={{ background: '#b695c0' }} />
-              <p className="text-[11px] leading-tight" style={{ color: 'rgba(218,201,223,0.7)' }}>
-                {f}
-              </p>
-            </div>
-          ))}
         </div>
       </div>
 
@@ -143,10 +129,6 @@ export default function Login({ onLogin }) {
               Ingresar al sistema
             </button>
           </form>
-
-          <p className="text-center text-xs mt-8" style={{ color: 'rgba(129,99,139,0.5)' }}>
-            Maho Boutique Admin · v2.1.0
-          </p>
         </div>
       </div>
     </div>
