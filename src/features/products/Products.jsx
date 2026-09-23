@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Plus } from 'lucide-react';
 import useProducts, { totalStock } from '@/features/products/store';
-import { useCategories } from '@/features/categories/store';
+import useCategories from '@/features/categories/store';
 import useSuppliers from '@/features/suppliers/store';
 import ConfirmDialog from '@/shared/components/ConfirmDialog';
 import { Button, RowActions } from '@/shared/components/Form';

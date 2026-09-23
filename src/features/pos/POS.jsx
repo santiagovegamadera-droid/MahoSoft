@@ -3,7 +3,7 @@ import { Banknote, Check, CreditCard, Landmark, Minus, Plus, ShoppingBag, X } fr
 import saleTotals from '@/features/sales/saleTotals';
 import { registerSale as saveSale } from '@/features/sales/store';
 import useProducts, { totalStock } from '@/features/products/store';
-import { useCategories } from '@/features/categories/store';
+import useCategories from '@/features/categories/store';
 
 export default function POS() {
   const { items: products } = useProducts();

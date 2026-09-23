@@ -8,7 +8,7 @@ import useMovements, {
   updateMovement,
 } from '@/features/purchases/store';
 import useProducts, { SIZE_GROUPS, totalStock } from '@/features/products/store';
-import { useCategories } from '@/features/categories/store';
+import useCategories from '@/features/categories/store';
 import Modal from '@/shared/components/Modal';
 import ConfirmDialog from '@/shared/components/ConfirmDialog';
 import { Button, Field, RowActions, inputClass } from '@/shared/components/Form';

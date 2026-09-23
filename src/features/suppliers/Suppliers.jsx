@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Plus } from 'lucide-react';
 import useSuppliers from '@/features/suppliers/store';
-import { useCategories } from '@/features/categories/store';
+import useCategories from '@/features/categories/store';
 import useProducts from '@/features/products/store';
 import Modal from '@/shared/components/Modal';
 import ConfirmDialog from '@/shared/components/ConfirmDialog';

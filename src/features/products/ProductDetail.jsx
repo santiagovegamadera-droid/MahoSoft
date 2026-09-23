@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { ArrowLeft, Plus, Trash2, X } from 'lucide-react';
 import useProducts, { SIZE_GROUPS } from '@/features/products/store';
-import { useCategories, useCollections } from '@/features/categories/store';
+import useCategories from '@/features/categories/store';
 import useSuppliers from '@/features/suppliers/store';
 import ConfirmDialog from '@/shared/components/ConfirmDialog';
 import { Button, Field, inputClass } from '@/shared/components/Form';
@@ -10,7 +10,6 @@ const emptyProduct = {
   name: '',
   catId: null,
   proveedorId: null,
-  coleccionId: null,
   precio: 0,
   costo: 0,
   descripcion: '',
@@ -27,7 +26,6 @@ const toId = (v) => (v === '' ? null : Number(v));
 export default function ProductDetail({ productId, onBack }) {
   const { getById, create, update, remove } = useProducts();
   const { items: categories } = useCategories();
-  const { items: collections } = useCollections();
   const { items: suppliers } = useSuppliers();
   const existing = productId != null ? getById(productId) : null;
 
@@ -307,18 +305,6 @@ export default function ProductDetail({ productId, onBack }) {
                 </button>
               ))}
             </div>
-          </div>
-
-          <div className="bg-white rounded-2xl p-5 border border-brand-150">
-            <h3 className="text-sm font-semibold mb-4 text-brand-800">Colección</h3>
-            <select value={form.coleccionId ?? ''} onChange={setId('coleccionId')} className={inputClass}>
-              <option value="">Sin colección</option>
-              {collections.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
           </div>
 
           <div className="rounded-2xl p-5 border bg-brand-200 border-brand-400">

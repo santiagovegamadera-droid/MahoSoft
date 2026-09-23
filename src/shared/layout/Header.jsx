@@ -8,7 +8,7 @@ const titles = {
   suppliers: 'Proveedores',
   users: 'Usuarios',
   reports: 'Reportes',
-  categories: 'Categorías & Colecciones',
+  categories: 'Categorías',
 };
 
 export default function Header({ current }) {

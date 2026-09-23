@@ -1,6 +1,6 @@
 import createCollection from '@/shared/lib/createCollection';
 
-export const useCategories = createCollection('categories', [
+const useCategories = createCollection('categories', [
   {
     id: 1,
     name: 'Vestidos',
@@ -52,13 +52,4 @@ export const useCategories = createCollection('categories', [
   },
 ]);
 
-export const COLLECTION_STATES = ['Activa', 'Borrador', 'Próximamente'];
-export const COLLECTION_COLORS = ['bg-brand-800', 'bg-brand-600', 'bg-brand-400', 'bg-brand-200', 'bg-brand-50'];
-
-export const useCollections = createCollection('collections', [
-  { id: 1, name: 'Colección Primavera 2026', estado: 'Activa', color: 'bg-brand-800' },
-  { id: 2, name: 'Básicos Ella', estado: 'Activa', color: 'bg-brand-600' },
-  { id: 3, name: 'Edición Verano 2026', estado: 'Activa', color: 'bg-brand-400' },
-  { id: 4, name: 'Colección Noche', estado: 'Borrador', color: 'bg-brand-200' },
-  { id: 5, name: 'Otoño — Invierno 2026', estado: 'Próximamente', color: 'bg-brand-50' },
-]);
+export default useCategories;
