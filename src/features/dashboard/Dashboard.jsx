@@ -1,8 +1,6 @@
 import {
   AreaChart,
   Area,
-  BarChart,
-  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -311,47 +309,6 @@ export default function Dashboard() {
             ))}
           </div>
         </div>
-      </div>
-
-      {/* Bar chart */}
-      <div className="bg-white rounded-2xl p-5 border border-brand-150">
-        <h3 className="text-sm font-semibold mb-1 text-brand-800">Ventas por hora — hoy</h3>
-        <p className="text-xs mb-4 text-brand-400">Distribución del día actual</p>
-        <ResponsiveContainer width="100%" height={130}>
-          <BarChart
-            data={[
-              { h: '8am', v: 120000 },
-              { h: '9am', v: 280000 },
-              { h: '10am', v: 410000 },
-              { h: '11am', v: 390000 },
-              { h: '12pm', v: 510000 },
-              { h: '1pm', v: 300000 },
-              { h: '2pm', v: 190000 },
-              { h: '3pm', v: 420000 },
-              { h: '4pm', v: 580000 },
-              { h: '5pm', v: 340000 },
-              { h: '6pm', v: 210000 },
-              { h: '7pm', v: 90000 },
-            ]}
-            barSize={18}
-          >
-            <XAxis dataKey="h" tick={{ fontSize: 11, fill: '#b695c0' }} axisLine={false} tickLine={false} />
-            <YAxis hide />
-            <Tooltip
-              formatter={(v) => [`$${fmt(v)}`, '']}
-              contentStyle={{
-                fontSize: 12,
-                borderRadius: 8,
-                border: '1px solid #e8dff0',
-              }}
-            />
-            <Bar dataKey="v" fill="#b695c0" radius={[4, 4, 0, 0]}>
-              {[...Array(12)].map((_, i) => (
-                <Cell key={i} fill={i === 8 ? '#503459' : '#b695c0'} />
-              ))}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
       </div>
     </div>
   );
