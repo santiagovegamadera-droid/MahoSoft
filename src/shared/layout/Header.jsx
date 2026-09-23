@@ -6,6 +6,7 @@ const titles = {
   'product-detail': 'Detalle de Producto',
   purchases: 'Compras',
   pos: 'Punto de Venta',
+  'sales-history': 'Historial de ventas',
   customers: 'Clientes',
   suppliers: 'Proveedores',
   users: 'Usuarios',

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Banknote, Check, CreditCard, Landmark, Minus, Plus, ShoppingBag, X } from 'lucide-react';
+import saleTotals from '@/features/sales/saleTotals';
 
 const catalog = [
   {
@@ -60,12 +61,12 @@ const catalog = [
   },
 ];
 
-export default function POS() {
+export default function POS({ onRegisterSale }) {
   const [cart, setCart] = useState([]);
   const [payment, setPayment] = useState('tarjeta');
   const [discount, setDiscount] = useState(0);
   const [catFilter, setCatFilter] = useState('Todos');
-  const [completed, setCompleted] = useState(false);
+  const [completed, setCompleted] = useState(null);
   const [customer, setCustomer] = useState('');
 
   const cats = ['Todos', ...Array.from(new Set(catalog.map((p) => p.cat)))];
@@ -85,11 +86,18 @@ export default function POS() {
     setCart((prev) => prev.map((c) => (c.id === id ? { ...c, qty: Math.max(1, c.qty + d) } : c)));
   }
 
-  const subtotal = cart.reduce((s, c) => s + c.price * c.qty, 0);
-  const discountAmt = Math.round((subtotal * discount) / 100);
-  const total = subtotal - discountAmt;
-  const iva = Math.round(total * 0.19);
+  const { subtotal, descuentoAmt: discountAmt, total, iva } = saleTotals({ items: cart, descuento: discount });
   const fmt = (n) => `$${n.toLocaleString('es-CO')}`;
+
+  function registerSale() {
+    const sale = onRegisterSale({
+      cliente: customer.trim() || 'Cliente general',
+      pago: payment,
+      descuento: discount,
+      items: cart.map((c) => ({ name: c.name, talla: c.talla, qty: c.qty, price: c.price })),
+    });
+    setCompleted({ factura: sale.factura, total });
+  }
 
   if (completed) {
     return (
@@ -100,9 +108,9 @@ export default function POS() {
           </div>
           <h2 className="text-2xl mb-2 font-display text-brand-800">Venta registrada</h2>
           <p className="text-sm mb-1 text-brand-600">
-            Total cobrado: <strong>{fmt(total)}</strong>
+            Total cobrado: <strong>{fmt(completed.total)}</strong>
           </p>
-          <p className="text-xs mb-6 text-brand-400">Factura #VTA-2026-0847 generada</p>
+          <p className="text-xs mb-6 text-brand-400">Factura #{completed.factura} generada</p>
           <div className="flex gap-3 justify-center">
             <button className="px-4 py-2 rounded-xl text-sm font-semibold bg-brand-200 text-brand-800">
               Imprimir recibo
@@ -110,7 +118,9 @@ export default function POS() {
             <button
               onClick={() => {
                 setCart([]);
-                setCompleted(false);
+                setCustomer('');
+                setDiscount(0);
+                setCompleted(null);
               }}
               className="px-4 py-2 rounded-xl text-sm font-semibold text-white bg-brand-600"
             >
@@ -305,7 +315,7 @@ export default function POS() {
           </div>
 
           <button
-            onClick={() => cart.length > 0 && setCompleted(true)}
+            onClick={registerSale}
             disabled={cart.length === 0}
             className="w-full py-3 rounded-xl text-sm font-bold text-white transition-all disabled:opacity-40 bg-brand-800 enabled:hover:bg-brand-600"
           >

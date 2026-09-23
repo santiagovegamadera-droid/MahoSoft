@@ -4,6 +4,7 @@ import {
   ChevronDown,
   LayoutDashboard,
   LogOut,
+  ReceiptText,
   Shirt,
   ShoppingBasket,
   ShoppingCart,
@@ -16,7 +17,13 @@ import Logo from '@/shared/components/Logo';
 
 const nav = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, group: 'Principal' },
-  { id: 'pos', label: 'Punto de Venta', icon: ShoppingCart, group: 'Operaciones' },
+  {
+    id: 'pos',
+    label: 'Punto de Venta',
+    icon: ShoppingCart,
+    group: 'Operaciones',
+    children: [{ id: 'sales-history', label: 'Historial de ventas', icon: ReceiptText }],
+  },
   {
     id: 'purchases',
     label: 'Compras',
