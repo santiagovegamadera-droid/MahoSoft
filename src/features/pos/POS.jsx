@@ -4,18 +4,16 @@ import saleTotals from '@/features/sales/saleTotals';
 import { registerSale as saveSale } from '@/features/sales/store';
 import useProducts, { totalStock } from '@/features/products/store';
 import { useCategories } from '@/features/categories/store';
-import useCustomers from '@/features/customers/store';
 
 export default function POS() {
   const { items: products } = useProducts();
   const { items: categories } = useCategories();
-  const { items: customers } = useCustomers();
   const [cart, setCart] = useState([]);
   const [payment, setPayment] = useState('tarjeta');
   const [discount, setDiscount] = useState(0);
   const [catFilter, setCatFilter] = useState('Todos');
   const [completed, setCompleted] = useState(null);
-  const [customer, setCustomer] = useState('Cliente general');
+  const [customer, setCustomer] = useState('');
 
   const catalog = products.filter((p) => p.estado === 'Activo');
   const catName = (id) => categories.find((c) => c.id === id)?.name ?? 'Otros';
@@ -52,7 +50,7 @@ export default function POS() {
 
   function registerSale() {
     const sale = saveSale({
-      cliente: customer,
+      cliente: customer.trim() || 'Cliente general',
       vendedor: 'Ana Martínez',
       pago: payment,
       descuento: discount,
@@ -80,7 +78,7 @@ export default function POS() {
             <button
               onClick={() => {
                 setCart([]);
-                setCustomer('Cliente general');
+                setCustomer('');
                 setDiscount(0);
                 setCompleted(null);
               }}
@@ -157,17 +155,13 @@ export default function POS() {
       <div className="w-80 shrink-0 flex flex-col border-l bg-white border-brand-150">
         <div className="p-4 border-b border-brand-50">
           <h3 className="text-sm font-semibold text-brand-800">Carrito de venta</h3>
-          <select
+          <input
             value={customer}
             onChange={(e) => setCustomer(e.target.value)}
-            className="w-full mt-2 px-3 py-2 rounded-xl border text-xs outline-none bg-white border-brand-200 text-brand-800"
+            placeholder="Nombre del cliente (opcional)"
+            className="w-full mt-2 px-3 py-2 rounded-xl border text-xs outline-none border-brand-200 text-brand-800 focus:border-brand-600"
             aria-label="Cliente"
-          >
-            <option>Cliente general</option>
-            {customers.map((c) => (
-              <option key={c.id}>{c.name}</option>
-            ))}
-          </select>
+          />
         </div>
 
         <div className="flex-1 overflow-y-auto p-3 space-y-2">

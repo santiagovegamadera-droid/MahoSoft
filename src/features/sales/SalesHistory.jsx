@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Ban, Banknote, CreditCard, Landmark, Pencil, Printer, ReceiptText } from 'lucide-react';
 import saleTotals from '@/features/sales/saleTotals';
 import useSales, { PAYMENT_METHODS, voidSale } from '@/features/sales/store';
-import useCustomers from '@/features/customers/store';
 import Modal from '@/shared/components/Modal';
 import ConfirmDialog from '@/shared/components/ConfirmDialog';
 import { Button, Field, inputClass } from '@/shared/components/Form';
@@ -15,11 +14,9 @@ const fmtDate = (iso) =>
 const isToday = (iso) => new Date(iso).toDateString() === new Date().toDateString();
 
 // Only the customer and payment method are editable; items and totals stay as sold
-function SaleForm({ sale, customers, onSave, onClose }) {
+function SaleForm({ sale, onSave, onClose }) {
   const [form, setForm] = useState({ cliente: sale.cliente, pago: sale.pago });
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
-  const names = ['Cliente general', ...customers.map((c) => c.name)];
-  if (!names.includes(sale.cliente)) names.push(sale.cliente);
 
   return (
     <Modal
@@ -30,17 +27,15 @@ function SaleForm({ sale, customers, onSave, onClose }) {
           <Button variant="secondary" onClick={onClose}>
             Cancelar
           </Button>
-          <Button onClick={() => onSave(form)}>Guardar</Button>
+          <Button onClick={() => onSave({ ...form, cliente: form.cliente.trim() || 'Cliente general' })}>
+            Guardar
+          </Button>
         </>
       }
     >
       <div className="space-y-4">
         <Field label="Cliente">
-          <select value={form.cliente} onChange={set('cliente')} className={inputClass}>
-            {names.map((n) => (
-              <option key={n}>{n}</option>
-            ))}
-          </select>
+          <input value={form.cliente} onChange={set('cliente')} className={inputClass} autoFocus />
         </Field>
         <Field label="Método de pago">
           <select value={form.pago} onChange={set('pago')} className={`${inputClass} capitalize`}>
@@ -58,7 +53,6 @@ function SaleForm({ sale, customers, onSave, onClose }) {
 
 export default function SalesHistory() {
   const { items: sales, update } = useSales();
-  const { items: customers } = useCustomers();
   const [search, setSearch] = useState('');
   const [payment, setPayment] = useState('todos');
   const [selectedId, setSelectedId] = useState(null);
@@ -245,7 +239,6 @@ export default function SalesHistory() {
       {editing && (
         <SaleForm
           sale={editing}
-          customers={customers}
           onClose={() => setEditing(null)}
           onSave={(data) => {
             update(editing.id, data);

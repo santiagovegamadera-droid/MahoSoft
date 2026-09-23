@@ -1,7 +1,7 @@
 import createCollection from '@/shared/lib/createCollection';
 
 export const ROLES = ['Administradora', 'Vendedora', 'Bodega'];
-export const PERMISSIONS = ['Dashboard', 'POS', 'Compras', 'Clientes', 'Proveedores', 'Usuarios', 'Reportes'];
+export const PERMISSIONS = ['Dashboard', 'POS', 'Compras', 'Proveedores', 'Usuarios', 'Reportes'];
 
 const useUsers = createCollection('users', [
   {
@@ -18,7 +18,7 @@ const useUsers = createCollection('users', [
     name: 'Carla Rodríguez',
     email: 'carla@ellaboutique.co',
     rol: 'Vendedora',
-    permisos: ['POS', 'Clientes'],
+    permisos: ['POS'],
     estado: 'Activo',
     ultimo: '2026-09-23 09:02',
   },
@@ -27,7 +27,7 @@ const useUsers = createCollection('users', [
     name: 'Sofía Parra',
     email: 'sofia@ellaboutique.co',
     rol: 'Vendedora',
-    permisos: ['POS', 'Clientes'],
+    permisos: ['POS'],
     estado: 'Activo',
     ultimo: '2026-09-22 18:45',
   },
@@ -36,7 +36,7 @@ const useUsers = createCollection('users', [
     name: 'Valentina Ruiz',
     email: 'vale@ellaboutique.co',
     rol: 'Vendedora',
-    permisos: ['POS', 'Clientes'],
+    permisos: ['POS'],
     estado: 'Inactivo',
     ultimo: '2026-09-10 12:30',
   },

@@ -25,7 +25,7 @@ This is the canonical project structure. Start with task-relevant files below. O
 
 Code is organized by feature, not by file type:
 
-- `src/features/<feature>/` - One folder per domain (`auth`, `dashboard`, `products`, `categories`, `purchases`, `pos`, `sales`, `customers`, `suppliers`, `users`, `reports`). Screens, and any components/hooks/data used only by that feature, live here.
+- `src/features/<feature>/` - One folder per domain (`auth`, `dashboard`, `products`, `categories`, `purchases`, `pos`, `sales`, `suppliers`, `users`, `reports`). Screens, and any components/hooks/data used only by that feature, live here.
 - `src/shared/components/` - Reusable UI used by more than one feature (e.g. `Logo`).
 - `src/shared/layout/` - App shell (`Sidebar`, `Header`).
 - `src/assets/` - Static images.
@@ -34,7 +34,7 @@ Import across folders with the `@` alias (`@/features/pos/POS`, `@/shared/compon
 
 ### Data (CRUD)
 
-Until the backend exists, each feature keeps its records in `src/features/<feature>/store.js`, built with `createCollection` from `src/shared/lib/createCollection.js`. It returns a hook (`useProducts()`, `useCustomers()`, …) with `items`, `create`, `update` and `remove`; data is shared across screens and persisted to localStorage under `mahosoft:<name>`. Records reference each other by id (`catId`, `proveedorId`, `coleccionId`, `productId`). Stock-changing operations (sales, voids, purchase movements) go through the helpers in `sales/store.js` and `purchases/store.js`, which adjust product stock. Forms use `Modal`, `ConfirmDialog` and the helpers in `src/shared/components/Form.jsx` (`Field`, `Button`, `RowActions`, `inputClass`).
+Until the backend exists, each feature keeps its records in `src/features/<feature>/store.js`, built with `createCollection` from `src/shared/lib/createCollection.js`. It returns a hook (`useProducts()`, `useSuppliers()`, …) with `items`, `create`, `update` and `remove`; data is shared across screens and persisted to localStorage under `mahosoft:<name>`. Records reference each other by id (`catId`, `proveedorId`, `coleccionId`, `productId`). Stock-changing operations (sales, voids, purchase movements) go through the helpers in `sales/store.js` and `purchases/store.js`, which adjust product stock. Forms use `Modal`, `ConfirmDialog` and the helpers in `src/shared/components/Form.jsx` (`Field`, `Button`, `RowActions`, `inputClass`).
 
 ## Dependencies
 

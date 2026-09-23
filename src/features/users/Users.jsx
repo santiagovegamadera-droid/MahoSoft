@@ -15,7 +15,7 @@ const emptyUser = {
   name: '',
   email: '',
   rol: 'Vendedora',
-  permisos: ['POS', 'Clientes'],
+  permisos: ['POS'],
   estado: 'Activo',
   ultimo: '—',
 };
@@ -27,7 +27,9 @@ const initials = (name) =>
     .slice(0, 2);
 
 function UserForm({ user, onSave, onClose }) {
-  const [form, setForm] = useState(user ?? emptyUser);
+  const [form, setForm] = useState(() =>
+    user ? { ...user, permisos: user.permisos.filter((p) => PERMISSIONS.includes(p)) } : emptyUser,
+  );
   const [errors, setErrors] = useState({});
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
 
@@ -156,12 +158,12 @@ export default function Users() {
                 </td>
                 <td className="px-5 py-3.5">
                   <div className="flex gap-1 flex-wrap">
-                    {user.permisos.length === PERMISSIONS.length ? (
+                    {PERMISSIONS.every((p) => user.permisos.includes(p)) ? (
                       <span className="text-[10px] px-1.5 py-0.5 rounded border border-brand-400 text-brand-600">
                         Todo
                       </span>
                     ) : (
-                      user.permisos.map((p) => (
+                      PERMISSIONS.filter((p) => user.permisos.includes(p)).map((p) => (
                         <span
                           key={p}
                           className="text-[10px] px-1.5 py-0.5 rounded border border-brand-400 text-brand-600"

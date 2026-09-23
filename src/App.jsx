@@ -7,7 +7,6 @@ import Products from '@/features/products/Products';
 import ProductDetail from '@/features/products/ProductDetail';
 import Purchases from '@/features/purchases/Purchases';
 import POS from '@/features/pos/POS';
-import Customers from '@/features/customers/Customers';
 import Suppliers from '@/features/suppliers/Suppliers';
 import Users from '@/features/users/Users';
 import Reports from '@/features/reports/Reports';
@@ -55,7 +54,6 @@ export default function App() {
           {view === 'purchases' && <Purchases />}
           {view === 'pos' && <POS />}
           {view === 'sales-history' && <SalesHistory />}
-          {view === 'customers' && <Customers />}
           {view === 'suppliers' && <Suppliers />}
           {view === 'users' && <Users />}
           {view === 'reports' && <Reports />}

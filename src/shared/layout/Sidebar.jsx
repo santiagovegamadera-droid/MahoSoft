@@ -11,7 +11,6 @@ import {
   Tags,
   Truck,
   UserCog,
-  Users,
 } from 'lucide-react';
 import Logo from '@/shared/components/Logo';
 
@@ -35,7 +34,6 @@ const nav = [
       { id: 'suppliers', label: 'Proveedores', icon: Truck },
     ],
   },
-  { id: 'customers', label: 'Clientes', icon: Users, group: 'Relaciones' },
   { id: 'users', label: 'Usuarios', icon: UserCog, group: 'Relaciones' },
   { id: 'reports', label: 'Reportes', icon: ChartColumn, group: 'Análisis' },
 ];
