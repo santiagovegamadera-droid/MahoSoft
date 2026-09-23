@@ -1,4 +1,5 @@
 import Logo from '../components/Logo';
+import fondo from '../assets/public/fondo.png';
 
 export default function Login({ onLogin }) {
   function handleSubmit(e) {
@@ -7,11 +8,14 @@ export default function Login({ onLogin }) {
   }
 
   return (
-    <div className="min-h-screen flex" style={{ background: '#f5f0f7' }}>
+    <div
+      className="min-h-screen flex bg-cover bg-center"
+      style={{ backgroundImage: `url(${fondo})`, backgroundColor: '#f5f0f7' }}
+    >
       {/* Left panel */}
       <div
-        className="hidden lg:flex flex-col justify-between w-[440px] p-12 shrink-0"
-        style={{ background: '#503459' }}
+        className="hidden lg:flex flex-col justify-between w-[440px] p-12 shrink-0 backdrop-blur-md"
+        style={{ background: 'rgba(80,52,89,0.82)' }}
       >
         {/* Logo prominently at top */}
         <div className="flex flex-col items-center">
@@ -49,7 +53,10 @@ export default function Login({ onLogin }) {
 
       {/* Right panel */}
       <div className="flex-1 flex items-center justify-center p-8">
-        <div className="w-full max-w-sm">
+        <div
+          className="w-full max-w-sm rounded-3xl p-8 backdrop-blur-md"
+          style={{ background: 'rgba(255,255,255,0.88)', boxShadow: '0 8px 40px rgba(80,52,89,0.25)' }}
+        >
           {/* Mobile: show logo */}
           <div className="lg:hidden mb-8 flex justify-center">
             <div

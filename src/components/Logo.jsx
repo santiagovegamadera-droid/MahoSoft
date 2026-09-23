@@ -1,4 +1,4 @@
-import logoSrc from '../assets/logo.png';
+import logoSrc from '../assets/public/logo.png';
 
 export default function Logo({ variant = 'light', size = 'md' }) {
   const dims = { sm: 32, md: 44, lg: 80 };
