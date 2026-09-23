@@ -1,19 +1,11 @@
 import { useState } from 'react';
-import { ArrowRight, ChartColumn, Eye, EyeOff, Heart, Lock, Mail, Package, Settings, Users } from 'lucide-react';
+import { ArrowRight, Eye, EyeOff, Heart, Lock, Mail } from 'lucide-react';
 import Logo from '@/shared/components/Logo';
 import fondo from '@/assets/public/fondo.png';
 import logoSrc from '@/assets/public/logo.png';
 
-const FEATURES = [
-  { icon: Package, label: 'Control de inventario' },
-  { icon: Users, label: 'Gestión de clientes' },
-  { icon: ChartColumn, label: 'Reportes en tiempo real' },
-  { icon: Settings, label: 'Configuración simple' },
-];
-
 export default function Login({ onLogin }) {
   const [showPassword, setShowPassword] = useState(false);
-  const [lang, setLang] = useState('ES');
 
   function handleSubmit(e) {
     e.preventDefault();
@@ -37,7 +29,7 @@ export default function Login({ onLogin }) {
           </p>
         </div>
 
-        {/* Headline + features */}
+        {/* Headline */}
         <div>
           <h1 className="text-[clamp(30px,5.8vh,56px)] leading-[1.05] text-white font-display">
             Gestiona tu boutique con <span className="text-orchid">elegancia</span> y{' '}
@@ -46,17 +38,6 @@ export default function Login({ onLogin }) {
           <p className="mt-[1.5vh] text-[clamp(14px,2vh,18px)] leading-snug text-white/90">
             Todo lo que necesitas en un solo lugar para hacer crecer tu negocio.
           </p>
-
-          <div className="mt-[3vh] grid grid-cols-4 gap-3">
-            {FEATURES.map((f) => (
-              <div key={f.label} className="flex flex-col items-center text-center">
-                <div className="w-[clamp(44px,7vh,64px)] aspect-square rounded-full flex items-center justify-center text-white border border-white/35 bg-white/8">
-                  <f.icon size={24} strokeWidth={1.75} />
-                </div>
-                <p className="mt-[1vh] text-xs leading-tight text-white/85">{f.label}</p>
-              </div>
-            ))}
-          </div>
         </div>
 
         {/* Motto */}
@@ -71,23 +52,12 @@ export default function Login({ onLogin }) {
       {/* Right panel */}
       <div className="relative flex-1 min-w-0 flex items-center justify-center p-4 pb-16 sm:px-8 lg:pb-[clamp(40px,7vh,64px)] lg:pt-[3vh]">
         <div className="relative w-full max-w-md rounded-3xl px-6 py-8 sm:px-10 lg:py-[clamp(20px,4vh,40px)] bg-white/95 shadow-[0_12px_48px_rgba(80,52,89,0.25)]">
-          {/* Language selector */}
-          <select
-            value={lang}
-            onChange={(e) => setLang(e.target.value)}
-            className="absolute top-[clamp(14px,3vh,24px)] right-6 text-sm font-semibold bg-transparent outline-none cursor-pointer text-brand-800"
-            aria-label="Idioma"
-          >
-            <option value="ES">ES</option>
-            <option value="EN">EN</option>
-          </select>
-
           {/* Mobile: show logo */}
           <div className="lg:hidden mb-6 flex justify-center">
             <Logo variant="dark" size="md" />
           </div>
 
-          <h2 className="flex items-center gap-3 pr-8 text-2xl sm:text-3xl text-brand-800 font-display">
+          <h2 className="flex items-center gap-3text-2xl sm:text-3xl text-brand-800 font-display">
             Bienvenida de nuevo
             <Heart size={26} strokeWidth={1.75} className="text-brand-400" />
           </h2>
@@ -161,31 +131,6 @@ export default function Login({ onLogin }) {
               <ArrowRight size={18} strokeWidth={1.75} />
             </button>
           </form>
-
-          {/* Divider */}
-          <div className="my-[clamp(10px,2.5vh,24px)] flex items-center gap-2">
-            <div className="flex-1 h-px bg-brand-200" />
-            <div className="w-2 h-2 rounded-full border border-brand-200" />
-            <div className="flex-1 h-px bg-brand-200" />
-          </div>
-
-          <p className="text-center text-sm text-brand-600">
-            ¿Aún no tienes una cuenta?
-            <br />
-            <button type="button" className="font-semibold underline underline-offset-2 text-brand-800">
-              Contáctanos
-            </button>
-          </p>
-
-          {/* Quote */}
-          <div className="mt-[clamp(10px,2.5vh,24px)] flex items-center justify-between gap-4 rounded-2xl px-5 py-[clamp(10px,1.8vh,16px)] bg-brand-50">
-            <p className="italic text-base leading-snug text-brand-800 font-display">
-              “Una boutique organizada,
-              <br />
-              siempre llega más lejos”
-            </p>
-            <Heart size={26} strokeWidth={1.75} className="shrink-0 text-brand-400" />
-          </div>
         </div>
 
         <p className="absolute bottom-[clamp(12px,2.5vh,24px)] left-0 right-0 px-4 text-center text-[10px] sm:text-[11px] font-medium tracking-[0.15em] sm:tracking-[0.25em] text-brand-800">
