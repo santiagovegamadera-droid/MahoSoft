@@ -1,4 +1,4 @@
-import { Bell, Plus, Search } from 'lucide-react';
+import { Plus, Search } from 'lucide-react';
 
 const titles = {
   dashboard: 'Dashboard',
@@ -37,12 +37,6 @@ export default function Header({ current, onNewProduct }) {
           <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-brand-400" />
         </div>
 
-        {/* Notifications */}
-        <button className="relative w-9 h-9 rounded-lg flex items-center justify-center transition-colors bg-brand-50 text-brand-800">
-          <Bell size={18} />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-brand-600" />
-        </button>
-
         {/* Action */}
         {current === 'products' && (
           <button
@@ -51,9 +45,6 @@ export default function Header({ current, onNewProduct }) {
           >
             <Plus size={16} /> Nuevo Producto
           </button>
-        )}
-        {current === 'pos' && (
-          <span className="px-3 py-1 rounded-full text-xs font-semibold bg-brand-200 text-brand-800">POS Activo</span>
         )}
       </div>
     </header>
