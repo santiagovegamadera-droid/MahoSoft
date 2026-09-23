@@ -42,8 +42,8 @@ function NavButton({ item, active, onClick, nested = false, children }) {
   return (
     <button
       onClick={onClick}
-      className={`w-full flex items-center gap-3 px-3 rounded-lg mb-0.5 font-medium transition-all duration-150 text-left border-l-2 ${
-        nested ? 'py-2 text-sm' : 'py-2.5 text-sm'
+      className={`w-full flex items-center gap-3 px-3 rounded-lg mb-0.5 text-sm font-medium transition-all duration-150 text-left border-l-2 ${
+        nested ? 'py-2' : 'py-2.5'
       } ${
         active
           ? 'bg-white/12 text-white border-brand-400'
