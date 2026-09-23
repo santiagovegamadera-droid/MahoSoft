@@ -1,100 +1,62 @@
 import { useState } from 'react';
 import { Banknote, Check, CreditCard, Landmark, Minus, Plus, ShoppingBag, X } from 'lucide-react';
 import saleTotals from '@/features/sales/saleTotals';
+import { registerSale as saveSale } from '@/features/sales/store';
+import useProducts, { totalStock } from '@/features/products/store';
+import { useCategories } from '@/features/categories/store';
+import useCustomers from '@/features/customers/store';
 
-const catalog = [
-  {
-    id: 1,
-    name: 'Vestido Floral',
-    price: 89900,
-    cat: 'Vestidos',
-    img: 'https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=80&h=80&fit=crop&auto=format',
-  },
-  {
-    id: 2,
-    name: 'Blusa Seda Negra',
-    price: 65000,
-    cat: 'Blusas',
-    img: 'https://images.unsplash.com/photo-1485462537746-965f33f7f6a7?w=80&h=80&fit=crop&auto=format',
-  },
-  {
-    id: 3,
-    name: 'Jean Skinny',
-    price: 119000,
-    cat: 'Pantalones',
-    img: 'https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=80&h=80&fit=crop&auto=format',
-  },
-  {
-    id: 4,
-    name: 'Falda Plisada',
-    price: 75000,
-    cat: 'Faldas',
-    img: 'https://images.unsplash.com/photo-1583496661160-fb5886a0aaaa?w=80&h=80&fit=crop&auto=format',
-  },
-  {
-    id: 5,
-    name: 'Cardigan Crema',
-    price: 145000,
-    cat: 'Abrigos',
-    img: 'https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=80&h=80&fit=crop&auto=format',
-  },
-  {
-    id: 6,
-    name: 'Top Lentejuelas',
-    price: 98000,
-    cat: 'Tops',
-    img: 'https://images.unsplash.com/photo-1594938298603-c8148c4b4017?w=80&h=80&fit=crop&auto=format',
-  },
-  {
-    id: 7,
-    name: 'Conjunto Lino',
-    price: 185000,
-    cat: 'Conjuntos',
-    img: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=80&h=80&fit=crop&auto=format',
-  },
-  {
-    id: 8,
-    name: 'Pantalón Palazzo',
-    price: 109000,
-    cat: 'Pantalones',
-    img: 'https://images.unsplash.com/photo-1506629082955-511b1aa562c8?w=80&h=80&fit=crop&auto=format',
-  },
-];
-
-export default function POS({ onRegisterSale }) {
+export default function POS() {
+  const { items: products } = useProducts();
+  const { items: categories } = useCategories();
+  const { items: customers } = useCustomers();
   const [cart, setCart] = useState([]);
   const [payment, setPayment] = useState('tarjeta');
   const [discount, setDiscount] = useState(0);
   const [catFilter, setCatFilter] = useState('Todos');
   const [completed, setCompleted] = useState(null);
-  const [customer, setCustomer] = useState('');
+  const [customer, setCustomer] = useState('Cliente general');
 
-  const cats = ['Todos', ...Array.from(new Set(catalog.map((p) => p.cat)))];
-  const filtered = catFilter === 'Todos' ? catalog : catalog.filter((p) => p.cat === catFilter);
+  const catalog = products.filter((p) => p.estado === 'Activo');
+  const catName = (id) => categories.find((c) => c.id === id)?.name ?? 'Otros';
+  const cats = ['Todos', ...Array.from(new Set(catalog.map((p) => catName(p.catId))))];
+  const filtered = catFilter === 'Todos' ? catalog : catalog.filter((p) => catName(p.catId) === catFilter);
+
+  // Units available for a product size, read from the live stock
+  const available = (id, talla) => products.find((p) => p.id === id)?.stock[talla] ?? 0;
+  const sizesInStock = (p) => Object.keys(p.stock).filter((t) => p.stock[t] > 0);
 
   function addToCart(p) {
     setCart((prev) => {
       const ex = prev.find((c) => c.id === p.id);
-      if (ex) return prev.map((c) => (c.id === p.id ? { ...c, qty: c.qty + 1 } : c));
-      return [...prev, { ...p, qty: 1, talla: 'M' }];
+      if (ex) {
+        return prev.map((c) => (c.id === p.id ? { ...c, qty: Math.min(c.qty + 1, available(c.id, c.talla)) } : c));
+      }
+      return [...prev, { id: p.id, name: p.name, price: p.precio, img: p.img, qty: 1, talla: sizesInStock(p)[0] }];
     });
   }
   function removeFromCart(id) {
     setCart((prev) => prev.filter((c) => c.id !== id));
   }
   function updateQty(id, d) {
-    setCart((prev) => prev.map((c) => (c.id === id ? { ...c, qty: Math.max(1, c.qty + d) } : c)));
+    setCart((prev) =>
+      prev.map((c) => (c.id === id ? { ...c, qty: Math.min(Math.max(1, c.qty + d), available(c.id, c.talla)) } : c)),
+    );
+  }
+  function changeSize(id, talla) {
+    setCart((prev) => prev.map((c) => (c.id === id ? { ...c, talla, qty: Math.min(c.qty, available(id, talla)) } : c)));
   }
 
   const { subtotal, descuentoAmt: discountAmt, total, iva } = saleTotals({ items: cart, descuento: discount });
   const fmt = (n) => `$${n.toLocaleString('es-CO')}`;
 
   function registerSale() {
-    const sale = onRegisterSale({
-      cliente: customer.trim() || 'Cliente general',
+    const sale = saveSale({
+      cliente: customer,
+      vendedor: 'Ana Martínez',
       pago: payment,
       descuento: discount,
-      items: cart.map((c) => ({ name: c.name, talla: c.talla, qty: c.qty, price: c.price })),
+      items: cart.map((c) => ({ productId: c.id, name: c.name, talla: c.talla, qty: c.qty, price: c.price })),
     });
     setCompleted({ factura: sale.factura, total });
   }
@@ -118,7 +80,7 @@ export default function POS({ onRegisterSale }) {
             <button
               onClick={() => {
                 setCart([]);
-                setCustomer('');
+                setCustomer('Cliente general');
                 setDiscount(0);
                 setCompleted(null);
               }}
@@ -155,16 +117,20 @@ export default function POS({ onRegisterSale }) {
           <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
             {filtered.map((p) => {
               const inCart = cart.find((c) => c.id === p.id);
+              const soldOut = sizesInStock(p).length === 0;
               return (
                 <button
                   key={p.id}
                   onClick={() => addToCart(p)}
-                  className={`text-left rounded-2xl border overflow-hidden transition-all hover:shadow-md bg-white ${
+                  disabled={soldOut}
+                  className={`text-left rounded-2xl border overflow-hidden transition-all enabled:hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed bg-white ${
                     inCart ? 'border-brand-600 shadow-[0_0_0_2px_rgba(129,99,139,0.2)]' : 'border-brand-150 shadow-none'
                   }`}
                 >
                   <div className="relative">
-                    <img src={p.img} alt={p.name} className="w-full h-28 object-cover bg-brand-200" />
+                    <div className="w-full h-28 bg-brand-200">
+                      {p.img && <img src={p.img} alt={p.name} className="w-full h-full object-cover" />}
+                    </div>
                     {inCart && (
                       <span className="absolute top-2 right-2 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold text-white bg-brand-800">
                         {inCart.qty}
@@ -173,7 +139,12 @@ export default function POS({ onRegisterSale }) {
                   </div>
                   <div className="p-3">
                     <p className="text-xs font-semibold leading-tight mb-1 text-brand-800">{p.name}</p>
-                    <p className="text-xs text-brand-600 font-mono">{fmt(p.price)}</p>
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-xs text-brand-600 font-mono">{fmt(p.precio)}</p>
+                      <p className={`text-[10px] ${soldOut ? 'font-semibold text-danger' : 'text-brand-400'}`}>
+                        {soldOut ? 'Agotado' : `${totalStock(p)} disp.`}
+                      </p>
+                    </div>
                   </div>
                 </button>
               );
@@ -186,12 +157,17 @@ export default function POS({ onRegisterSale }) {
       <div className="w-80 shrink-0 flex flex-col border-l bg-white border-brand-150">
         <div className="p-4 border-b border-brand-50">
           <h3 className="text-sm font-semibold text-brand-800">Carrito de venta</h3>
-          <input
+          <select
             value={customer}
             onChange={(e) => setCustomer(e.target.value)}
-            placeholder="Buscar cliente (opcional)..."
-            className="w-full mt-2 px-3 py-2 rounded-xl border text-xs outline-none border-brand-200 text-brand-800"
-          />
+            className="w-full mt-2 px-3 py-2 rounded-xl border text-xs outline-none bg-white border-brand-200 text-brand-800"
+            aria-label="Cliente"
+          >
+            <option>Cliente general</option>
+            {customers.map((c) => (
+              <option key={c.id}>{c.name}</option>
+            ))}
+          </select>
         </div>
 
         <div className="flex-1 overflow-y-auto p-3 space-y-2">
@@ -212,14 +188,16 @@ export default function POS({ onRegisterSale }) {
                   <p className="text-xs font-semibold truncate text-brand-800">{item.name}</p>
                   <select
                     value={item.talla}
-                    onChange={(e) =>
-                      setCart((prev) => prev.map((c) => (c.id === item.id ? { ...c, talla: e.target.value } : c)))
-                    }
+                    onChange={(e) => changeSize(item.id, e.target.value)}
                     className="text-[10px] border rounded-md px-1 py-0.5 outline-none mt-0.5 border-brand-200 text-brand-600"
                   >
-                    {['XS', 'S', 'M', 'L', 'XL'].map((t) => (
-                      <option key={t}>{t}</option>
-                    ))}
+                    {Object.keys(products.find((p) => p.id === item.id)?.stock ?? {})
+                      .filter((t) => available(item.id, t) > 0 || t === item.talla)
+                      .map((t) => (
+                        <option key={t} value={t}>
+                          {t} ({available(item.id, t)})
+                        </option>
+                      ))}
                   </select>
                 </div>
                 <div className="flex flex-col items-end gap-1">
@@ -316,7 +294,7 @@ export default function POS({ onRegisterSale }) {
 
           <button
             onClick={registerSale}
-            disabled={cart.length === 0}
+            disabled={cart.length === 0 || cart.some((c) => c.qty < 1)}
             className="w-full py-3 rounded-xl text-sm font-bold text-white transition-all disabled:opacity-40 bg-brand-800 enabled:hover:bg-brand-600"
           >
             Registrar venta

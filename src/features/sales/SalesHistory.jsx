@@ -1,6 +1,11 @@
 import { useState } from 'react';
-import { Banknote, CreditCard, Landmark, Printer, ReceiptText } from 'lucide-react';
+import { Ban, Banknote, CreditCard, Landmark, Pencil, Printer, ReceiptText } from 'lucide-react';
 import saleTotals from '@/features/sales/saleTotals';
+import useSales, { PAYMENT_METHODS, voidSale } from '@/features/sales/store';
+import useCustomers from '@/features/customers/store';
+import Modal from '@/shared/components/Modal';
+import ConfirmDialog from '@/shared/components/ConfirmDialog';
+import { Button, Field, inputClass } from '@/shared/components/Form';
 
 const paymentIcons = { efectivo: Banknote, tarjeta: CreditCard, transferencia: Landmark };
 
@@ -9,10 +14,56 @@ const fmtDate = (iso) =>
   new Date(iso).toLocaleString('es-CO', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
 const isToday = (iso) => new Date(iso).toDateString() === new Date().toDateString();
 
-export default function SalesHistory({ sales }) {
+// Only the customer and payment method are editable; items and totals stay as sold
+function SaleForm({ sale, customers, onSave, onClose }) {
+  const [form, setForm] = useState({ cliente: sale.cliente, pago: sale.pago });
+  const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
+  const names = ['Cliente general', ...customers.map((c) => c.name)];
+  if (!names.includes(sale.cliente)) names.push(sale.cliente);
+
+  return (
+    <Modal
+      title={`Editar ${sale.factura}`}
+      onClose={onClose}
+      footer={
+        <>
+          <Button variant="secondary" onClick={onClose}>
+            Cancelar
+          </Button>
+          <Button onClick={() => onSave(form)}>Guardar</Button>
+        </>
+      }
+    >
+      <div className="space-y-4">
+        <Field label="Cliente">
+          <select value={form.cliente} onChange={set('cliente')} className={inputClass}>
+            {names.map((n) => (
+              <option key={n}>{n}</option>
+            ))}
+          </select>
+        </Field>
+        <Field label="Método de pago">
+          <select value={form.pago} onChange={set('pago')} className={`${inputClass} capitalize`}>
+            {PAYMENT_METHODS.map((m) => (
+              <option key={m} value={m}>
+                {m}
+              </option>
+            ))}
+          </select>
+        </Field>
+      </div>
+    </Modal>
+  );
+}
+
+export default function SalesHistory() {
+  const { items: sales, update } = useSales();
+  const { items: customers } = useCustomers();
   const [search, setSearch] = useState('');
   const [payment, setPayment] = useState('todos');
   const [selectedId, setSelectedId] = useState(null);
+  const [editing, setEditing] = useState(null);
+  const [voiding, setVoiding] = useState(null);
 
   // Newest first
   const rows = [...sales]
@@ -166,8 +217,19 @@ export default function SalesHistory({ sales }) {
                   <span>Total</span>
                   <span className="font-mono">{fmt(selected.total)}</span>
                 </div>
-                <button className="mt-3 w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold bg-brand-200 text-brand-800">
-                  <Printer size={16} /> Imprimir recibo
+                <div className="mt-3 grid grid-cols-2 gap-2">
+                  <Button variant="soft" onClick={() => setEditing(selected)}>
+                    <Pencil size={15} /> Editar
+                  </Button>
+                  <Button variant="soft">
+                    <Printer size={15} /> Imprimir
+                  </Button>
+                </div>
+                <button
+                  onClick={() => setVoiding(selected)}
+                  className="w-full flex items-center justify-center gap-2 py-2 rounded-xl text-sm font-semibold text-danger hover:bg-danger-soft"
+                >
+                  <Ban size={15} /> Anular venta
                 </button>
               </div>
             </>
@@ -179,6 +241,31 @@ export default function SalesHistory({ sales }) {
           )}
         </div>
       </div>
+
+      {editing && (
+        <SaleForm
+          sale={editing}
+          customers={customers}
+          onClose={() => setEditing(null)}
+          onSave={(data) => {
+            update(editing.id, data);
+            setEditing(null);
+          }}
+        />
+      )}
+      {voiding && (
+        <ConfirmDialog
+          title="Anular venta"
+          message={`¿Anular la venta ${voiding.factura} por ${fmt(voiding.total)}? Se eliminará del historial y las prendas vendidas en el POS volverán al stock.`}
+          confirmLabel="Anular venta"
+          onCancel={() => setVoiding(null)}
+          onConfirm={() => {
+            voidSale(voiding.id);
+            setSelectedId(null);
+            setVoiding(null);
+          }}
+        />
+      )}
     </div>
   );
 }

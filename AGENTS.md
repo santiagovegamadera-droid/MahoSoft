@@ -32,6 +32,10 @@ Code is organized by feature, not by file type:
 
 Import across folders with the `@` alias (`@/features/pos/POS`, `@/shared/components/Logo`).
 
+### Data (CRUD)
+
+Until the backend exists, each feature keeps its records in `src/features/<feature>/store.js`, built with `createCollection` from `src/shared/lib/createCollection.js`. It returns a hook (`useProducts()`, `useCustomers()`, …) with `items`, `create`, `update` and `remove`; data is shared across screens and persisted to localStorage under `mahosoft:<name>`. Records reference each other by id (`catId`, `proveedorId`, `coleccionId`, `productId`). Stock-changing operations (sales, voids, purchase movements) go through the helpers in `sales/store.js` and `purchases/store.js`, which adjust product stock. Forms use `Modal`, `ConfirmDialog` and the helpers in `src/shared/components/Form.jsx` (`Field`, `Button`, `RowActions`, `inputClass`).
+
 ## Dependencies
 
 - Runtime: React 19 and React DOM 19

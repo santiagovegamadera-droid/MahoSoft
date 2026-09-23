@@ -1,83 +1,116 @@
+import { useState } from 'react';
 import { Plus } from 'lucide-react';
+import useSuppliers from '@/features/suppliers/store';
+import { useCategories } from '@/features/categories/store';
+import useProducts from '@/features/products/store';
+import Modal from '@/shared/components/Modal';
+import ConfirmDialog from '@/shared/components/ConfirmDialog';
+import { Button, CheckboxList, Field, RowActions, inputClass } from '@/shared/components/Form';
 
-const suppliers = [
-  {
-    id: 1,
-    name: 'Textiles Bogotá S.A.S.',
-    contacto: 'Pedro Vargas',
-    email: 'pvargas@textilesbog.com',
-    tel: '601-234-5678',
-    ciudad: 'Bogotá',
-    categorias: ['Vestidos', 'Faldas', 'Blusas'],
-    ultimoPedido: '2026-09-15',
-    montoPedido: '$4.250.000',
-    estado: 'Activo',
-  },
-  {
-    id: 2,
-    name: 'ModaCali S.A.',
-    contacto: 'Sandra Lozano',
-    email: 'slozano@modacali.com',
-    tel: '602-345-6789',
-    ciudad: 'Cali',
-    categorias: ['Blusas', 'Pantalones'],
-    ultimoPedido: '2026-09-10',
-    montoPedido: '$2.800.000',
-    estado: 'Activo',
-  },
-  {
-    id: 3,
-    name: 'DenimCo',
-    contacto: 'Ricardo Montoya',
-    email: 'r.montoya@denimco.co',
-    tel: '604-456-7890',
-    ciudad: 'Medellín',
-    categorias: ['Pantalones', 'Jeans'],
-    ultimoPedido: '2026-08-28',
-    montoPedido: '$3.150.000',
-    estado: 'Activo',
-  },
-  {
-    id: 4,
-    name: 'LuxFashion Ltda.',
-    contacto: 'Andrea Silva',
-    email: 'asilva@luxfashion.com',
-    tel: '605-567-8901',
-    ciudad: 'Bogotá',
-    categorias: ['Conjuntos', 'Abrigos'],
-    ultimoPedido: '2026-09-05',
-    montoPedido: '$5.400.000',
-    estado: 'Activo',
-  },
-  {
-    id: 5,
-    name: 'KnitCo Textiles',
-    contacto: 'Jorge Pérez',
-    email: 'jperez@knitco.co',
-    tel: '607-678-9012',
-    ciudad: 'Manizales',
-    categorias: ['Abrigos', 'Cardigans'],
-    ultimoPedido: '2026-09-20',
-    montoPedido: '$1.950.000',
-    estado: 'Inactivo',
-  },
-];
+const emptySupplier = { name: '', contacto: '', email: '', tel: '', ciudad: '', categorias: [], estado: 'Activo' };
+
+function SupplierForm({ supplier, categories, onSave, onClose }) {
+  const [form, setForm] = useState(supplier ?? emptySupplier);
+  const [error, setError] = useState('');
+  const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
+
+  // CheckboxList works with names; the store keeps category ids
+  const nameOf = (id) => categories.find((c) => c.id === id)?.name;
+  const idOf = (name) => categories.find((c) => c.name === name)?.id;
+
+  function submit(e) {
+    e.preventDefault();
+    if (!form.name.trim()) return setError('El nombre es obligatorio');
+    onSave({ ...form, name: form.name.trim() });
+  }
+
+  return (
+    <Modal
+      title={supplier ? 'Editar proveedor' : 'Nuevo proveedor'}
+      onClose={onClose}
+      footer={
+        <>
+          <Button variant="secondary" onClick={onClose}>
+            Cancelar
+          </Button>
+          <Button type="submit" form="supplier-form">
+            Guardar
+          </Button>
+        </>
+      }
+    >
+      <form id="supplier-form" onSubmit={submit} className="space-y-4">
+        <Field label="Empresa" error={error}>
+          <input value={form.name} onChange={set('name')} className={inputClass} autoFocus />
+        </Field>
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Contacto">
+            <input value={form.contacto} onChange={set('contacto')} className={inputClass} />
+          </Field>
+          <Field label="Teléfono">
+            <input value={form.tel} onChange={set('tel')} className={inputClass} />
+          </Field>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Email">
+            <input type="email" value={form.email} onChange={set('email')} className={inputClass} />
+          </Field>
+          <Field label="Ciudad">
+            <input value={form.ciudad} onChange={set('ciudad')} className={inputClass} />
+          </Field>
+        </div>
+        <Field label="Categorías que surte" group>
+          <CheckboxList
+            options={categories.map((c) => c.name)}
+            value={form.categorias.map(nameOf).filter(Boolean)}
+            onChange={(names) => setForm((f) => ({ ...f, categorias: names.map(idOf) }))}
+          />
+        </Field>
+        <Field label="Estado">
+          <select value={form.estado} onChange={set('estado')} className={inputClass}>
+            <option>Activo</option>
+            <option>Inactivo</option>
+          </select>
+        </Field>
+      </form>
+    </Modal>
+  );
+}
 
 export default function Suppliers() {
+  const { items: suppliers, create, update, remove } = useSuppliers();
+  const { items: categories } = useCategories();
+  const { items: products, update: updateProduct } = useProducts();
+  const [editing, setEditing] = useState(null); // null | 'new' | supplier
+  const [deleting, setDeleting] = useState(null);
+
+  const productCount = (s) => products.filter((p) => p.proveedorId === s.id).length;
+
+  function save(data) {
+    if (editing === 'new') create(data);
+    else update(editing.id, data);
+    setEditing(null);
+  }
+
+  function confirmDelete() {
+    products.filter((p) => p.proveedorId === deleting.id).forEach((p) => updateProduct(p.id, { proveedorId: null }));
+    remove(deleting.id);
+    setDeleting(null);
+  }
+
   return (
     <div className="p-8">
-      <div className="flex justify-between items-center mb-5">
-        <div />
-        <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-brand-600">
+      <div className="flex justify-end items-center mb-5">
+        <Button onClick={() => setEditing('new')}>
           <Plus size={16} /> Nuevo proveedor
-        </button>
+        </Button>
       </div>
 
       <div className="grid grid-cols-3 gap-4 mb-6">
         {[
           { label: 'Total proveedores', val: suppliers.length },
-          { label: 'Pedidos este mes', val: 8 },
-          { label: 'Monto total pedidos', val: '$17.55M' },
+          { label: 'Activos', val: suppliers.filter((s) => s.estado === 'Activo').length },
+          { label: 'Productos surtidos', val: products.filter((p) => p.proveedorId).length },
         ].map((k) => (
           <div key={k.label} className="bg-white rounded-2xl p-5 border border-brand-150">
             <p className="text-xs uppercase tracking-wide mb-1 text-brand-600">{k.label}</p>
@@ -90,7 +123,7 @@ export default function Suppliers() {
         <table className="w-full text-sm">
           <thead>
             <tr className="bg-brand-50">
-              {['Proveedor', 'Contacto', 'Ciudad', 'Categorías', 'Último pedido', 'Monto', 'Estado', ''].map((h) => (
+              {['Proveedor', 'Contacto', 'Ciudad', 'Categorías', 'Productos', 'Estado', ''].map((h) => (
                 <th
                   key={h}
                   className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-brand-600"
@@ -114,15 +147,19 @@ export default function Suppliers() {
                 <td className="px-5 py-3.5 text-xs text-brand-600">{s.ciudad}</td>
                 <td className="px-5 py-3.5">
                   <div className="flex flex-wrap gap-1">
-                    {s.categorias.slice(0, 2).map((c) => (
-                      <span key={c} className="text-[10px] px-1.5 py-0.5 rounded bg-brand-200 text-brand-800">
-                        {c}
-                      </span>
-                    ))}
+                    {s.categorias.map((id) => {
+                      const cat = categories.find((c) => c.id === id);
+                      return (
+                        cat && (
+                          <span key={id} className="text-[10px] px-1.5 py-0.5 rounded bg-brand-200 text-brand-800">
+                            {cat.name}
+                          </span>
+                        )
+                      );
+                    })}
                   </div>
                 </td>
-                <td className="px-5 py-3.5 text-xs font-mono text-brand-600">{s.ultimoPedido}</td>
-                <td className="px-5 py-3.5 font-mono font-semibold text-sm text-brand-800">{s.montoPedido}</td>
+                <td className="px-5 py-3.5 font-semibold text-brand-800">{productCount(s)}</td>
                 <td className="px-5 py-3.5">
                   <span
                     className={`text-xs px-2.5 py-1 rounded-full font-semibold ${
@@ -133,15 +170,35 @@ export default function Suppliers() {
                   </span>
                 </td>
                 <td className="px-5 py-3.5">
-                  <button className="text-xs px-3 py-1.5 rounded-lg font-semibold bg-brand-200 text-brand-800">
-                    Ver pedidos
-                  </button>
+                  <RowActions label={s.name} onEdit={() => setEditing(s)} onDelete={() => setDeleting(s)} />
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
+        {suppliers.length === 0 && <p className="px-5 py-10 text-center text-sm text-brand-400">No hay proveedores.</p>}
       </div>
+
+      {editing && (
+        <SupplierForm
+          supplier={editing === 'new' ? null : editing}
+          categories={categories}
+          onSave={save}
+          onClose={() => setEditing(null)}
+        />
+      )}
+      {deleting && (
+        <ConfirmDialog
+          title="Eliminar proveedor"
+          message={
+            productCount(deleting) > 0
+              ? `¿Eliminar a ${deleting.name}? Sus ${productCount(deleting)} productos quedarán sin proveedor.`
+              : `¿Eliminar a ${deleting.name}?`
+          }
+          onCancel={() => setDeleting(null)}
+          onConfirm={confirmDelete}
+        />
+      )}
     </div>
   );
 }
