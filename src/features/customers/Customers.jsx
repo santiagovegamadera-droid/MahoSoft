@@ -70,9 +70,9 @@ const customers = [
 ];
 
 const levelColors = {
-  VIP: { bg: '#503459', color: '#fff' },
-  Frecuente: { bg: '#dac9df', color: '#503459' },
-  Nuevo: { bg: '#f5f0f7', color: '#81638b' },
+  VIP: 'bg-brand-800 text-white',
+  Frecuente: 'bg-brand-200 text-brand-800',
+  Nuevo: 'bg-brand-50 text-brand-600',
 };
 
 export default function Customers() {
@@ -91,96 +91,67 @@ export default function Customers() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Buscar por nombre o email..."
-            className="px-4 py-2.5 text-sm rounded-xl border outline-none"
-            style={{ borderColor: '#dac9df', background: '#fff', color: '#503459', width: 260 }}
+            className="px-4 py-2.5 text-sm rounded-xl border outline-none border-brand-200 bg-white text-brand-800 w-[260px]"
           />
-          <select
-            className="px-3 py-2.5 text-sm rounded-xl border outline-none"
-            style={{ borderColor: '#dac9df', color: '#503459' }}
-          >
+          <select className="px-3 py-2.5 text-sm rounded-xl border outline-none border-brand-200 text-brand-800">
             <option>Todos los niveles</option>
             <option>VIP</option>
             <option>Frecuente</option>
             <option>Nuevo</option>
           </select>
-          <button
-            className="ml-auto px-4 py-2.5 rounded-xl text-sm font-semibold text-white"
-            style={{ background: '#81638b' }}
-          >
+          <button className="ml-auto px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-brand-600">
             + Nuevo cliente
           </button>
         </div>
 
-        <div className="bg-white rounded-2xl border overflow-hidden" style={{ borderColor: '#e8dff0' }}>
+        <div className="bg-white rounded-2xl border overflow-hidden border-brand-150">
           <table className="w-full text-sm">
             <thead>
-              <tr style={{ background: '#f5f0f7' }}>
+              <tr className="bg-brand-50">
                 {['Cliente', 'Ciudad', 'Compras', 'Total gastado', 'Última compra', 'Nivel', ''].map((h) => (
                   <th
                     key={h}
-                    className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide"
-                    style={{ color: '#81638b' }}
+                    className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-brand-600"
                   >
                     {h}
                   </th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y" style={{ borderColor: '#f5f0f7' }}>
+            <tbody className="divide-y divide-brand-50">
               {filtered.map((c) => (
                 <tr
                   key={c.id}
-                  className="cursor-pointer transition-colors"
-                  style={{ background: selected?.id === c.id ? '#faf7fc' : '' }}
+                  className={`cursor-pointer transition-colors hover:bg-brand-25 ${
+                    selected?.id === c.id ? 'bg-brand-25' : ''
+                  }`}
                   onClick={() => setSelected(c)}
-                  onMouseEnter={(e) => (e.currentTarget.style.background = '#faf7fc')}
-                  onMouseLeave={(e) => (e.currentTarget.style.background = selected?.id === c.id ? '#faf7fc' : '')}
                 >
                   <td className="px-5 py-3.5">
                     <div className="flex items-center gap-3">
-                      <div
-                        className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
-                        style={{ background: '#dac9df', color: '#503459' }}
-                      >
+                      <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 bg-brand-200 text-brand-800">
                         {c.name
                           .split(' ')
                           .map((n) => n[0])
                           .join('')}
                       </div>
                       <div>
-                        <p className="font-medium" style={{ color: '#503459' }}>
-                          {c.name}
-                        </p>
-                        <p className="text-xs" style={{ color: '#b695c0' }}>
-                          {c.email}
-                        </p>
+                        <p className="font-medium text-brand-800">{c.name}</p>
+                        <p className="text-xs text-brand-400">{c.email}</p>
                       </div>
                     </div>
                   </td>
-                  <td className="px-5 py-3.5 text-xs" style={{ color: '#81638b' }}>
-                    {c.ciudad}
-                  </td>
-                  <td className="px-5 py-3.5 font-semibold" style={{ color: '#503459' }}>
-                    {c.compras}
-                  </td>
-                  <td className="px-5 py-3.5 font-mono font-semibold" style={{ color: '#503459' }}>
-                    {c.total}
-                  </td>
-                  <td className="px-5 py-3.5 text-xs font-mono" style={{ color: '#81638b' }}>
-                    {c.ultimo}
-                  </td>
+                  <td className="px-5 py-3.5 text-xs text-brand-600">{c.ciudad}</td>
+                  <td className="px-5 py-3.5 font-semibold text-brand-800">{c.compras}</td>
+                  <td className="px-5 py-3.5 font-mono font-semibold text-brand-800">{c.total}</td>
+                  <td className="px-5 py-3.5 text-xs font-mono text-brand-600">{c.ultimo}</td>
                   <td className="px-5 py-3.5">
-                    <span className="text-xs px-2.5 py-1 rounded-full font-semibold" style={levelColors[c.nivel]}>
+                    <span className={`text-xs px-2.5 py-1 rounded-full font-semibold ${levelColors[c.nivel]}`}>
                       {c.nivel}
                     </span>
                   </td>
                   <td className="px-5 py-3.5">
-                    <button
-                      className="text-xs px-2.5 py-1 rounded-lg"
-                      style={{ background: '#f5f0f7', color: '#81638b' }}
-                    >
-                      Ver
-                    </button>
+                    <button className="text-xs px-2.5 py-1 rounded-lg bg-brand-50 text-brand-600">Ver</button>
                   </td>
                 </tr>
               ))}
@@ -192,24 +163,17 @@ export default function Customers() {
       {/* Detail panel */}
       {selected && (
         <div className="w-72 shrink-0">
-          <div className="bg-white rounded-2xl border overflow-hidden" style={{ borderColor: '#e8dff0' }}>
-            <div className="p-5 text-center border-b" style={{ borderColor: '#f5f0f7', background: '#f5f0f7' }}>
-              <div
-                className="w-14 h-14 rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-3"
-                style={{ background: '#503459', color: '#fff' }}
-              >
+          <div className="bg-white rounded-2xl border overflow-hidden border-brand-150">
+            <div className="p-5 text-center border-b border-brand-50 bg-brand-50">
+              <div className="w-14 h-14 rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-3 bg-brand-800 text-white">
                 {selected.name
                   .split(' ')
                   .map((n) => n[0])
                   .join('')}
               </div>
-              <p className="font-semibold" style={{ color: '#503459' }}>
-                {selected.name}
-              </p>
-              <p className="text-xs mb-2" style={{ color: '#81638b' }}>
-                {selected.email}
-              </p>
-              <span className="text-xs px-2.5 py-1 rounded-full font-semibold" style={levelColors[selected.nivel]}>
+              <p className="font-semibold text-brand-800">{selected.name}</p>
+              <p className="text-xs mb-2 text-brand-600">{selected.email}</p>
+              <span className={`text-xs px-2.5 py-1 rounded-full font-semibold ${levelColors[selected.nivel]}`}>
                 {selected.nivel}
               </span>
             </div>
@@ -222,24 +186,16 @@ export default function Customers() {
                 { label: 'Última compra', val: selected.ultimo },
               ].map((row) => (
                 <div key={row.label} className="flex justify-between text-xs">
-                  <span style={{ color: '#81638b' }}>{row.label}</span>
-                  <span className="font-semibold" style={{ color: '#503459' }}>
-                    {row.val}
-                  </span>
+                  <span className="text-brand-600">{row.label}</span>
+                  <span className="font-semibold text-brand-800">{row.val}</span>
                 </div>
               ))}
             </div>
             <div className="px-5 pb-5 space-y-2">
-              <button
-                className="w-full py-2.5 rounded-xl text-sm font-semibold text-white"
-                style={{ background: '#81638b' }}
-              >
+              <button className="w-full py-2.5 rounded-xl text-sm font-semibold text-white bg-brand-600">
                 Ver historial
               </button>
-              <button
-                className="w-full py-2 rounded-xl text-sm font-semibold border"
-                style={{ borderColor: '#dac9df', color: '#81638b' }}
-              >
+              <button className="w-full py-2 rounded-xl text-sm font-semibold border border-brand-200 text-brand-600">
                 Editar datos
               </button>
             </div>

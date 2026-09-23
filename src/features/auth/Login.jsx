@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import Logo from '../components/Logo';
-import fondo from '../assets/public/fondo.png';
-import logoSrc from '../assets/public/logo.png';
+import Logo from '@/shared/components/Logo';
+import fondo from '@/assets/public/fondo.png';
+import logoSrc from '@/assets/public/logo.png';
 
 const ICONS = {
   mail: (
@@ -95,8 +95,6 @@ const FEATURES = [
   { icon: 'settings', label: 'Configuración simple' },
 ];
 
-const HIGHLIGHT = '#f2c8f7';
-
 export default function Login({ onLogin }) {
   const [showPassword, setShowPassword] = useState(false);
   const [lang, setLang] = useState('ES');
@@ -108,42 +106,26 @@ export default function Login({ onLogin }) {
 
   return (
     <div
-      className="min-h-dvh lg:h-dvh lg:overflow-hidden flex bg-cover bg-center"
-      style={{ backgroundImage: `url(${fondo})`, backgroundColor: '#f5f0f7' }}
+      className="min-h-dvh lg:h-dvh lg:overflow-hidden flex bg-cover bg-center bg-brand-50"
+      style={{ backgroundImage: `url(${fondo})` }}
     >
       {/* Left panel */}
-      <div
-        className="hidden lg:flex flex-col justify-between gap-[2vh] w-120 xl:w-140 px-14 py-[4vh] shrink-0 backdrop-blur-md"
-        style={{ background: 'linear-gradient(160deg, rgba(90,58,100,0.86), rgba(58,37,65,0.9))' }}
-      >
+      <div className="hidden lg:flex flex-col justify-between gap-[2vh] w-120 xl:w-140 px-14 py-[4vh] shrink-0 backdrop-blur-md bg-linear-160 from-brand-750/86 to-brand-900/90">
         {/* Logo + tagline */}
         <div className="flex flex-col items-center">
-          <div
-            className="w-[clamp(88px,17vh,160px)] aspect-square rounded-[clamp(18px,3vh,28px)] p-[1.5vh] flex items-center justify-center"
-            style={{
-              background: 'linear-gradient(145deg, #ffffff, #f3e6f7)',
-              border: '3px solid rgba(222,184,235,0.9)',
-              boxShadow: '0 0 32px rgba(230,180,245,0.45)',
-            }}
-          >
+          <div className="w-[clamp(88px,17vh,160px)] aspect-square rounded-[clamp(18px,3vh,28px)] p-[1.5vh] flex items-center justify-center bg-linear-145 from-white to-brand-75 border-3 border-brand-300/90 shadow-[0_0_32px_rgba(230,180,245,0.45)]">
             <img src={logoSrc} alt="Maho Boutique" className="w-full h-full object-contain" />
           </div>
-          <p
-            className="mt-[2vh] text-[clamp(9px,1.3vh,11px)] font-medium tracking-[0.4em] whitespace-nowrap"
-            style={{ color: 'rgba(218,201,223,0.9)' }}
-          >
+          <p className="mt-[2vh] text-[clamp(9px,1.3vh,11px)] font-medium tracking-[0.4em] whitespace-nowrap text-brand-200/90">
             MODA | ESTILO | TU ESENCIA
           </p>
         </div>
 
         {/* Headline + features */}
         <div>
-          <h1
-            className="text-[clamp(30px,5.8vh,56px)] leading-[1.05] text-white"
-            style={{ fontFamily: 'DM Serif Display, serif' }}
-          >
-            Gestiona tu boutique con <span style={{ color: HIGHLIGHT }}>elegancia</span> y{' '}
-            <span style={{ color: HIGHLIGHT }}>precisión.</span>
+          <h1 className="text-[clamp(30px,5.8vh,56px)] leading-[1.05] text-white font-display">
+            Gestiona tu boutique con <span className="text-orchid">elegancia</span> y{' '}
+            <span className="text-orchid">precisión.</span>
           </h1>
           <p className="mt-[1.5vh] text-[clamp(14px,2vh,18px)] leading-snug text-white/90">
             Todo lo que necesitas en un solo lugar para hacer crecer tu negocio.
@@ -152,10 +134,7 @@ export default function Login({ onLogin }) {
           <div className="mt-[3vh] grid grid-cols-4 gap-3">
             {FEATURES.map((f) => (
               <div key={f.label} className="flex flex-col items-center text-center">
-                <div
-                  className="w-[clamp(44px,7vh,64px)] aspect-square rounded-full flex items-center justify-center text-white"
-                  style={{ border: '1px solid rgba(255,255,255,0.35)', background: 'rgba(255,255,255,0.08)' }}
-                >
+                <div className="w-[clamp(44px,7vh,64px)] aspect-square rounded-full flex items-center justify-center text-white border border-white/35 bg-white/8">
                   <Icon name={f.icon} size={24} />
                 </div>
                 <p className="mt-[1vh] text-xs leading-tight text-white/85">{f.label}</p>
@@ -166,17 +145,16 @@ export default function Login({ onLogin }) {
 
         {/* Motto */}
         <div className="flex flex-col items-center">
-          <p className="font-script text-[clamp(24px,4vh,36px)] text-white whitespace-nowrap">Sueña · Organiza · Vende · Crece</p>
+          <p className="font-script text-[clamp(24px,4vh,36px)] text-white whitespace-nowrap">
+            Sueña · Organiza · Vende · Crece
+          </p>
           <div className="mt-1 w-32 h-px bg-white/40" />
         </div>
       </div>
 
       {/* Right panel */}
       <div className="relative flex-1 min-w-0 flex items-center justify-center p-4 pb-16 sm:px-8 lg:pb-[clamp(40px,7vh,64px)] lg:pt-[3vh]">
-        <div
-          className="relative w-full max-w-md rounded-3xl px-6 py-8 sm:px-10 lg:py-[clamp(20px,4vh,40px)]"
-          style={{ background: 'rgba(255,255,255,0.95)', boxShadow: '0 12px 48px rgba(80,52,89,0.25)' }}
-        >
+        <div className="relative w-full max-w-md rounded-3xl px-6 py-8 sm:px-10 lg:py-[clamp(20px,4vh,40px)] bg-white/95 shadow-[0_12px_48px_rgba(80,52,89,0.25)]">
           {/* Language selector */}
           <select
             value={lang}
@@ -193,18 +171,20 @@ export default function Login({ onLogin }) {
             <Logo variant="dark" size="md" />
           </div>
 
-          <h2
-            className="flex items-center gap-3 pr-8 text-2xl sm:text-3xl text-brand-800"
-            style={{ fontFamily: 'DM Serif Display, serif' }}
-          >
+          <h2 className="flex items-center gap-3 pr-8 text-2xl sm:text-3xl text-brand-800 font-display">
             Bienvenida de nuevo
             <Icon name="heart" size={26} className="text-brand-400" />
           </h2>
-          <p className="mt-1 mb-[clamp(12px,2.8vh,28px)] text-sm text-brand-600">Ingresa tus credenciales para continuar</p>
+          <p className="mt-1 mb-[clamp(12px,2.8vh,28px)] text-sm text-brand-600">
+            Ingresa tus credenciales para continuar
+          </p>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-[clamp(10px,2vh,20px)]">
             <div>
-              <label htmlFor="login-email" className="block text-xs font-semibold mb-1.5 uppercase tracking-wide text-brand-800">
+              <label
+                htmlFor="login-email"
+                className="block text-xs font-semibold mb-1.5 uppercase tracking-wide text-brand-800"
+              >
                 Correo electrónico
               </label>
               <div className="flex items-center gap-3 px-4 rounded-xl border border-brand-200 bg-white text-brand-800 transition-all focus-within:border-brand-600 focus-within:ring-3 focus-within:ring-brand-600/15">
@@ -219,7 +199,10 @@ export default function Login({ onLogin }) {
             </div>
 
             <div>
-              <label htmlFor="login-password" className="block text-xs font-semibold mb-1.5 uppercase tracking-wide text-brand-800">
+              <label
+                htmlFor="login-password"
+                className="block text-xs font-semibold mb-1.5 uppercase tracking-wide text-brand-800"
+              >
                 Contraseña
               </label>
               <div className="flex items-center gap-3 px-4 rounded-xl border border-brand-200 bg-white text-brand-800 transition-all focus-within:border-brand-600 focus-within:ring-3 focus-within:ring-brand-600/15">
@@ -246,18 +229,17 @@ export default function Login({ onLogin }) {
                 <input type="checkbox" defaultChecked className="w-4 h-4 accent-brand-800" />
                 Recordarme
               </label>
-              <button type="button" className="font-semibold underline underline-offset-2 text-brand-600 hover:text-brand-800">
+              <button
+                type="button"
+                className="font-semibold underline underline-offset-2 text-brand-600 hover:text-brand-800"
+              >
                 ¿Olvidaste tu contraseña?
               </button>
             </div>
 
             <button
               type="submit"
-              className="mt-1 w-full py-[clamp(10px,1.6vh,14px)] rounded-xl flex items-center justify-center gap-2 text-base font-semibold text-white transition-all hover:brightness-110"
-              style={{
-                background: 'linear-gradient(90deg, #8a5a9b, #5e2f70)',
-                boxShadow: '0 6px 20px rgba(94,47,112,0.35)',
-              }}
+              className="mt-1 w-full py-[clamp(10px,1.6vh,14px)] rounded-xl flex items-center justify-center gap-2 text-base font-semibold text-white transition-all hover:brightness-110 bg-linear-90 from-brand-500 to-brand-700 shadow-[0_6px_20px_rgba(94,47,112,0.35)]"
             >
               Ingresar al sistema
               <Icon name="arrowRight" size={18} />
@@ -281,7 +263,7 @@ export default function Login({ onLogin }) {
 
           {/* Quote */}
           <div className="mt-[clamp(10px,2.5vh,24px)] flex items-center justify-between gap-4 rounded-2xl px-5 py-[clamp(10px,1.8vh,16px)] bg-brand-50">
-            <p className="italic text-base leading-snug text-brand-800" style={{ fontFamily: 'DM Serif Display, serif' }}>
+            <p className="italic text-base leading-snug text-brand-800 font-display">
               “Una boutique organizada,
               <br />
               siempre llega más lejos”

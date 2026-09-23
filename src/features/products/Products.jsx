@@ -117,30 +117,23 @@ export default function Products({ onEdit }) {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Buscar producto..."
-          className="px-4 py-2.5 text-sm rounded-xl border outline-none"
-          style={{ borderColor: '#dac9df', background: '#fff', color: '#503459', width: 220 }}
+          className="px-4 py-2.5 text-sm rounded-xl border outline-none border-brand-200 bg-white text-brand-800 w-[220px]"
         />
         <div className="flex gap-1 flex-wrap">
           {categories.map((c) => (
             <button
               key={c}
               onClick={() => setCat(c)}
-              className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
-              style={{
-                background: cat === c ? '#81638b' : '#fff',
-                color: cat === c ? '#fff' : '#81638b',
-                border: `1px solid ${cat === c ? '#81638b' : '#dac9df'}`,
-              }}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border ${
+                cat === c ? 'bg-brand-600 text-white border-brand-600' : 'bg-white text-brand-600 border-brand-200'
+              }`}
             >
               {c}
             </button>
           ))}
         </div>
         <div className="ml-auto flex gap-2">
-          <select
-            className="px-3 py-2 text-xs rounded-xl border outline-none"
-            style={{ borderColor: '#dac9df', color: '#503459' }}
-          >
+          <select className="px-3 py-2 text-xs rounded-xl border outline-none border-brand-200 text-brand-800">
             <option>Todos los estados</option>
             <option>Activo</option>
             <option>Inactivo</option>
@@ -152,22 +145,33 @@ export default function Products({ onEdit }) {
       <div className="flex gap-3 mb-5">
         {[
           { label: 'Total productos', val: products.length },
-          { label: 'Stock bajo', val: products.filter((p) => p.stock > 0 && p.stock <= 5).length, warn: true },
-          { label: 'Agotados', val: products.filter((p) => p.stock === 0).length, danger: true },
-          { label: 'Inactivos', val: products.filter((p) => p.estado === 'Inactivo').length },
+          {
+            label: 'Stock bajo',
+            val: products.filter((p) => p.stock > 0 && p.stock <= 5).length,
+            warn: true,
+          },
+          {
+            label: 'Agotados',
+            val: products.filter((p) => p.stock === 0).length,
+            danger: true,
+          },
+          {
+            label: 'Inactivos',
+            val: products.filter((p) => p.estado === 'Inactivo').length,
+          },
         ].map((s) => (
           <div
             key={s.label}
-            className="px-4 py-2.5 rounded-xl flex items-center gap-2"
-            style={{ background: s.danger ? '#fde8ea' : s.warn ? '#fef3e2' : '#dac9df' }}
+            className={`px-4 py-2.5 rounded-xl flex items-center gap-2 ${
+              s.danger ? 'bg-danger-soft' : s.warn ? 'bg-warning-soft' : 'bg-brand-200'
+            }`}
           >
             <span
-              className="text-lg font-bold"
-              style={{ color: s.danger ? '#c0392b' : s.warn ? '#a0640a' : '#503459' }}
+              className={`text-lg font-bold ${s.danger ? 'text-danger' : s.warn ? 'text-warning' : 'text-brand-800'}`}
             >
               {s.val}
             </span>
-            <span className="text-xs" style={{ color: s.danger ? '#c0392b' : s.warn ? '#a0640a' : '#81638b' }}>
+            <span className={`text-xs ${s.danger ? 'text-danger' : s.warn ? 'text-warning' : 'text-brand-600'}`}>
               {s.label}
             </span>
           </div>
@@ -175,55 +179,35 @@ export default function Products({ onEdit }) {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-2xl border overflow-hidden" style={{ borderColor: '#e8dff0' }}>
+      <div className="bg-white rounded-2xl border overflow-hidden border-brand-150">
         <table className="w-full text-sm">
           <thead>
-            <tr style={{ background: '#f5f0f7' }}>
+            <tr className="bg-brand-50">
               {['Producto', 'Categoría', 'Precio', 'Tallas', 'Stock', 'Proveedor', 'Estado', ''].map((h) => (
                 <th
                   key={h}
-                  className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide"
-                  style={{ color: '#81638b' }}
+                  className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-brand-600"
                 >
                   {h}
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y" style={{ borderColor: '#f5f0f7' }}>
+          <tbody className="divide-y divide-brand-50">
             {filtered.map((p) => (
-              <tr
-                key={p.id}
-                className="transition-colors"
-                style={{ cursor: 'pointer' }}
-                onMouseEnter={(e) => (e.currentTarget.style.background = '#faf7fc')}
-                onMouseLeave={(e) => (e.currentTarget.style.background = '')}
-              >
+              <tr key={p.id} className="transition-colors cursor-pointer hover:bg-brand-25">
                 <td className="px-5 py-3.5">
                   <div className="flex items-center gap-3">
-                    <img
-                      src={p.img}
-                      alt={p.name}
-                      className="w-10 h-10 rounded-lg object-cover"
-                      style={{ background: '#dac9df' }}
-                    />
-                    <span className="font-medium" style={{ color: '#503459' }}>
-                      {p.name}
-                    </span>
+                    <img src={p.img} alt={p.name} className="w-10 h-10 rounded-lg object-cover bg-brand-200" />
+                    <span className="font-medium text-brand-800">{p.name}</span>
                   </div>
                 </td>
                 <td className="px-5 py-3.5">
-                  <span
-                    className="text-xs px-2 py-1 rounded-full font-medium"
-                    style={{ background: '#dac9df', color: '#503459' }}
-                  >
+                  <span className="text-xs px-2 py-1 rounded-full font-medium bg-brand-200 text-brand-800">
                     {p.cat}
                   </span>
                 </td>
-                <td
-                  className="px-5 py-3.5 font-semibold"
-                  style={{ color: '#503459', fontFamily: 'DM Mono, monospace' }}
-                >
+                <td className="px-5 py-3.5 font-semibold text-brand-800 font-mono">
                   ${p.precio.toLocaleString('es-CO')}
                 </td>
                 <td className="px-5 py-3.5">
@@ -231,37 +215,29 @@ export default function Products({ onEdit }) {
                     {p.tallas.slice(0, 3).map((t) => (
                       <span
                         key={t}
-                        className="text-[10px] px-1.5 py-0.5 rounded border font-medium"
-                        style={{ borderColor: '#b695c0', color: '#81638b' }}
+                        className="text-[10px] px-1.5 py-0.5 rounded border font-medium border-brand-400 text-brand-600"
                       >
                         {t}
                       </span>
                     ))}
-                    {p.tallas.length > 3 && (
-                      <span className="text-[10px]" style={{ color: '#b695c0' }}>
-                        +{p.tallas.length - 3}
-                      </span>
-                    )}
+                    {p.tallas.length > 3 && <span className="text-[10px] text-brand-400">+{p.tallas.length - 3}</span>}
                   </div>
                 </td>
                 <td className="px-5 py-3.5">
                   <span
-                    className="font-bold text-sm"
-                    style={{ color: p.stock === 0 ? '#c0392b' : p.stock <= 5 ? '#a0640a' : '#2d6a4f' }}
+                    className={`font-bold text-sm ${
+                      p.stock === 0 ? 'text-danger' : p.stock <= 5 ? 'text-warning' : 'text-success-dark'
+                    }`}
                   >
                     {p.stock}
                   </span>
                 </td>
-                <td className="px-5 py-3.5 text-xs" style={{ color: '#81638b' }}>
-                  {p.proveedor}
-                </td>
+                <td className="px-5 py-3.5 text-xs text-brand-600">{p.proveedor}</td>
                 <td className="px-5 py-3.5">
                   <span
-                    className="text-xs px-2.5 py-1 rounded-full font-semibold"
-                    style={{
-                      background: p.estado === 'Activo' ? '#d1f5e0' : '#f0f0f0',
-                      color: p.estado === 'Activo' ? '#1a7a45' : '#666',
-                    }}
+                    className={`text-xs px-2.5 py-1 rounded-full font-semibold ${
+                      p.estado === 'Activo' ? 'bg-success-soft text-success' : 'bg-muted-soft text-muted'
+                    }`}
                   >
                     {p.estado}
                   </span>
@@ -269,10 +245,7 @@ export default function Products({ onEdit }) {
                 <td className="px-5 py-3.5">
                   <button
                     onClick={() => onEdit(p.id)}
-                    className="text-xs px-3 py-1.5 rounded-lg font-semibold transition-all"
-                    style={{ background: '#dac9df', color: '#503459' }}
-                    onMouseEnter={(e) => (e.currentTarget.style.background = '#b695c0')}
-                    onMouseLeave={(e) => (e.currentTarget.style.background = '#dac9df')}
+                    className="text-xs px-3 py-1.5 rounded-lg font-semibold transition-all bg-brand-200 text-brand-800 hover:bg-brand-400"
                   >
                     Editar
                   </button>
@@ -281,16 +254,17 @@ export default function Products({ onEdit }) {
             ))}
           </tbody>
         </table>
-        <div className="px-5 py-3 flex items-center justify-between border-t" style={{ borderColor: '#f5f0f7' }}>
-          <p className="text-xs" style={{ color: '#b695c0' }}>
+        <div className="px-5 py-3 flex items-center justify-between border-t border-brand-50">
+          <p className="text-xs text-brand-400">
             Mostrando {filtered.length} de {products.length} productos
           </p>
           <div className="flex gap-1">
             {[1, 2, 3].map((n) => (
               <button
                 key={n}
-                className="w-7 h-7 rounded-lg text-xs font-semibold transition-all"
-                style={{ background: n === 1 ? '#81638b' : '#f5f0f7', color: n === 1 ? '#fff' : '#81638b' }}
+                className={`w-7 h-7 rounded-lg text-xs font-semibold transition-all ${
+                  n === 1 ? 'bg-brand-600 text-white' : 'bg-brand-50 text-brand-600'
+                }`}
               >
                 {n}
               </button>

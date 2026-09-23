@@ -11,14 +11,41 @@
   --font-script: 'Great Vibes', cursive;
 
   --color-brand-900: #3a2541;
+  --color-brand-750: #5a3a64;
+  --color-brand-700: #5e2f70;
   --color-brand-800: #503459;
   --color-brand-600: #81638b;
+  --color-brand-500: #8a5a9b;
   --color-brand-400: #b695c0;
+  --color-brand-300: #deb8eb;
   --color-brand-200: #dac9df;
+  --color-brand-150: #e8dff0;
+  --color-brand-100: #f0e8f5;
+  --color-brand-75: #f3e6f7;
   --color-brand-50: #f5f0f7;
+  --color-brand-25: #faf7fc;
+  --color-canvas: #f8f5fa;
+  --color-orchid: #f2c8f7;
+
+  --color-success: #1a7a45;
+  --color-success-dark: #2d6a4f;
+  --color-success-soft: #d1f5e0;
+  --color-warning: #a0640a;
+  --color-warning-soft: #fef3e2;
+  --color-warning-tint: #fffbf0;
+  --color-warning-line: #fde8c0;
+  --color-danger: #c0392b;
+  --color-danger-soft: #fde8ea;
+  --color-danger-tint: #fff5f5;
+  --color-danger-line: #fdd8d8;
+  --color-rose: #a0404a;
+  --color-rose-soft: #f5dde0;
+  --color-muted: #666666;
+  --color-muted-soft: #f0f0f0;
 }
 
-html, body {
+html,
+body {
   font-family: var(--font-sans);
 }
 
@@ -27,6 +54,14 @@ html, body {
   scrollbar-color: #b695c0 transparent;
 }
 
-::-webkit-scrollbar { width: 5px; height: 5px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #b695c0; border-radius: 9999px; }
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #b695c0;
+  border-radius: 9999px;
+}

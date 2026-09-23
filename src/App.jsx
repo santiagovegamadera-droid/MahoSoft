@@ -1,21 +1,36 @@
 import { useState } from 'react';
-import Sidebar from './components/Sidebar';
-import Header from './components/Header';
-import Login from './views/Login';
-import Dashboard from './views/Dashboard';
-import Products from './views/Products';
-import ProductDetail from './views/ProductDetail';
-import Inventory from './views/Inventory';
-import POS from './views/POS';
-import Customers from './views/Customers';
-import Suppliers from './views/Suppliers';
-import Employees from './views/Employees';
-import Reports from './views/Reports';
-import Categories from './views/Categories';
+
+import Sidebar from '@/shared/layout/Sidebar';
+
+import Header from '@/shared/layout/Header';
+
+import Login from '@/features/auth/Login';
+
+import Dashboard from '@/features/dashboard/Dashboard';
+
+import Products from '@/features/products/Products';
+
+import ProductDetail from '@/features/products/ProductDetail';
+
+import Inventory from '@/features/inventory/Inventory';
+
+import POS from '@/features/pos/POS';
+
+import Customers from '@/features/customers/Customers';
+
+import Suppliers from '@/features/suppliers/Suppliers';
+
+import Employees from '@/features/employees/Employees';
+
+import Reports from '@/features/reports/Reports';
+
+import Categories from '@/features/categories/Categories';
 
 export default function App() {
   const [authenticated, setAuthenticated] = useState(false);
+
   const [view, setView] = useState('dashboard');
+
   const [editingProduct, setEditingProduct] = useState(undefined);
 
   if (!authenticated) {
@@ -24,19 +39,24 @@ export default function App() {
 
   function goToProducts() {
     setView('products');
+
     setEditingProduct(undefined);
   }
+
   function editProduct(id) {
     setEditingProduct(id);
+
     setView('product-detail');
   }
+
   function newProduct() {
     setEditingProduct(undefined);
+
     setView('product-detail');
   }
 
   return (
-    <div className="flex min-h-screen" style={{ background: '#f8f5fa' }}>
+    <div className="flex min-h-screen bg-canvas">
       <Sidebar current={view} onChange={setView} />
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <Header current={view} onNewProduct={newProduct} />

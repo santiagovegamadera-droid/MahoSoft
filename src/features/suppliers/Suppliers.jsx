@@ -66,7 +66,7 @@ export default function Suppliers() {
     <div className="p-8">
       <div className="flex justify-between items-center mb-5">
         <div />
-        <button className="px-4 py-2.5 rounded-xl text-sm font-semibold text-white" style={{ background: '#81638b' }}>
+        <button className="px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-brand-600">
           + Nuevo proveedor
         </button>
       </div>
@@ -77,94 +77,61 @@ export default function Suppliers() {
           { label: 'Pedidos este mes', val: 8 },
           { label: 'Monto total pedidos', val: '$17.55M' },
         ].map((k) => (
-          <div key={k.label} className="bg-white rounded-2xl p-5 border" style={{ borderColor: '#e8dff0' }}>
-            <p className="text-xs uppercase tracking-wide mb-1" style={{ color: '#81638b' }}>
-              {k.label}
-            </p>
-            <p className="text-2xl font-bold" style={{ color: '#503459' }}>
-              {k.val}
-            </p>
+          <div key={k.label} className="bg-white rounded-2xl p-5 border border-brand-150">
+            <p className="text-xs uppercase tracking-wide mb-1 text-brand-600">{k.label}</p>
+            <p className="text-2xl font-bold text-brand-800">{k.val}</p>
           </div>
         ))}
       </div>
 
-      <div className="bg-white rounded-2xl border overflow-hidden" style={{ borderColor: '#e8dff0' }}>
+      <div className="bg-white rounded-2xl border overflow-hidden border-brand-150">
         <table className="w-full text-sm">
           <thead>
-            <tr style={{ background: '#f5f0f7' }}>
+            <tr className="bg-brand-50">
               {['Proveedor', 'Contacto', 'Ciudad', 'Categorías', 'Último pedido', 'Monto', 'Estado', ''].map((h) => (
                 <th
                   key={h}
-                  className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide"
-                  style={{ color: '#81638b' }}
+                  className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-brand-600"
                 >
                   {h}
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y" style={{ borderColor: '#f5f0f7' }}>
+          <tbody className="divide-y divide-brand-50">
             {suppliers.map((s) => (
-              <tr
-                key={s.id}
-                className="transition-colors"
-                onMouseEnter={(e) => (e.currentTarget.style.background = '#faf7fc')}
-                onMouseLeave={(e) => (e.currentTarget.style.background = '')}
-              >
+              <tr key={s.id} className="transition-colors hover:bg-brand-25">
                 <td className="px-5 py-3.5">
-                  <p className="font-semibold" style={{ color: '#503459' }}>
-                    {s.name}
-                  </p>
-                  <p className="text-xs" style={{ color: '#b695c0' }}>
-                    {s.email}
-                  </p>
+                  <p className="font-semibold text-brand-800">{s.name}</p>
+                  <p className="text-xs text-brand-400">{s.email}</p>
                 </td>
                 <td className="px-5 py-3.5">
-                  <p className="text-sm" style={{ color: '#503459' }}>
-                    {s.contacto}
-                  </p>
-                  <p className="text-xs" style={{ color: '#b695c0' }}>
-                    {s.tel}
-                  </p>
+                  <p className="text-sm text-brand-800">{s.contacto}</p>
+                  <p className="text-xs text-brand-400">{s.tel}</p>
                 </td>
-                <td className="px-5 py-3.5 text-xs" style={{ color: '#81638b' }}>
-                  {s.ciudad}
-                </td>
+                <td className="px-5 py-3.5 text-xs text-brand-600">{s.ciudad}</td>
                 <td className="px-5 py-3.5">
                   <div className="flex flex-wrap gap-1">
                     {s.categorias.slice(0, 2).map((c) => (
-                      <span
-                        key={c}
-                        className="text-[10px] px-1.5 py-0.5 rounded"
-                        style={{ background: '#dac9df', color: '#503459' }}
-                      >
+                      <span key={c} className="text-[10px] px-1.5 py-0.5 rounded bg-brand-200 text-brand-800">
                         {c}
                       </span>
                     ))}
                   </div>
                 </td>
-                <td className="px-5 py-3.5 text-xs font-mono" style={{ color: '#81638b' }}>
-                  {s.ultimoPedido}
-                </td>
-                <td className="px-5 py-3.5 font-mono font-semibold text-sm" style={{ color: '#503459' }}>
-                  {s.montoPedido}
-                </td>
+                <td className="px-5 py-3.5 text-xs font-mono text-brand-600">{s.ultimoPedido}</td>
+                <td className="px-5 py-3.5 font-mono font-semibold text-sm text-brand-800">{s.montoPedido}</td>
                 <td className="px-5 py-3.5">
                   <span
-                    className="text-xs px-2.5 py-1 rounded-full font-semibold"
-                    style={{
-                      background: s.estado === 'Activo' ? '#d1f5e0' : '#f0f0f0',
-                      color: s.estado === 'Activo' ? '#1a7a45' : '#666',
-                    }}
+                    className={`text-xs px-2.5 py-1 rounded-full font-semibold ${
+                      s.estado === 'Activo' ? 'bg-success-soft text-success' : 'bg-muted-soft text-muted'
+                    }`}
                   >
                     {s.estado}
                   </span>
                 </td>
                 <td className="px-5 py-3.5">
-                  <button
-                    className="text-xs px-3 py-1.5 rounded-lg font-semibold"
-                    style={{ background: '#dac9df', color: '#503459' }}
-                  >
+                  <button className="text-xs px-3 py-1.5 rounded-lg font-semibold bg-brand-200 text-brand-800">
                     Ver pedidos
                   </button>
                 </td>
