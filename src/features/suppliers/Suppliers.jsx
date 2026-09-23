@@ -1,3 +1,5 @@
+import { Plus } from 'lucide-react';
+
 const suppliers = [
   {
     id: 1,
@@ -66,8 +68,8 @@ export default function Suppliers() {
     <div className="p-8">
       <div className="flex justify-between items-center mb-5">
         <div />
-        <button className="px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-brand-600">
-          + Nuevo proveedor
+        <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-brand-600">
+          <Plus size={16} /> Nuevo proveedor
         </button>
       </div>
 

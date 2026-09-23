@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { FileSpreadsheet, FileText } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
 
 const weeklyData = [
@@ -50,10 +51,10 @@ export default function Reports() {
         </div>
         <div className="flex gap-2">
           <button className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border transition-all border-brand-200 text-brand-800">
-            📄 Exportar PDF
+            <FileText size={16} /> Exportar PDF
           </button>
           <button className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white transition-all bg-brand-600">
-            📊 Exportar Excel
+            <FileSpreadsheet size={16} /> Exportar Excel
           </button>
         </div>
       </div>

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Plus } from 'lucide-react';
 
 const employees = [
   {
@@ -82,8 +83,8 @@ export default function Employees() {
               <option>Bodega</option>
             </select>
           </div>
-          <button className="px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-brand-600">
-            + Nuevo usuario
+          <button className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-brand-600">
+            <Plus size={16} /> Nuevo usuario
           </button>
         </div>
 

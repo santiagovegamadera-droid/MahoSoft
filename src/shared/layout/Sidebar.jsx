@@ -1,23 +1,27 @@
+import {
+  ChartColumn,
+  Boxes,
+  LayoutDashboard,
+  LogOut,
+  Shirt,
+  ShoppingCart,
+  Tags,
+  Truck,
+  UserCog,
+  Users,
+} from 'lucide-react';
 import Logo from '@/shared/components/Logo';
 
 const nav = [
-  { id: 'dashboard', label: 'Dashboard', icon: '◈', group: 'Principal' },
-
-  { id: 'pos', label: 'Punto de Venta', icon: '⊞', group: 'Operaciones' },
-
-  { id: 'products', label: 'Productos', icon: '◻', group: 'Operaciones' },
-
-  { id: 'inventory', label: 'Inventario', icon: '⊟', group: 'Operaciones' },
-
-  { id: 'categories', label: 'Categorías', icon: '⊛', group: 'Operaciones' },
-
-  { id: 'customers', label: 'Clientes', icon: '◎', group: 'Relaciones' },
-
-  { id: 'suppliers', label: 'Proveedores', icon: '⊕', group: 'Relaciones' },
-
-  { id: 'employees', label: 'Empleados', icon: '◉', group: 'Relaciones' },
-
-  { id: 'reports', label: 'Reportes', icon: '◈', group: 'Análisis' },
+  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, group: 'Principal' },
+  { id: 'pos', label: 'Punto de Venta', icon: ShoppingCart, group: 'Operaciones' },
+  { id: 'products', label: 'Productos', icon: Shirt, group: 'Operaciones' },
+  { id: 'inventory', label: 'Inventario', icon: Boxes, group: 'Operaciones' },
+  { id: 'categories', label: 'Categorías', icon: Tags, group: 'Operaciones' },
+  { id: 'customers', label: 'Clientes', icon: Users, group: 'Relaciones' },
+  { id: 'suppliers', label: 'Proveedores', icon: Truck, group: 'Relaciones' },
+  { id: 'employees', label: 'Empleados', icon: UserCog, group: 'Relaciones' },
+  { id: 'reports', label: 'Reportes', icon: ChartColumn, group: 'Análisis' },
 ];
 
 export default function Sidebar({ current, onChange }) {
@@ -36,12 +40,10 @@ export default function Sidebar({ current, onChange }) {
           <div key={group} className="mb-5">
             <p className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-widest text-brand-200/55">{group}</p>
             {nav
-
               .filter((n) => n.group === group)
-
               .map((item) => {
                 const active = current === item.id;
-
+                const Icon = item.icon;
                 return (
                   <button
                     key={item.id}
@@ -52,7 +54,7 @@ export default function Sidebar({ current, onChange }) {
                         : 'bg-transparent text-brand-200/75 border-transparent hover:bg-white/7 hover:text-brand-200'
                     }`}
                   >
-                    <span className={`font-mono text-base ${active ? 'opacity-100' : 'opacity-70'}`}>{item.icon}</span>
+                    <Icon size={18} strokeWidth={1.75} className={active ? 'opacity-100' : 'opacity-70'} />
                     {item.label}
                   </button>
                 );
@@ -71,8 +73,12 @@ export default function Sidebar({ current, onChange }) {
             <p className="text-xs font-semibold truncate text-white">Ana Martínez</p>
             <p className="text-[10px] truncate text-brand-200/55">Admin · Maho Boutique</p>
           </div>
-          <button className="text-xs px-1.5 py-0.5 rounded transition-colors text-brand-200/55" title="Cerrar sesión">
-            ⇥
+          <button
+            className="p-1 rounded transition-colors text-brand-200/55 hover:text-white"
+            title="Cerrar sesión"
+            aria-label="Cerrar sesión"
+          >
+            <LogOut size={16} />
           </button>
         </div>
       </div>

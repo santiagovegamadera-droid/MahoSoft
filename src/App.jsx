@@ -1,36 +1,21 @@
 import { useState } from 'react';
-
 import Sidebar from '@/shared/layout/Sidebar';
-
 import Header from '@/shared/layout/Header';
-
 import Login from '@/features/auth/Login';
-
 import Dashboard from '@/features/dashboard/Dashboard';
-
 import Products from '@/features/products/Products';
-
 import ProductDetail from '@/features/products/ProductDetail';
-
 import Inventory from '@/features/inventory/Inventory';
-
 import POS from '@/features/pos/POS';
-
 import Customers from '@/features/customers/Customers';
-
 import Suppliers from '@/features/suppliers/Suppliers';
-
 import Employees from '@/features/employees/Employees';
-
 import Reports from '@/features/reports/Reports';
-
 import Categories from '@/features/categories/Categories';
 
 export default function App() {
   const [authenticated, setAuthenticated] = useState(false);
-
   const [view, setView] = useState('dashboard');
-
   const [editingProduct, setEditingProduct] = useState(undefined);
 
   if (!authenticated) {
@@ -39,19 +24,14 @@ export default function App() {
 
   function goToProducts() {
     setView('products');
-
     setEditingProduct(undefined);
   }
-
   function editProduct(id) {
     setEditingProduct(id);
-
     setView('product-detail');
   }
-
   function newProduct() {
     setEditingProduct(undefined);
-
     setView('product-detail');
   }
 

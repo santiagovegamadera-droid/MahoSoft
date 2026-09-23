@@ -12,6 +12,7 @@ import {
   Pie,
   Cell,
 } from 'recharts';
+import { TrendingDown, TrendingUp } from 'lucide-react';
 
 const salesData = [
   { mes: 'Abr', ventas: 8200000, meta: 9000000 },
@@ -94,28 +95,28 @@ export default function Dashboard() {
             value: '$1.245.000',
             delta: '+12%',
             sub: 'vs. ayer',
-            icon: '↑',
+            up: true,
           },
           {
             label: 'Ventas del mes',
             value: '$15.100.000',
             delta: '+16%',
             sub: 'vs. sep anterior',
-            icon: '↑',
+            up: true,
           },
           {
             label: 'Transacciones hoy',
             value: '34',
             delta: '+5',
             sub: 'vs. ayer',
-            icon: '↑',
+            up: true,
           },
           {
             label: 'Ticket promedio',
             value: '$366.000',
             delta: '-3%',
             sub: 'vs. mes anterior',
-            icon: '↓',
+            up: false,
           },
         ].map((card) => (
           <div key={card.label} className="bg-white rounded-2xl p-5 border border-brand-150">
@@ -123,10 +124,11 @@ export default function Dashboard() {
             <p className="text-2xl font-bold mb-1 text-brand-800">{card.value}</p>
             <div className="flex items-center gap-1.5">
               <span
-                className={`text-xs font-semibold px-1.5 py-0.5 rounded ${
-                  card.icon === '↑' ? 'bg-brand-200 text-brand-800' : 'bg-rose-soft text-rose'
+                className={`flex items-center gap-1 text-xs font-semibold px-1.5 py-0.5 rounded ${
+                  card.up ? 'bg-brand-200 text-brand-800' : 'bg-rose-soft text-rose'
                 }`}
               >
+                {card.up ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
                 {card.delta}
               </span>
               <span className="text-xs text-brand-400">{card.sub}</span>

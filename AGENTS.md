@@ -35,6 +35,7 @@ Import across folders with the `@` alias (`@/features/pos/POS`, `@/shared/compon
 ## Dependencies
 
 - Runtime: React 19 and React DOM 19
+- Icons: `lucide-react` — use it for every icon; do not use emojis or Unicode symbols as icons
 - Styling: Tailwind CSS v4 with the `@tailwindcss/vite` plugin
 - Build tooling: Vite 8 and `@vitejs/plugin-react`
 - Formatting: oxfmt

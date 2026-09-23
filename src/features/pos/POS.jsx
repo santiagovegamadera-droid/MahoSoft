@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Banknote, Check, CreditCard, Landmark, Minus, Plus, ShoppingBag, X } from 'lucide-react';
 
 const catalog = [
   {
@@ -94,8 +95,8 @@ export default function POS() {
     return (
       <div className="flex items-center justify-center h-[80vh]">
         <div className="text-center max-w-sm">
-          <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-5 text-4xl bg-brand-200">
-            ✓
+          <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-5 bg-brand-200 text-brand-800">
+            <Check size={40} strokeWidth={2} />
           </div>
           <h2 className="text-2xl mb-2 font-display text-brand-800">Venta registrada</h2>
           <p className="text-sm mb-1 text-brand-600">
@@ -186,7 +187,7 @@ export default function POS() {
         <div className="flex-1 overflow-y-auto p-3 space-y-2">
           {cart.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-2xl mb-2 text-brand-200">🛍</p>
+              <ShoppingBag size={32} strokeWidth={1.5} className="mx-auto mb-2 text-brand-200" />
               <p className="text-xs text-brand-400">Selecciona productos del catálogo</p>
             </div>
           ) : (
@@ -217,21 +218,24 @@ export default function POS() {
                     <button
                       onClick={() => updateQty(item.id, -1)}
                       className="w-5 h-5 rounded flex items-center justify-center text-xs bg-brand-200 text-brand-800"
+                      aria-label="Restar"
                     >
-                      −
+                      <Minus size={12} />
                     </button>
                     <span className="text-xs w-4 text-center font-semibold text-brand-800">{item.qty}</span>
                     <button
                       onClick={() => updateQty(item.id, 1)}
                       className="w-5 h-5 rounded flex items-center justify-center text-xs bg-brand-200 text-brand-800"
+                      aria-label="Sumar"
                     >
-                      +
+                      <Plus size={12} />
                     </button>
                     <button
                       onClick={() => removeFromCart(item.id)}
                       className="w-5 h-5 rounded flex items-center justify-center text-xs ml-1 bg-danger-soft text-danger"
+                      aria-label="Quitar"
                     >
-                      ×
+                      <X size={12} />
                     </button>
                   </div>
                 </div>
@@ -282,13 +286,20 @@ export default function POS() {
               <button
                 key={m}
                 onClick={() => setPayment(m)}
-                className={`flex-1 py-2 rounded-xl text-[10px] font-semibold border-2 capitalize transition-all ${
+                className={`flex-1 flex items-center justify-center gap-1 py-2 rounded-xl text-[10px] font-semibold border-2 capitalize transition-all ${
                   payment === m
                     ? 'bg-brand-600 border-brand-600 text-white'
                     : 'bg-white border-brand-200 text-brand-600'
                 }`}
               >
-                {m === 'efectivo' ? '💵' : m === 'tarjeta' ? '💳' : '🏦'} {m}
+                {m === 'efectivo' ? (
+                  <Banknote size={14} />
+                ) : m === 'tarjeta' ? (
+                  <CreditCard size={14} />
+                ) : (
+                  <Landmark size={14} />
+                )}
+                {m}
               </button>
             ))}
           </div>

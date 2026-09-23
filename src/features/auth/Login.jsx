@@ -1,98 +1,14 @@
 import { useState } from 'react';
+import { ArrowRight, ChartColumn, Eye, EyeOff, Heart, Lock, Mail, Package, Settings, Users } from 'lucide-react';
 import Logo from '@/shared/components/Logo';
 import fondo from '@/assets/public/fondo.png';
 import logoSrc from '@/assets/public/logo.png';
 
-const ICONS = {
-  mail: (
-    <>
-      <rect x="2" y="4" width="20" height="16" rx="2" />
-      <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
-    </>
-  ),
-  lock: (
-    <>
-      <rect x="3" y="11" width="18" height="11" rx="2" />
-      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-    </>
-  ),
-  eye: (
-    <>
-      <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
-      <circle cx="12" cy="12" r="3" />
-    </>
-  ),
-  eyeOff: (
-    <>
-      <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" />
-      <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" />
-      <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" />
-      <path d="m2 2 20 20" />
-    </>
-  ),
-  heart: (
-    <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
-  ),
-  arrowRight: (
-    <>
-      <path d="M5 12h14" />
-      <path d="m12 5 7 7-7 7" />
-    </>
-  ),
-  box: (
-    <>
-      <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" />
-      <path d="m3.3 7 8.7 5 8.7-5" />
-      <path d="M12 22V12" />
-    </>
-  ),
-  users: (
-    <>
-      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-      <circle cx="9" cy="7" r="4" />
-      <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-    </>
-  ),
-  chart: (
-    <>
-      <rect x="4" y="12" width="4" height="8" rx="1" />
-      <rect x="10" y="8" width="4" height="12" rx="1" />
-      <rect x="16" y="4" width="4" height="16" rx="1" />
-    </>
-  ),
-  settings: (
-    <>
-      <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
-      <circle cx="12" cy="12" r="3" />
-    </>
-  ),
-};
-
-function Icon({ name, size = 20, className = '' }) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.75"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-      aria-hidden="true"
-    >
-      {ICONS[name]}
-    </svg>
-  );
-}
-
 const FEATURES = [
-  { icon: 'box', label: 'Control de inventario' },
-  { icon: 'users', label: 'Gestión de clientes' },
-  { icon: 'chart', label: 'Reportes en tiempo real' },
-  { icon: 'settings', label: 'Configuración simple' },
+  { icon: Package, label: 'Control de inventario' },
+  { icon: Users, label: 'Gestión de clientes' },
+  { icon: ChartColumn, label: 'Reportes en tiempo real' },
+  { icon: Settings, label: 'Configuración simple' },
 ];
 
 export default function Login({ onLogin }) {
@@ -135,7 +51,7 @@ export default function Login({ onLogin }) {
             {FEATURES.map((f) => (
               <div key={f.label} className="flex flex-col items-center text-center">
                 <div className="w-[clamp(44px,7vh,64px)] aspect-square rounded-full flex items-center justify-center text-white border border-white/35 bg-white/8">
-                  <Icon name={f.icon} size={24} />
+                  <f.icon size={24} strokeWidth={1.75} />
                 </div>
                 <p className="mt-[1vh] text-xs leading-tight text-white/85">{f.label}</p>
               </div>
@@ -173,7 +89,7 @@ export default function Login({ onLogin }) {
 
           <h2 className="flex items-center gap-3 pr-8 text-2xl sm:text-3xl text-brand-800 font-display">
             Bienvenida de nuevo
-            <Icon name="heart" size={26} className="text-brand-400" />
+            <Heart size={26} strokeWidth={1.75} className="text-brand-400" />
           </h2>
           <p className="mt-1 mb-[clamp(12px,2.8vh,28px)] text-sm text-brand-600">
             Ingresa tus credenciales para continuar
@@ -188,7 +104,7 @@ export default function Login({ onLogin }) {
                 Correo electrónico
               </label>
               <div className="flex items-center gap-3 px-4 rounded-xl border border-brand-200 bg-white text-brand-800 transition-all focus-within:border-brand-600 focus-within:ring-3 focus-within:ring-brand-600/15">
-                <Icon name="mail" size={18} className="shrink-0 text-brand-600" />
+                <Mail size={18} strokeWidth={1.75} className="shrink-0 text-brand-600" />
                 <input
                   id="login-email"
                   type="email"
@@ -206,7 +122,7 @@ export default function Login({ onLogin }) {
                 Contraseña
               </label>
               <div className="flex items-center gap-3 px-4 rounded-xl border border-brand-200 bg-white text-brand-800 transition-all focus-within:border-brand-600 focus-within:ring-3 focus-within:ring-brand-600/15">
-                <Icon name="lock" size={18} className="shrink-0 text-brand-600" />
+                <Lock size={18} strokeWidth={1.75} className="shrink-0 text-brand-600" />
                 <input
                   id="login-password"
                   type={showPassword ? 'text' : 'password'}
@@ -219,7 +135,7 @@ export default function Login({ onLogin }) {
                   className="shrink-0 text-brand-600 hover:text-brand-800"
                   aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                 >
-                  <Icon name={showPassword ? 'eyeOff' : 'eye'} size={18} />
+                  {showPassword ? <EyeOff size={18} strokeWidth={1.75} /> : <Eye size={18} strokeWidth={1.75} />}
                 </button>
               </div>
             </div>
@@ -242,7 +158,7 @@ export default function Login({ onLogin }) {
               className="mt-1 w-full py-[clamp(10px,1.6vh,14px)] rounded-xl flex items-center justify-center gap-2 text-base font-semibold text-white transition-all hover:brightness-110 bg-linear-90 from-brand-500 to-brand-700 shadow-[0_6px_20px_rgba(94,47,112,0.35)]"
             >
               Ingresar al sistema
-              <Icon name="arrowRight" size={18} />
+              <ArrowRight size={18} strokeWidth={1.75} />
             </button>
           </form>
 
@@ -268,7 +184,7 @@ export default function Login({ onLogin }) {
               <br />
               siempre llega más lejos”
             </p>
-            <Icon name="heart" size={26} className="shrink-0 text-brand-400" />
+            <Heart size={26} strokeWidth={1.75} className="shrink-0 text-brand-400" />
           </div>
         </div>
 

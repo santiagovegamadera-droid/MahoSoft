@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { ArrowLeft, Check, ImagePlus, Plus, X } from 'lucide-react';
 
 const sizeGroups = {
   ropa: ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
@@ -43,7 +44,7 @@ export default function ProductDetail({ onBack }) {
         onClick={onBack}
         className="flex items-center gap-2 text-sm mb-6 font-medium transition-colors text-brand-600"
       >
-        ← Volver a productos
+        <ArrowLeft size={16} /> Volver a productos
       </button>
 
       {/* Tabs */}
@@ -180,9 +181,10 @@ export default function ProductDetail({ onBack }) {
                     {c}
                     <button
                       onClick={() => setColors((prev) => prev.filter((x) => x !== c))}
-                      className="ml-1 text-xs text-brand-600"
+                      className="ml-1 text-brand-600"
+                      aria-label={`Quitar ${c}`}
                     >
-                      ×
+                      <X size={12} />
                     </button>
                   </span>
                 ))}
@@ -197,9 +199,9 @@ export default function ProductDetail({ onBack }) {
                 />
                 <button
                   onClick={addColor}
-                  className="px-4 py-2 rounded-xl text-sm font-semibold bg-brand-200 text-brand-800"
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold bg-brand-200 text-brand-800"
                 >
-                  + Agregar
+                  <Plus size={16} /> Agregar
                 </button>
               </div>
             </div>
@@ -244,11 +246,17 @@ export default function ProductDetail({ onBack }) {
 
             <button
               onClick={save}
-              className={`w-full py-3 rounded-xl text-sm font-semibold text-white transition-all ${
+              className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold text-white transition-all ${
                 saved ? 'bg-success-dark' : 'bg-brand-600'
               }`}
             >
-              {saved ? '✓ Guardado' : 'Guardar cambios'}
+              {saved ? (
+                <>
+                  <Check size={16} /> Guardado
+                </>
+              ) : (
+                'Guardar cambios'
+              )}
             </button>
             <button className="w-full py-2.5 rounded-xl text-sm font-semibold border transition-all border-brand-200 text-brand-600">
               Cancelar
@@ -330,7 +338,7 @@ export default function ProductDetail({ onBack }) {
             className="rounded-2xl object-cover w-full aspect-square"
           />
           <div className="rounded-2xl aspect-square flex flex-col items-center justify-center gap-2 border-2 border-dashed cursor-pointer transition-all border-brand-400">
-            <span className="text-3xl text-brand-400">+</span>
+            <ImagePlus size={28} strokeWidth={1.5} className="text-brand-400" />
             <span className="text-xs font-medium text-brand-400">Agregar imagen</span>
           </div>
         </div>

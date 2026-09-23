@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Plus } from 'lucide-react';
 
 const categories = [
   {
@@ -156,7 +157,7 @@ export default function Categories() {
 
           {/* Add new */}
           <button className="rounded-2xl border-2 border-dashed h-48 flex flex-col items-center justify-center gap-2 transition-all border-brand-400">
-            <span className="text-3xl text-brand-400">+</span>
+            <Plus size={28} strokeWidth={1.5} className="text-brand-400" />
             <span className="text-sm font-semibold text-brand-400">Nueva categoría</span>
           </button>
         </div>
@@ -188,8 +189,8 @@ export default function Categories() {
             </div>
           ))}
 
-          <button className="w-full py-4 rounded-2xl border-2 border-dashed text-sm font-semibold transition-all border-brand-400 text-brand-400">
-            + Nueva colección
+          <button className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl border-2 border-dashed text-sm font-semibold transition-all border-brand-400 text-brand-400">
+            <Plus size={16} /> Nueva colección
           </button>
         </div>
       )}
