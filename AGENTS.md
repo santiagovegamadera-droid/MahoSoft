@@ -21,15 +21,31 @@ This is the canonical project structure. Start with task-relevant files below. O
 - `vite.config.js` - Vite configuration with React, Tailwind CSS v4, and Figma Make plugins plus the `@` alias for `src`
 - `.mise.toml` - Toolchain versions for Node.js and pnpm
 
+### Feature architecture
+
+Code is organized by feature, not by file type:
+
+- `src/features/<feature>/` - One folder per domain (`auth`, `dashboard`, `products`, `categories`, `purchases`, `pos`, `sales`, `suppliers`, `users`, `reports`). Screens, and any components/hooks/data used only by that feature, live here.
+- `src/shared/components/` - Reusable UI used by more than one feature (e.g. `Logo`).
+- `src/shared/layout/` - App shell (`Sidebar`, `Header`).
+- `src/assets/` - Static images.
+
+Import across folders with the `@` alias (`@/features/pos/POS`, `@/shared/components/Logo`).
+
+### Data (CRUD)
+
+Until the backend exists, each feature keeps its records in `src/features/<feature>/store.js`, built with `createCollection` from `src/shared/lib/createCollection.js`. It returns a hook (`useProducts()`, `useSuppliers()`, …) with `items`, `create`, `update` and `remove`; data is shared across screens and persisted to localStorage under `mahosoft:<name>`. Records reference each other by id (`catId`, `proveedorId`, `productId`). Stock-changing operations (sales, voids, purchase movements) go through the helpers in `sales/store.js` and `purchases/store.js`, which adjust product stock. Forms use `Modal`, `ConfirmDialog` and the helpers in `src/shared/components/Form.jsx` (`Field`, `Button`, `RowActions`, `inputClass`).
+
 ## Dependencies
 
 - Runtime: React 19 and React DOM 19
+- Icons: `lucide-react` — use it for every icon; do not use emojis or Unicode symbols as icons
 - Styling: Tailwind CSS v4 with the `@tailwindcss/vite` plugin
 - Build tooling: Vite 8 and `@vitejs/plugin-react`
 - Formatting: oxfmt
 
 ## Styling
 
-This project uses **Tailwind CSS v4** through the `@tailwindcss/vite` plugin configured in `vite.config.js`. `src/index.css` imports Tailwind with `@import 'tailwindcss';`. Use Tailwind utility classes directly in JSX and put global CSS or Tailwind v4 theme customization in `src/index.css`. This scaffold does not need a Tailwind config file or PostCSS config.
+This project uses **Tailwind CSS v4** through the `@tailwindcss/vite` plugin configured in `vite.config.js`. `src/index.css` imports Tailwind with `@import 'tailwindcss';`. Use Tailwind utility classes directly in JSX and put global CSS or Tailwind v4 theme customization in `src/index.css`. Use the `@theme` color tokens (`brand-*`, `canvas`, `success`, `warning`, `danger`, …) instead of hex values; add a new token when a color is missing. Do not use inline `style={{}}` or JS hover/focus handlers for styling — use `hover:`/`focus:` variants and conditional classes; inline style is only for values computed at runtime (e.g. a percentage width). This scaffold does not need a Tailwind config file or PostCSS config.
 
 `src/main.jsx` imports `src/index.css`, so global font wiring belongs in `src/index.css`. Keep CSS `@import` statements first, then add any `@font-face` rules and font-family defaults there.

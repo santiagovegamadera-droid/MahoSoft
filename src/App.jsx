@@ -1,17 +1,17 @@
 import { useState } from 'react';
-import Sidebar from './components/Sidebar';
-import Header from './components/Header';
-import Login from './views/Login';
-import Dashboard from './views/Dashboard';
-import Products from './views/Products';
-import ProductDetail from './views/ProductDetail';
-import Inventory from './views/Inventory';
-import POS from './views/POS';
-import Customers from './views/Customers';
-import Suppliers from './views/Suppliers';
-import Employees from './views/Employees';
-import Reports from './views/Reports';
-import Categories from './views/Categories';
+import Sidebar from '@/shared/layout/Sidebar';
+import Header from '@/shared/layout/Header';
+import Login from '@/features/auth/Login';
+import Dashboard from '@/features/dashboard/Dashboard';
+import Products from '@/features/products/Products';
+import ProductDetail from '@/features/products/ProductDetail';
+import Purchases from '@/features/purchases/Purchases';
+import POS from '@/features/pos/POS';
+import Suppliers from '@/features/suppliers/Suppliers';
+import Users from '@/features/users/Users';
+import Reports from '@/features/reports/Reports';
+import Categories from '@/features/categories/Categories';
+import SalesHistory from '@/features/sales/SalesHistory';
 
 export default function App() {
   const [authenticated, setAuthenticated] = useState(false);
@@ -34,21 +34,28 @@ export default function App() {
     setEditingProduct(undefined);
     setView('product-detail');
   }
+  function logout() {
+    setAuthenticated(false);
+    setView('dashboard');
+    setEditingProduct(undefined);
+  }
 
   return (
-    <div className="flex min-h-screen" style={{ background: '#f8f5fa' }}>
-      <Sidebar current={view} onChange={setView} />
+    <div className="flex min-h-screen bg-canvas">
+      <Sidebar current={view} onChange={setView} onLogout={logout} />
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <Header current={view} onNewProduct={newProduct} />
+        <Header current={view} />
         <main className="flex-1 overflow-y-auto">
           {view === 'dashboard' && <Dashboard />}
-          {view === 'products' && <Products onEdit={editProduct} />}
-          {view === 'product-detail' && <ProductDetail onBack={goToProducts} />}
-          {view === 'inventory' && <Inventory />}
+          {view === 'products' && <Products onEdit={editProduct} onNew={newProduct} />}
+          {view === 'product-detail' && (
+            <ProductDetail key={editingProduct ?? 'new'} productId={editingProduct} onBack={goToProducts} />
+          )}
+          {view === 'purchases' && <Purchases />}
           {view === 'pos' && <POS />}
-          {view === 'customers' && <Customers />}
+          {view === 'sales-history' && <SalesHistory />}
           {view === 'suppliers' && <Suppliers />}
-          {view === 'employees' && <Employees />}
+          {view === 'users' && <Users />}
           {view === 'reports' && <Reports />}
           {view === 'categories' && <Categories />}
         </main>
