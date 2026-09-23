@@ -9,7 +9,7 @@ import Inventory from '@/features/inventory/Inventory';
 import POS from '@/features/pos/POS';
 import Customers from '@/features/customers/Customers';
 import Suppliers from '@/features/suppliers/Suppliers';
-import Employees from '@/features/employees/Employees';
+import Users from '@/features/users/Users';
 import Reports from '@/features/reports/Reports';
 import Categories from '@/features/categories/Categories';
 
@@ -53,7 +53,7 @@ export default function App() {
           {view === 'pos' && <POS />}
           {view === 'customers' && <Customers />}
           {view === 'suppliers' && <Suppliers />}
-          {view === 'employees' && <Employees />}
+          {view === 'users' && <Users />}
           {view === 'reports' && <Reports />}
           {view === 'categories' && <Categories />}
         </main>

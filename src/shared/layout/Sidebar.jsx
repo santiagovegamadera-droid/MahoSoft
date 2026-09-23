@@ -20,7 +20,7 @@ const nav = [
   { id: 'categories', label: 'Categorías', icon: Tags, group: 'Operaciones' },
   { id: 'customers', label: 'Clientes', icon: Users, group: 'Relaciones' },
   { id: 'suppliers', label: 'Proveedores', icon: Truck, group: 'Relaciones' },
-  { id: 'employees', label: 'Empleados', icon: UserCog, group: 'Relaciones' },
+  { id: 'users', label: 'Usuarios', icon: UserCog, group: 'Relaciones' },
   { id: 'reports', label: 'Reportes', icon: ChartColumn, group: 'Análisis' },
 ];
 

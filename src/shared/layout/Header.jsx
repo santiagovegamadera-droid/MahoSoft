@@ -8,7 +8,7 @@ const titles = {
   pos: 'Punto de Venta',
   customers: 'Clientes',
   suppliers: 'Proveedores',
-  employees: 'Empleados & Usuarios',
+  users: 'Usuarios',
   reports: 'Reportes',
   categories: 'Categorías & Colecciones',
 };

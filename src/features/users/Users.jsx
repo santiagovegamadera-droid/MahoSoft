@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Plus } from 'lucide-react';
 
-const employees = [
+const users = [
   {
     id: 1,
     name: 'Ana Martínez',
@@ -60,9 +60,9 @@ const rolColors = {
   Bodega: 'bg-brand-50 text-brand-600',
 };
 
-const allPerms = ['Dashboard', 'POS', 'Productos', 'Inventario', 'Clientes', 'Proveedores', 'Empleados', 'Reportes'];
+const allPerms = ['Dashboard', 'POS', 'Productos', 'Inventario', 'Clientes', 'Proveedores', 'Usuarios', 'Reportes'];
 
-export default function Employees() {
+export default function Users() {
   const [selected, setSelected] = useState(null);
   const [perms, setPerms] = useState([]);
 
@@ -103,33 +103,33 @@ export default function Employees() {
               </tr>
             </thead>
             <tbody className="divide-y divide-brand-50">
-              {employees.map((emp) => (
+              {users.map((user) => (
                 <tr
-                  key={emp.id}
+                  key={user.id}
                   className={`transition-colors cursor-pointer hover:bg-brand-25 ${
-                    selected?.id === emp.id ? 'bg-brand-25' : ''
+                    selected?.id === user.id ? 'bg-brand-25' : ''
                   }`}
-                  onClick={() => openEdit(emp)}
+                  onClick={() => openEdit(user)}
                 >
                   <td className="px-5 py-3.5">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 bg-brand-200 text-brand-800">
-                        {emp.iniciales}
+                        {user.iniciales}
                       </div>
                       <div>
-                        <p className="font-medium text-brand-800">{emp.name}</p>
-                        <p className="text-xs text-brand-400">{emp.email}</p>
+                        <p className="font-medium text-brand-800">{user.name}</p>
+                        <p className="text-xs text-brand-400">{user.email}</p>
                       </div>
                     </div>
                   </td>
                   <td className="px-5 py-3.5">
-                    <span className={`text-xs px-2.5 py-1 rounded-full font-semibold ${rolColors[emp.rol]}`}>
-                      {emp.rol}
+                    <span className={`text-xs px-2.5 py-1 rounded-full font-semibold ${rolColors[user.rol]}`}>
+                      {user.rol}
                     </span>
                   </td>
                   <td className="px-5 py-3.5">
                     <div className="flex gap-1 flex-wrap">
-                      {emp.permisos.map((p) => (
+                      {user.permisos.map((p) => (
                         <span
                           key={p}
                           className="text-[10px] px-1.5 py-0.5 rounded border border-brand-400 text-brand-600"
@@ -139,14 +139,14 @@ export default function Employees() {
                       ))}
                     </div>
                   </td>
-                  <td className="px-5 py-3.5 text-xs font-mono text-brand-600">{emp.ultimo}</td>
+                  <td className="px-5 py-3.5 text-xs font-mono text-brand-600">{user.ultimo}</td>
                   <td className="px-5 py-3.5">
                     <span
                       className={`text-xs px-2.5 py-1 rounded-full font-semibold ${
-                        emp.estado === 'Activo' ? 'bg-success-soft text-success' : 'bg-muted-soft text-muted'
+                        user.estado === 'Activo' ? 'bg-success-soft text-success' : 'bg-muted-soft text-muted'
                       }`}
                     >
-                      {emp.estado}
+                      {user.estado}
                     </span>
                   </td>
                   <td className="px-5 py-3.5">
