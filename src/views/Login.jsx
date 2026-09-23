@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import Logo from '../components/Logo';
 import fondo from '../assets/public/fondo.png';
+import logoSrc from '../assets/public/logo.png';
 
 const ICONS = {
   mail: (
@@ -107,28 +108,28 @@ export default function Login({ onLogin }) {
 
   return (
     <div
-      className="min-h-screen flex bg-cover bg-center"
+      className="min-h-dvh lg:h-dvh lg:overflow-hidden flex bg-cover bg-center"
       style={{ backgroundImage: `url(${fondo})`, backgroundColor: '#f5f0f7' }}
     >
       {/* Left panel */}
       <div
-        className="hidden lg:flex flex-col justify-between gap-8 w-120 xl:w-140 px-14 py-10 shrink-0 backdrop-blur-md"
+        className="hidden lg:flex flex-col justify-between gap-[2vh] w-120 xl:w-140 px-14 py-[4vh] shrink-0 backdrop-blur-md"
         style={{ background: 'linear-gradient(160deg, rgba(90,58,100,0.86), rgba(58,37,65,0.9))' }}
       >
         {/* Logo + tagline */}
         <div className="flex flex-col items-center">
           <div
-            className="w-40 h-40 rounded-[28px] flex items-center justify-center"
+            className="w-[clamp(88px,17vh,160px)] aspect-square rounded-[clamp(18px,3vh,28px)] p-[1.5vh] flex items-center justify-center"
             style={{
               background: 'linear-gradient(145deg, #ffffff, #f3e6f7)',
               border: '3px solid rgba(222,184,235,0.9)',
               boxShadow: '0 0 32px rgba(230,180,245,0.45)',
             }}
           >
-            <Logo variant="dark" size="lg" />
+            <img src={logoSrc} alt="Maho Boutique" className="w-full h-full object-contain" />
           </div>
           <p
-            className="mt-5 text-[11px] font-medium tracking-[0.4em] whitespace-nowrap"
+            className="mt-[2vh] text-[clamp(9px,1.3vh,11px)] font-medium tracking-[0.4em] whitespace-nowrap"
             style={{ color: 'rgba(218,201,223,0.9)' }}
           >
             MODA | ESTILO | TU ESENCIA
@@ -138,26 +139,26 @@ export default function Login({ onLogin }) {
         {/* Headline + features */}
         <div>
           <h1
-            className="text-5xl xl:text-[56px] leading-[1.05] text-white"
+            className="text-[clamp(30px,5.8vh,56px)] leading-[1.05] text-white"
             style={{ fontFamily: 'DM Serif Display, serif' }}
           >
             Gestiona tu boutique con <span style={{ color: HIGHLIGHT }}>elegancia</span> y{' '}
             <span style={{ color: HIGHLIGHT }}>precisión.</span>
           </h1>
-          <p className="mt-4 text-lg leading-snug text-white/90">
+          <p className="mt-[1.5vh] text-[clamp(14px,2vh,18px)] leading-snug text-white/90">
             Todo lo que necesitas en un solo lugar para hacer crecer tu negocio.
           </p>
 
-          <div className="mt-8 grid grid-cols-4 gap-3">
+          <div className="mt-[3vh] grid grid-cols-4 gap-3">
             {FEATURES.map((f) => (
               <div key={f.label} className="flex flex-col items-center text-center">
                 <div
-                  className="w-16 h-16 rounded-full flex items-center justify-center text-white"
+                  className="w-[clamp(44px,7vh,64px)] aspect-square rounded-full flex items-center justify-center text-white"
                   style={{ border: '1px solid rgba(255,255,255,0.35)', background: 'rgba(255,255,255,0.08)' }}
                 >
-                  <Icon name={f.icon} size={26} />
+                  <Icon name={f.icon} size={24} />
                 </div>
-                <p className="mt-2 text-xs leading-tight text-white/85">{f.label}</p>
+                <p className="mt-[1vh] text-xs leading-tight text-white/85">{f.label}</p>
               </div>
             ))}
           </div>
@@ -165,22 +166,22 @@ export default function Login({ onLogin }) {
 
         {/* Motto */}
         <div className="flex flex-col items-center">
-          <p className="font-script text-4xl text-white whitespace-nowrap">Sueña · Organiza · Vende · Crece</p>
+          <p className="font-script text-[clamp(24px,4vh,36px)] text-white whitespace-nowrap">Sueña · Organiza · Vende · Crece</p>
           <div className="mt-1 w-32 h-px bg-white/40" />
         </div>
       </div>
 
       {/* Right panel */}
-      <div className="relative flex-1 min-w-0 flex items-center justify-center p-4 pb-16 sm:p-8 sm:pb-16">
+      <div className="relative flex-1 min-w-0 flex items-center justify-center p-4 pb-16 sm:px-8 lg:pb-[clamp(40px,7vh,64px)] lg:pt-[3vh]">
         <div
-          className="relative w-full max-w-md rounded-3xl px-6 py-8 sm:px-10 sm:py-10"
+          className="relative w-full max-w-md rounded-3xl px-6 py-8 sm:px-10 lg:py-[clamp(20px,4vh,40px)]"
           style={{ background: 'rgba(255,255,255,0.95)', boxShadow: '0 12px 48px rgba(80,52,89,0.25)' }}
         >
           {/* Language selector */}
           <select
             value={lang}
             onChange={(e) => setLang(e.target.value)}
-            className="absolute top-6 right-6 text-sm font-semibold bg-transparent outline-none cursor-pointer text-brand-800"
+            className="absolute top-[clamp(14px,3vh,24px)] right-6 text-sm font-semibold bg-transparent outline-none cursor-pointer text-brand-800"
             aria-label="Idioma"
           >
             <option value="ES">ES</option>
@@ -199,9 +200,9 @@ export default function Login({ onLogin }) {
             Bienvenida de nuevo
             <Icon name="heart" size={26} className="text-brand-400" />
           </h2>
-          <p className="mt-1 mb-7 text-sm text-brand-600">Ingresa tus credenciales para continuar</p>
+          <p className="mt-1 mb-[clamp(12px,2.8vh,28px)] text-sm text-brand-600">Ingresa tus credenciales para continuar</p>
 
-          <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+          <form onSubmit={handleSubmit} className="flex flex-col gap-[clamp(10px,2vh,20px)]">
             <div>
               <label htmlFor="login-email" className="block text-xs font-semibold mb-1.5 uppercase tracking-wide text-brand-800">
                 Correo electrónico
@@ -212,7 +213,7 @@ export default function Login({ onLogin }) {
                   id="login-email"
                   type="email"
                   defaultValue="admin@mahoboutique.co"
-                  className="w-full py-3 text-sm outline-none bg-transparent"
+                  className="w-full py-[clamp(8px,1.4vh,12px)] text-sm outline-none bg-transparent"
                 />
               </div>
             </div>
@@ -227,7 +228,7 @@ export default function Login({ onLogin }) {
                   id="login-password"
                   type={showPassword ? 'text' : 'password'}
                   defaultValue="maho2026"
-                  className="w-full py-3 text-sm outline-none bg-transparent"
+                  className="w-full py-[clamp(8px,1.4vh,12px)] text-sm outline-none bg-transparent"
                 />
                 <button
                   type="button"
@@ -252,7 +253,7 @@ export default function Login({ onLogin }) {
 
             <button
               type="submit"
-              className="mt-1 w-full py-3.5 rounded-xl flex items-center justify-center gap-2 text-base font-semibold text-white transition-all hover:brightness-110"
+              className="mt-1 w-full py-[clamp(10px,1.6vh,14px)] rounded-xl flex items-center justify-center gap-2 text-base font-semibold text-white transition-all hover:brightness-110"
               style={{
                 background: 'linear-gradient(90deg, #8a5a9b, #5e2f70)',
                 boxShadow: '0 6px 20px rgba(94,47,112,0.35)',
@@ -264,7 +265,7 @@ export default function Login({ onLogin }) {
           </form>
 
           {/* Divider */}
-          <div className="my-6 flex items-center gap-2">
+          <div className="my-[clamp(10px,2.5vh,24px)] flex items-center gap-2">
             <div className="flex-1 h-px bg-brand-200" />
             <div className="w-2 h-2 rounded-full border border-brand-200" />
             <div className="flex-1 h-px bg-brand-200" />
@@ -279,7 +280,7 @@ export default function Login({ onLogin }) {
           </p>
 
           {/* Quote */}
-          <div className="mt-6 flex items-center justify-between gap-4 rounded-2xl px-5 py-4 bg-brand-50">
+          <div className="mt-[clamp(10px,2.5vh,24px)] flex items-center justify-between gap-4 rounded-2xl px-5 py-[clamp(10px,1.8vh,16px)] bg-brand-50">
             <p className="italic text-base leading-snug text-brand-800" style={{ fontFamily: 'DM Serif Display, serif' }}>
               “Una boutique organizada,
               <br />
@@ -289,7 +290,7 @@ export default function Login({ onLogin }) {
           </div>
         </div>
 
-        <p className="absolute bottom-6 left-0 right-0 px-4 text-center text-[10px] sm:text-[11px] font-medium tracking-[0.15em] sm:tracking-[0.25em] text-brand-800">
+        <p className="absolute bottom-[clamp(12px,2.5vh,24px)] left-0 right-0 px-4 text-center text-[10px] sm:text-[11px] font-medium tracking-[0.15em] sm:tracking-[0.25em] text-brand-800">
           MAHO BOUTIQUE | MODA QUE TE INSPIRA | © {new Date().getFullYear()}
         </p>
       </div>
