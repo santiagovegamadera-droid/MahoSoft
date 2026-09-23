@@ -29,17 +29,15 @@ export default function SalesHistory({ sales }) {
 
   const today = rows.filter((s) => isToday(s.fecha));
   const todayTotal = today.reduce((sum, s) => sum + s.total, 0);
-  const allTotal = rows.reduce((sum, s) => sum + s.total, 0);
 
   return (
     <div className="p-8 space-y-6">
       {/* KPIs */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {[
           { label: 'Ventas de hoy', value: today.length },
           { label: 'Vendido hoy', value: fmt(todayTotal) },
           { label: 'Ventas registradas', value: rows.length },
-          { label: 'Ticket promedio', value: fmt(rows.length ? Math.round(allTotal / rows.length) : 0) },
         ].map((k) => (
           <div key={k.label} className="bg-white rounded-2xl p-5 border border-brand-150">
             <p className="text-xs font-medium uppercase tracking-wide mb-2 text-brand-600">{k.label}</p>

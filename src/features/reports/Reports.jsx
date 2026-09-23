@@ -60,7 +60,7 @@ export default function Reports() {
       </div>
 
       {/* KPIs */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {[
           {
             label: 'Total ventas',
@@ -68,11 +68,6 @@ export default function Reports() {
             sub: '+18% vs. semana pasada',
           },
           { label: 'Transacciones', val: '271', sub: '+24% vs. semana pasada' },
-          {
-            label: 'Ticket promedio',
-            val: '$74.000',
-            sub: '−5% vs. semana pasada',
-          },
           { label: 'Margen bruto', val: '52%', sub: '+2pp vs. semana pasada' },
         ].map((k) => (
           <div key={k.label} className="bg-white rounded-2xl p-5 border border-brand-150">

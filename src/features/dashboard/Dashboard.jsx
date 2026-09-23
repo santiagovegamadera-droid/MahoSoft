@@ -86,7 +86,7 @@ export default function Dashboard() {
   return (
     <div className="p-8 space-y-6">
       {/* KPI Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {[
           {
             label: 'Ventas de hoy',
@@ -108,13 +108,6 @@ export default function Dashboard() {
             delta: '+5',
             sub: 'vs. ayer',
             up: true,
-          },
-          {
-            label: 'Ticket promedio',
-            value: '$366.000',
-            delta: '-3%',
-            sub: 'vs. mes anterior',
-            up: false,
           },
         ].map((card) => (
           <div key={card.label} className="bg-white rounded-2xl p-5 border border-brand-150">
