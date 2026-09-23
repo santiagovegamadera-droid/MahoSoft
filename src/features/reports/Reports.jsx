@@ -190,19 +190,16 @@ export default function Reports() {
               name: 'Carla Rodríguez',
               ventas: '$8.450.000',
               trans: 98,
-              avg: '$86.224',
             },
             {
               name: 'Sofía Parra',
               ventas: '$6.320.000',
               trans: 74,
-              avg: '$85.405',
             },
             {
               name: 'Valentina Ruiz',
               ventas: '$5.280.000',
               trans: 99,
-              avg: '$53.333',
             },
           ].map((e, i) => (
             <div
@@ -237,10 +234,6 @@ export default function Reports() {
                 <div className="flex justify-between text-xs">
                   <span className="text-brand-600">Transacciones</span>
                   <span className="font-semibold text-brand-800">{e.trans}</span>
-                </div>
-                <div className="flex justify-between text-xs">
-                  <span className="text-brand-600">Ticket prom.</span>
-                  <span className="font-mono font-semibold text-brand-800">{e.avg}</span>
                 </div>
               </div>
             </div>
