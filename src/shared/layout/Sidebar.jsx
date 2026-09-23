@@ -1,9 +1,12 @@
+import { useState } from 'react';
 import {
+  ArrowLeftRight,
   ChartColumn,
-  Boxes,
+  ChevronDown,
   LayoutDashboard,
   LogOut,
   Shirt,
+  ShoppingBasket,
   ShoppingCart,
   Tags,
   Truck,
@@ -15,17 +18,49 @@ import Logo from '@/shared/components/Logo';
 const nav = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, group: 'Principal' },
   { id: 'pos', label: 'Punto de Venta', icon: ShoppingCart, group: 'Operaciones' },
-  { id: 'products', label: 'Productos', icon: Shirt, group: 'Operaciones' },
-  { id: 'inventory', label: 'Inventario', icon: Boxes, group: 'Operaciones' },
-  { id: 'categories', label: 'Categorías', icon: Tags, group: 'Operaciones' },
+  {
+    id: 'compras',
+    label: 'Compras',
+    icon: ShoppingBasket,
+    group: 'Operaciones',
+    children: [
+      { id: 'purchases', label: 'Movimientos', icon: ArrowLeftRight },
+      { id: 'products', label: 'Productos', icon: Shirt, match: ['product-detail'] },
+      { id: 'categories', label: 'Categorías', icon: Tags },
+    ],
+  },
   { id: 'customers', label: 'Clientes', icon: Users, group: 'Relaciones' },
   { id: 'suppliers', label: 'Proveedores', icon: Truck, group: 'Relaciones' },
   { id: 'users', label: 'Usuarios', icon: UserCog, group: 'Relaciones' },
   { id: 'reports', label: 'Reportes', icon: ChartColumn, group: 'Análisis' },
 ];
 
+const isActive = (item, current) => item.id === current || (item.match?.includes(current) ?? false);
+
+function NavButton({ item, active, onClick, nested = false, children }) {
+  const Icon = item.icon;
+  return (
+    <button
+      onClick={onClick}
+      className={`w-full flex items-center gap-3 px-3 rounded-lg mb-0.5 font-medium transition-all duration-150 text-left border-l-2 ${
+        nested ? 'py-2 text-sm' : 'py-2.5 text-sm'
+      } ${
+        active
+          ? 'bg-white/12 text-white border-brand-400'
+          : 'bg-transparent text-brand-200/75 border-transparent hover:bg-white/7 hover:text-brand-200'
+      }`}
+    >
+      <Icon size={nested ? 16 : 18} strokeWidth={1.75} className={active ? 'opacity-100' : 'opacity-70'} />
+      {item.label}
+      {children}
+    </button>
+  );
+}
+
 export default function Sidebar({ current, onChange, onLogout }) {
   const groups = [...new Set(nav.map((n) => n.group))];
+  // Explicit open/closed per dropdown; when unset, a dropdown is open while one of its children is active
+  const [openMenus, setOpenMenus] = useState({});
 
   return (
     <aside className="flex flex-col w-60 shrink-0 h-screen sticky top-0 bg-brand-800">
@@ -42,21 +77,45 @@ export default function Sidebar({ current, onChange, onLogout }) {
             {nav
               .filter((n) => n.group === group)
               .map((item) => {
-                const active = current === item.id;
-                const Icon = item.icon;
+                if (!item.children) {
+                  return (
+                    <NavButton
+                      key={item.id}
+                      item={item}
+                      active={isActive(item, current)}
+                      onClick={() => onChange(item.id)}
+                    />
+                  );
+                }
+
+                const childActive = item.children.some((c) => isActive(c, current));
+                const open = openMenus[item.id] ?? childActive;
                 return (
-                  <button
-                    key={item.id}
-                    onClick={() => onChange(item.id)}
-                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg mb-0.5 text-sm font-medium transition-all duration-150 text-left border-l-2 ${
-                      active
-                        ? 'bg-white/12 text-white border-brand-400'
-                        : 'bg-transparent text-brand-200/75 border-transparent hover:bg-white/7 hover:text-brand-200'
-                    }`}
-                  >
-                    <Icon size={18} strokeWidth={1.75} className={active ? 'opacity-100' : 'opacity-70'} />
-                    {item.label}
-                  </button>
+                  <div key={item.id}>
+                    <NavButton
+                      item={item}
+                      active={childActive && !open}
+                      onClick={() => setOpenMenus((prev) => ({ ...prev, [item.id]: !open }))}
+                    >
+                      <ChevronDown
+                        size={16}
+                        className={`ml-auto opacity-70 transition-transform ${open ? 'rotate-180' : ''}`}
+                      />
+                    </NavButton>
+                    {open && (
+                      <div className="ml-4 pl-2 border-l border-white/10">
+                        {item.children.map((child) => (
+                          <NavButton
+                            key={child.id}
+                            item={child}
+                            nested
+                            active={isActive(child, current)}
+                            onClick={() => onChange(child.id)}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 );
               })}
           </div>

@@ -4,7 +4,7 @@ const titles = {
   dashboard: 'Dashboard',
   products: 'Productos',
   'product-detail': 'Detalle de Producto',
-  inventory: 'Inventario',
+  purchases: 'Compras',
   pos: 'Punto de Venta',
   customers: 'Clientes',
   suppliers: 'Proveedores',

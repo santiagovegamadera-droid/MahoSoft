@@ -5,7 +5,7 @@ import Login from '@/features/auth/Login';
 import Dashboard from '@/features/dashboard/Dashboard';
 import Products from '@/features/products/Products';
 import ProductDetail from '@/features/products/ProductDetail';
-import Inventory from '@/features/inventory/Inventory';
+import Purchases from '@/features/purchases/Purchases';
 import POS from '@/features/pos/POS';
 import Customers from '@/features/customers/Customers';
 import Suppliers from '@/features/suppliers/Suppliers';
@@ -49,7 +49,7 @@ export default function App() {
           {view === 'dashboard' && <Dashboard />}
           {view === 'products' && <Products onEdit={editProduct} />}
           {view === 'product-detail' && <ProductDetail onBack={goToProducts} />}
-          {view === 'inventory' && <Inventory />}
+          {view === 'purchases' && <Purchases />}
           {view === 'pos' && <POS />}
           {view === 'customers' && <Customers />}
           {view === 'suppliers' && <Suppliers />}

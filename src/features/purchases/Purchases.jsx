@@ -96,7 +96,7 @@ const stockTable = [
   },
 ];
 
-export default function Inventory() {
+export default function Purchases() {
   const [tab, setTab] = useState('stock');
 
   return (

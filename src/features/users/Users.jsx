@@ -47,7 +47,7 @@ const users = [
     name: 'Jorge Mejía',
     email: 'jorge@ellaboutique.co',
     rol: 'Bodega',
-    permisos: ['Inventario'],
+    permisos: ['Compras'],
     estado: 'Activo',
     ultimo: '2026-09-23 07:58',
     iniciales: 'JM',
@@ -60,7 +60,7 @@ const rolColors = {
   Bodega: 'bg-brand-50 text-brand-600',
 };
 
-const allPerms = ['Dashboard', 'POS', 'Productos', 'Inventario', 'Clientes', 'Proveedores', 'Usuarios', 'Reportes'];
+const allPerms = ['Dashboard', 'POS', 'Compras', 'Clientes', 'Proveedores', 'Usuarios', 'Reportes'];
 
 export default function Users() {
   const [selected, setSelected] = useState(null);
