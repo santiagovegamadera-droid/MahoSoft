@@ -3,7 +3,7 @@ import { Plus } from 'lucide-react';
 import useUsers, { PERMISSIONS, ROLES } from '@/features/users/store';
 import Modal from '@/shared/components/Modal';
 import ConfirmDialog from '@/shared/components/ConfirmDialog';
-import { Button, CheckboxList, Field, RowActions, inputClass } from '@/shared/components/Form';
+import { Button, CheckboxList, Field, RowActions, StatusToggle, inputClass } from '@/shared/components/Form';
 
 const rolColors = {
   Administradora: 'bg-brand-800 text-white',
@@ -72,11 +72,10 @@ function UserForm({ user, onSave, onClose }) {
               ))}
             </select>
           </Field>
-          <Field label="Estado">
-            <select value={form.estado} onChange={set('estado')} className={inputClass}>
-              <option>Activo</option>
-              <option>Inactivo</option>
-            </select>
+          <Field label="Estado" group>
+            <div className="py-2.5">
+              <StatusToggle value={form.estado} onChange={(estado) => setForm((f) => ({ ...f, estado }))} />
+            </div>
           </Field>
         </div>
         <Field label="Permisos de acceso" group>
@@ -176,13 +175,11 @@ export default function Users() {
                 </td>
                 <td className="px-5 py-3.5 text-xs font-mono text-brand-600">{user.ultimo}</td>
                 <td className="px-5 py-3.5">
-                  <span
-                    className={`text-xs px-2.5 py-1 rounded-full font-semibold ${
-                      user.estado === 'Activo' ? 'bg-success-soft text-success' : 'bg-muted-soft text-muted'
-                    }`}
-                  >
-                    {user.estado}
-                  </span>
+                  <StatusToggle
+                    value={user.estado}
+                    label={user.name}
+                    onChange={(estado) => update(user.id, { estado })}
+                  />
                 </td>
                 <td className="px-5 py-3.5">
                   <RowActions label={user.name} onEdit={() => setEditing(user)} onDelete={() => setDeleting(user)} />

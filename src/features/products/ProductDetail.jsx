@@ -4,7 +4,7 @@ import useProducts, { SIZE_GROUPS } from '@/features/products/store';
 import useCategories from '@/features/categories/store';
 import useSuppliers from '@/features/suppliers/store';
 import ConfirmDialog from '@/shared/components/ConfirmDialog';
-import { Button, Field, inputClass } from '@/shared/components/Form';
+import { Button, Field, StatusToggle, inputClass } from '@/shared/components/Form';
 
 const emptyProduct = {
   name: '',
@@ -290,21 +290,7 @@ export default function ProductDetail({ productId, onBack }) {
         <div className="space-y-4">
           <div className="bg-white rounded-2xl p-5 border border-brand-150">
             <h3 className="text-sm font-semibold mb-4 text-brand-800">Estado</h3>
-            <div className="flex gap-2">
-              {['Activo', 'Inactivo'].map((s) => (
-                <button
-                  key={s}
-                  onClick={() => setForm((f) => ({ ...f, estado: s }))}
-                  className={`flex-1 py-2 rounded-xl text-sm font-semibold border-2 transition-all ${
-                    form.estado === s
-                      ? 'bg-brand-600 border-brand-600 text-white'
-                      : 'bg-white border-brand-200 text-brand-600'
-                  }`}
-                >
-                  {s}
-                </button>
-              ))}
-            </div>
+            <StatusToggle value={form.estado} onChange={(estado) => setForm((f) => ({ ...f, estado }))} />
           </div>
 
           <div className="rounded-2xl p-5 border bg-brand-200 border-brand-400">

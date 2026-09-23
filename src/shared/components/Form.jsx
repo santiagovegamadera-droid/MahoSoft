@@ -55,6 +55,37 @@ export function Button({ variant = 'primary', className = '', ...props }) {
   );
 }
 
+/** Activo/Inactivo switch; works inside clickable rows without triggering them */
+export function StatusToggle({ value, onChange, label }) {
+  const active = value === 'Activo';
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={active}
+      aria-label={label ? `Estado de ${label}` : 'Estado'}
+      onClick={(e) => {
+        e.stopPropagation();
+        onChange(active ? 'Inactivo' : 'Activo');
+      }}
+      className="group inline-flex items-center gap-2"
+    >
+      <span
+        className={`relative inline-flex h-5 w-9 shrink-0 rounded-full transition-colors ${
+          active ? 'bg-success' : 'bg-brand-200'
+        }`}
+      >
+        <span
+          className={`absolute top-0.5 left-0.5 size-4 rounded-full bg-white shadow transition-transform ${
+            active ? 'translate-x-4' : 'translate-x-0'
+          }`}
+        />
+      </span>
+      <span className={`text-xs font-semibold ${active ? 'text-success' : 'text-muted'}`}>{value}</span>
+    </button>
+  );
+}
+
 /** Edit + delete icon buttons for a table row or card */
 export function RowActions({ onEdit, onDelete, label }) {
   return (

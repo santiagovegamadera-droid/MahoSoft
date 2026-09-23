@@ -4,10 +4,10 @@ import useProducts, { totalStock } from '@/features/products/store';
 import useCategories from '@/features/categories/store';
 import useSuppliers from '@/features/suppliers/store';
 import ConfirmDialog from '@/shared/components/ConfirmDialog';
-import { Button, RowActions } from '@/shared/components/Form';
+import { Button, RowActions, StatusToggle } from '@/shared/components/Form';
 
 export default function Products({ onEdit, onNew }) {
-  const { items: products, remove } = useProducts();
+  const { items: products, update, remove } = useProducts();
   const { items: categories } = useCategories();
   const { items: suppliers } = useSuppliers();
   const [catId, setCatId] = useState('all');
@@ -159,13 +159,7 @@ export default function Products({ onEdit, onNew }) {
                   </td>
                   <td className="px-5 py-3.5 text-xs text-brand-600">{supplierName(p.proveedorId)}</td>
                   <td className="px-5 py-3.5">
-                    <span
-                      className={`text-xs px-2.5 py-1 rounded-full font-semibold ${
-                        p.estado === 'Activo' ? 'bg-success-soft text-success' : 'bg-muted-soft text-muted'
-                      }`}
-                    >
-                      {p.estado}
-                    </span>
+                    <StatusToggle value={p.estado} label={p.name} onChange={(estado) => update(p.id, { estado })} />
                   </td>
                   <td className="px-5 py-3.5">
                     <RowActions label={p.name} onEdit={() => onEdit(p.id)} onDelete={() => setDeleting(p)} />

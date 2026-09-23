@@ -5,7 +5,7 @@ import useCategories from '@/features/categories/store';
 import useProducts from '@/features/products/store';
 import Modal from '@/shared/components/Modal';
 import ConfirmDialog from '@/shared/components/ConfirmDialog';
-import { Button, CheckboxList, Field, RowActions, inputClass } from '@/shared/components/Form';
+import { Button, CheckboxList, Field, RowActions, StatusToggle, inputClass } from '@/shared/components/Form';
 
 const emptySupplier = { name: '', contacto: '', email: '', tel: '', ciudad: '', categorias: [], estado: 'Activo' };
 
@@ -66,11 +66,8 @@ function SupplierForm({ supplier, categories, onSave, onClose }) {
             onChange={(names) => setForm((f) => ({ ...f, categorias: names.map(idOf) }))}
           />
         </Field>
-        <Field label="Estado">
-          <select value={form.estado} onChange={set('estado')} className={inputClass}>
-            <option>Activo</option>
-            <option>Inactivo</option>
-          </select>
+        <Field label="Estado" group>
+          <StatusToggle value={form.estado} onChange={(estado) => setForm((f) => ({ ...f, estado }))} />
         </Field>
       </form>
     </Modal>
@@ -161,13 +158,7 @@ export default function Suppliers() {
                 </td>
                 <td className="px-5 py-3.5 font-semibold text-brand-800">{productCount(s)}</td>
                 <td className="px-5 py-3.5">
-                  <span
-                    className={`text-xs px-2.5 py-1 rounded-full font-semibold ${
-                      s.estado === 'Activo' ? 'bg-success-soft text-success' : 'bg-muted-soft text-muted'
-                    }`}
-                  >
-                    {s.estado}
-                  </span>
+                  <StatusToggle value={s.estado} label={s.name} onChange={(estado) => update(s.id, { estado })} />
                 </td>
                 <td className="px-5 py-3.5">
                   <RowActions label={s.name} onEdit={() => setEditing(s)} onDelete={() => setDeleting(s)} />
