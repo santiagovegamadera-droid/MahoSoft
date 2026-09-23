@@ -1,0 +1,10 @@
+{
+  "description": "Centralized dashboard for managing women's clothing store operations including inventory, sales, products, clients, and reports with user-friendly tools.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
