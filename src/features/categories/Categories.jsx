@@ -178,56 +178,64 @@ export default function Categories() {
       </div>
 
       {tab === 'categorias' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {categoriesStore.items.map((cat) => {
-            const catProducts = categoryProducts(cat);
-            const activos = catProducts.filter((p) => p.estado === 'Activo').length;
-            return (
-              <div
-                key={cat.id}
-                className="bg-white rounded-2xl border overflow-hidden hover:shadow-md transition-shadow border-brand-150"
-              >
-                <div className="relative h-32 overflow-hidden bg-brand-200">
-                  {cat.img && <img src={cat.img} alt={cat.name} className="w-full h-full object-cover" />}
-                  <div className="absolute inset-0 bg-linear-to-b from-transparent from-30% to-brand-800/70" />
-                  <div className="absolute bottom-3 left-4 right-4">
-                    <p className="text-white font-semibold font-display text-lg">{cat.name}</p>
-                  </div>
-                </div>
-                <div className="p-4">
-                  <p className="text-xs mb-3 text-brand-600">{cat.descripcion || 'Sin descripción'}</p>
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="text-center">
-                      <p className="text-xl font-bold text-brand-800">{catProducts.length}</p>
-                      <p className="text-[10px] uppercase tracking-wide text-brand-400">Productos</p>
-                    </div>
-                    <div className="text-center">
-                      <p className="text-xl font-bold text-success">{activos}</p>
-                      <p className="text-[10px] uppercase tracking-wide text-brand-400">Activos</p>
-                    </div>
-                    <div className="text-center">
-                      <p className="text-xl font-bold text-danger">{catProducts.length - activos}</p>
-                      <p className="text-[10px] uppercase tracking-wide text-brand-400">Inactivos</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    {cat.temporada ? (
-                      <span className="text-xs px-2 py-0.5 rounded-full bg-brand-200 text-brand-800">
-                        {cat.temporada}
-                      </span>
-                    ) : (
-                      <span />
-                    )}
-                    <RowActions
-                      label={cat.name}
-                      onEdit={() => setEditing({ type: 'category', item: cat })}
-                      onDelete={() => setDeleting({ type: 'category', item: cat })}
-                    />
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+        <div className="bg-white rounded-2xl border overflow-hidden border-brand-150">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="bg-brand-50">
+                {['Categoría', 'Temporada', 'Productos', 'Activos', 'Inactivos', ''].map((h) => (
+                  <th
+                    key={h}
+                    className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-brand-600"
+                  >
+                    {h}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-brand-50">
+              {categoriesStore.items.map((cat) => {
+                const catProducts = categoryProducts(cat);
+                const activos = catProducts.filter((p) => p.estado === 'Activo').length;
+                return (
+                  <tr key={cat.id} className="transition-colors hover:bg-brand-25">
+                    <td className="px-5 py-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-lg overflow-hidden shrink-0 bg-brand-200">
+                          {cat.img && <img src={cat.img} alt="" className="w-full h-full object-cover" />}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="font-medium text-brand-800">{cat.name}</p>
+                          <p className="text-xs truncate text-brand-400">{cat.descripcion || 'Sin descripción'}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-5 py-3">
+                      {cat.temporada ? (
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-brand-200 text-brand-800">
+                          {cat.temporada}
+                        </span>
+                      ) : (
+                        <span className="text-xs text-brand-400">—</span>
+                      )}
+                    </td>
+                    <td className="px-5 py-3 font-semibold text-brand-800">{catProducts.length}</td>
+                    <td className="px-5 py-3 font-semibold text-success">{activos}</td>
+                    <td className="px-5 py-3 font-semibold text-danger">{catProducts.length - activos}</td>
+                    <td className="px-5 py-3">
+                      <RowActions
+                        label={cat.name}
+                        onEdit={() => setEditing({ type: 'category', item: cat })}
+                        onDelete={() => setDeleting({ type: 'category', item: cat })}
+                      />
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+          {categoriesStore.items.length === 0 && (
+            <p className="px-5 py-10 text-center text-sm text-brand-400">No hay categorías.</p>
+          )}
         </div>
       )}
 
