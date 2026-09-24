@@ -25,7 +25,7 @@ This is the canonical project structure. Start with task-relevant files below. O
 
 Code is organized by feature, not by file type:
 
-- `src/features/<feature>/` - One folder per domain (`auth`, `dashboard`, `products`, `categories`, `purchases`, `pos`, `sales`, `suppliers`, `users`, `reports`). Screens, and any components/hooks/data used only by that feature, live here.
+- `src/features/<feature>/` - One folder per domain (`auth`, `dashboard`, `products`, `categories`, `purchases`, `pos`, `sales`, `suppliers`, `users`, `reports`, `settings`). Screens, and any components/hooks/data used only by that feature, live here.
 - `src/shared/components/` - Reusable UI used by more than one feature (e.g. `Logo`).
 - `src/shared/layout/` - App shell (`Sidebar`, `Header`).
 - `src/assets/` - Static images.

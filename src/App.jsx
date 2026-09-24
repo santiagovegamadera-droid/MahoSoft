@@ -12,6 +12,8 @@ import Users from '@/features/users/Users';
 import Reports from '@/features/reports/Reports';
 import Categories from '@/features/categories/Categories';
 import SalesHistory from '@/features/sales/SalesHistory';
+import Settings from '@/features/settings/Settings';
+import Profile from '@/features/profile/Profile';
 
 export default function App() {
   const [authenticated, setAuthenticated] = useState(false);
@@ -58,6 +60,8 @@ export default function App() {
           {view === 'users' && <Users />}
           {view === 'reports' && <Reports />}
           {view === 'categories' && <Categories />}
+          {view === 'settings' && <Settings />}
+          {view === 'profile' && <Profile />}
         </main>
       </div>
     </div>

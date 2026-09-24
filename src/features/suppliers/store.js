@@ -5,6 +5,8 @@ const useSuppliers = createCollection('suppliers', [
   {
     id: 1,
     name: 'Textiles Bogotá S.A.S.',
+    tipoDocumento: 'NIT',
+    documento: '900123456-1',
     contacto: 'Pedro Vargas',
     email: 'pvargas@textilesbog.com',
     tel: '601-234-5678',
@@ -15,6 +17,8 @@ const useSuppliers = createCollection('suppliers', [
   {
     id: 2,
     name: 'ModaCali S.A.',
+    tipoDocumento: 'NIT',
+    documento: '800234567-2',
     contacto: 'Sandra Lozano',
     email: 'slozano@modacali.com',
     tel: '602-345-6789',
@@ -25,6 +29,8 @@ const useSuppliers = createCollection('suppliers', [
   {
     id: 3,
     name: 'DenimCo',
+    tipoDocumento: 'NIT',
+    documento: '901345678-3',
     contacto: 'Ricardo Montoya',
     email: 'r.montoya@denimco.co',
     tel: '604-456-7890',
@@ -35,6 +41,8 @@ const useSuppliers = createCollection('suppliers', [
   {
     id: 4,
     name: 'LuxFashion Ltda.',
+    tipoDocumento: 'NIT',
+    documento: '830456789-4',
     contacto: 'Andrea Silva',
     email: 'asilva@luxfashion.com',
     tel: '605-567-8901',
@@ -45,6 +53,8 @@ const useSuppliers = createCollection('suppliers', [
   {
     id: 5,
     name: 'KnitCo Textiles',
+    tipoDocumento: 'NIT',
+    documento: '900567890-5',
     contacto: 'Jorge Pérez',
     email: 'jperez@knitco.co',
     tel: '607-678-9012',
@@ -55,6 +65,8 @@ const useSuppliers = createCollection('suppliers', [
   {
     id: 6,
     name: 'GlamourBtq',
+    tipoDocumento: 'NIT',
+    documento: '901678901-6',
     contacto: 'Lucía Ramírez',
     email: 'lucia@glamourbtq.co',
     tel: '601-876-5432',

@@ -4,6 +4,8 @@ import saleTotals from '@/features/sales/saleTotals';
 import { ReceiptModal } from '@/features/sales/SaleReceipt';
 import useSales, { voidSale } from '@/features/sales/store';
 import ConfirmDialog from '@/shared/components/ConfirmDialog';
+import usePagination from '@/shared/lib/usePagination';
+import Pagination from '@/shared/components/Pagination';
 
 const paymentIcons = { efectivo: Banknote, tarjeta: CreditCard, transferencia: Landmark };
 
@@ -32,6 +34,7 @@ export default function SalesHistory() {
       (s.factura.toLowerCase().includes(q) || s.cliente.toLowerCase().includes(q)),
   );
   const selected = rows.find((s) => s.id === selectedId);
+  const pager = usePagination(filtered, `${search}|${payment}`);
 
   const today = rows.filter((s) => isToday(s.fecha));
   const todayTotal = today.reduce((sum, s) => sum + s.total, 0);
@@ -90,7 +93,7 @@ export default function SalesHistory() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-brand-50">
-                {filtered.map((s) => {
+                {pager.pageItems.map((s) => {
                   const PayIcon = paymentIcons[s.pago];
                   return (
                     <tr
@@ -121,6 +124,7 @@ export default function SalesHistory() {
                 No hay ventas que coincidan con la búsqueda.
               </p>
             )}
+            <Pagination pager={pager} label="ventas" />
           </div>
         </div>
 

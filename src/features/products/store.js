@@ -1,9 +1,11 @@
 import createCollection from '@/shared/lib/createCollection';
 
-export const SIZE_GROUPS = [
-  ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
-  ['25', '26', '27', '28', '29', '30', '32'],
-];
+// Sizes in the order configured in Settings (`tallas` groups); sizes no longer configured go last
+export function sortSizes(sizes, groups) {
+  const order = groups.flatMap((g) => g.valores);
+  const unique = [...new Set(sizes)];
+  return [...order.filter((s) => unique.includes(s)), ...unique.filter((s) => !order.includes(s))];
+}
 
 const img = (id) => `https://images.unsplash.com/photo-${id}?w=300&h=300&fit=crop&auto=format`;
 
@@ -122,6 +124,11 @@ export function adjustStock(productId, talla, delta) {
   const p = useProducts.api.getById(productId);
   if (!p) return;
   useProducts.api.update(productId, { stock: { ...p.stock, [talla]: Math.max(0, (p.stock[talla] ?? 0) + delta) } });
+}
+
+/** A product's cost is the unit cost it had in its most recent purchase */
+export function setPurchaseCost(productId, costo) {
+  if (useProducts.api.getById(productId)) useProducts.api.update(productId, { costo });
 }
 
 export default useProducts;

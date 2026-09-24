@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { FileText, Paperclip, X } from 'lucide-react';
+import useSettings from '@/features/settings/store';
 
-export const BANKS = ['Nequi', 'Daviplata', 'Bancolombia', 'Davivienda', 'Banco de Bogotá', 'BBVA', 'Otro'];
 export const EMPTY_PROOF = { file: null, banco: '', referencia: '' };
 
 const kb = (n) => (n < 1024 * 1024 ? `${Math.round(n / 1024)} KB` : `${(n / 1024 / 1024).toFixed(1)} MB`);
@@ -12,6 +12,7 @@ export default function TransferProof({ value, onChange }) {
   const [dragging, setDragging] = useState(false);
   const [preview, setPreview] = useState(null);
   const { file } = value;
+  const { bancos } = useSettings();
 
   useEffect(() => {
     if (!file?.type.startsWith('image/')) return setPreview(null);
@@ -88,7 +89,7 @@ export default function TransferProof({ value, onChange }) {
       <div className="grid grid-cols-2 gap-1.5">
         <select value={value.banco} onChange={set('banco')} className={fieldClass} aria-label="Banco">
           <option value="">Banco / billetera</option>
-          {BANKS.map((b) => (
+          {bancos.map((b) => (
             <option key={b}>{b}</option>
           ))}
         </select>

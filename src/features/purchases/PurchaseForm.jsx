@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
+import ProductSearch from '@/features/purchases/ProductSearch';
+import { useCurrentUser } from '@/features/users/store';
 import Modal from '@/shared/components/Modal';
 import { Button, Field, inputClass } from '@/shared/components/Form';
 
@@ -11,6 +13,7 @@ const cellClass =
 const newLine = (p) => ({ productId: p?.id ?? null, talla: Object.keys(p?.stock ?? {})[0] ?? '', cant: '', costo: p?.costo ?? '' });
 
 export default function PurchaseForm({ products, suppliers, onSave, onClose }) {
+  const user = useCurrentUser();
   const activeSuppliers = suppliers.filter((s) => s.estado === 'Activo');
   const [form, setForm] = useState({
     proveedorId: activeSuppliers[0]?.id ?? '',
@@ -48,7 +51,7 @@ export default function PurchaseForm({ products, suppliers, onSave, onClose }) {
       proveedorId: Number(form.proveedorId),
       facturaProveedor: form.facturaProveedor.trim(),
       notas: form.notas.trim(),
-      usuario: 'Ana Martínez',
+      usuario: user.name,
       items,
     });
   }
@@ -113,18 +116,12 @@ export default function PurchaseForm({ products, suppliers, onSave, onClose }) {
                   return (
                     <tr key={i}>
                       <td className="px-2 py-1.5">
-                        <select
-                          value={l.productId ?? ''}
-                          onChange={(e) => selectProduct(i, e.target.value)}
+                        <ProductSearch
+                          products={products}
+                          value={l.productId}
+                          onChange={(id) => selectProduct(i, id)}
                           className={cellClass}
-                          aria-label="Producto"
-                        >
-                          {products.map((x) => (
-                            <option key={x.id} value={x.id}>
-                              {x.name}
-                            </option>
-                          ))}
-                        </select>
+                        />
                       </td>
                       <td className="px-2 py-1.5">
                         <select

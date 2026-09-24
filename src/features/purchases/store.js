@@ -1,5 +1,5 @@
 import createCollection from '@/shared/lib/createCollection';
-import { adjustStock } from '@/features/products/store';
+import { adjustStock, setPurchaseCost } from '@/features/products/store';
 
 export const MOVEMENT_TYPES = ['entrada', 'salida', 'ajuste'];
 
@@ -115,6 +115,12 @@ export function registerPurchase(data) {
       usuario: purchase.usuario,
     }),
   );
+  // Update each product's cost unless a later-dated purchase already set it
+  const others = usePurchases.api.getAll().filter((p) => p.id !== purchase.id);
+  purchase.items.forEach((i) => {
+    const newer = others.some((p) => p.fecha > purchase.fecha && p.items.some((x) => x.productId === i.productId));
+    if (!newer) setPurchaseCost(i.productId, i.costo);
+  });
   return purchase;
 }
 

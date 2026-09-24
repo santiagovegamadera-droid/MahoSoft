@@ -3,6 +3,8 @@ import { PackagePlus, Search } from 'lucide-react';
 import { purchaseTotal, purchaseUnits } from '@/features/purchases/store';
 import Modal from '@/shared/components/Modal';
 import { Button } from '@/shared/components/Form';
+import usePagination from '@/shared/lib/usePagination';
+import Pagination from '@/shared/components/Pagination';
 
 const fmt = (n) => `$${n.toLocaleString('es-CO')}`;
 const fmtDate = (d) =>
@@ -85,13 +87,13 @@ export default function PurchaseOrders({ purchases, suppliers, products, onNew }
 
   const month = new Date().toISOString().slice(0, 7);
   const thisMonth = purchases.filter((p) => p.fecha.startsWith(month));
+  const pager = usePagination(rows, q);
 
   return (
     <>
-      <div className="grid grid-cols-3 gap-3 mb-4">
+      <div className="grid grid-cols-2 gap-3 mb-4">
         {[
           { label: 'Compras del mes', val: thisMonth.length },
-          { label: 'Prendas ingresadas (mes)', val: thisMonth.reduce((s, p) => s + purchaseUnits(p), 0) },
           { label: 'Invertido (mes)', val: fmt(thisMonth.reduce((s, p) => s + purchaseTotal(p), 0)) },
         ].map((k) => (
           <div key={k.label} className="bg-white rounded-xl px-4 py-3 border border-brand-150">
@@ -125,7 +127,7 @@ export default function PurchaseOrders({ purchases, suppliers, products, onNew }
             </tr>
           </thead>
           <tbody className="divide-y divide-brand-50">
-            {rows.map((p) => (
+            {pager.pageItems.map((p) => (
               <tr key={p.id} onClick={() => setViewing(p)} className="cursor-pointer hover:bg-brand-25">
                 <td className="px-4 py-2 font-mono font-semibold text-brand-800">{p.numero}</td>
                 <td className="px-4 py-2 text-brand-600">{fmtDate(p.fecha)}</td>
@@ -148,6 +150,7 @@ export default function PurchaseOrders({ purchases, suppliers, products, onNew }
             )}
           </div>
         )}
+        <Pagination pager={pager} label="compras" />
       </div>
 
       {viewing && (

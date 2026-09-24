@@ -5,6 +5,7 @@ import {
   LayoutDashboard,
   LogOut,
   ReceiptText,
+  Settings,
   Shirt,
   ShoppingBasket,
   ShoppingCart,
@@ -12,6 +13,8 @@ import {
   Truck,
   UserCog,
 } from 'lucide-react';
+import useSettings from '@/features/settings/store';
+import { initials, useCurrentUser } from '@/features/users/store';
 import Logo from '@/shared/components/Logo';
 
 const nav = [
@@ -36,6 +39,7 @@ const nav = [
   },
   { id: 'users', label: 'Usuarios', icon: UserCog, group: 'Relaciones' },
   { id: 'reports', label: 'Reportes', icon: ChartColumn, group: 'Análisis' },
+  { id: 'settings', label: 'Configuración', icon: Settings, group: 'Sistema' },
 ];
 
 const isActive = (item, current) => item.id === current || (item.match?.includes(current) ?? false);
@@ -60,6 +64,8 @@ function NavButton({ item, active, onClick, nested = false }) {
 }
 
 export default function Sidebar({ current, onChange, onLogout }) {
+  const { nombre } = useSettings();
+  const user = useCurrentUser();
   const groups = [...new Set(nav.map((n) => n.group))];
   // Explicit open/closed per dropdown; when unset, a dropdown is open while one of its children is active
   const [openMenus, setOpenMenus] = useState({});
@@ -131,14 +137,25 @@ export default function Sidebar({ current, onChange, onLogout }) {
 
       {/* User */}
       <div className="p-4 border-t border-white/10">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 bg-brand-600 text-white">
-            AM
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-xs font-semibold truncate text-white">Ana Martínez</p>
-            <p className="text-[10px] truncate text-brand-200/55">Admin · Maho Boutique</p>
-          </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => onChange('profile')}
+            aria-current={current === 'profile' ? 'page' : undefined}
+            title="Mi perfil"
+            className={`flex-1 min-w-0 flex items-center gap-3 p-1.5 -m-1.5 rounded-lg text-left transition-colors ${
+              current === 'profile' ? 'bg-white/12' : 'hover:bg-white/7'
+            }`}
+          >
+            <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 bg-brand-600 text-white">
+              {initials(user.name)}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-semibold truncate text-white">{user.name}</p>
+              <p className="text-[10px] truncate text-brand-200/55">
+                {user.rol} · {nombre}
+              </p>
+            </div>
+          </button>
           <button
             onClick={onLogout}
             className="p-1 rounded transition-colors text-brand-200/55 hover:text-white"

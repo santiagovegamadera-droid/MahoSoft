@@ -5,6 +5,8 @@ import useProducts from '@/features/products/store';
 import Modal from '@/shared/components/Modal';
 import ConfirmDialog from '@/shared/components/ConfirmDialog';
 import { Button, Field, RowActions, StatusToggle, inputClass } from '@/shared/components/Form';
+import usePagination from '@/shared/lib/usePagination';
+import Pagination from '@/shared/components/Pagination';
 
 const emptyCategory = { name: '', descripcion: '', img: '', estado: 'Activo' };
 
@@ -64,6 +66,7 @@ export default function Categories() {
   const [deleting, setDeleting] = useState(null);
 
   const categoryProducts = (cat) => products.filter((p) => p.catId === cat.id);
+  const pager = usePagination(categories);
 
   function save(data) {
     if (editing === 'new') create(data);
@@ -97,7 +100,7 @@ export default function Categories() {
             </tr>
           </thead>
           <tbody className="divide-y divide-brand-50">
-            {categories.map((cat) => {
+            {pager.pageItems.map((cat) => {
               const catProducts = categoryProducts(cat);
               const activos = catProducts.filter((p) => p.estado === 'Activo').length;
               return (
@@ -132,6 +135,7 @@ export default function Categories() {
           </tbody>
         </table>
         {categories.length === 0 && <p className="px-5 py-10 text-center text-sm text-brand-400">No hay categorías.</p>}
+        <Pagination pager={pager} label="categorías" />
       </div>
 
       {editing && (

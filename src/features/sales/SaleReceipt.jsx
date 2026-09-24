@@ -2,17 +2,8 @@ import logoSrc from '@/assets/public/logo.png';
 import Modal from '@/shared/components/Modal';
 import { Button } from '@/shared/components/Form';
 import saleTotals from '@/features/sales/saleTotals';
-
-// Store details shown on every receipt; empty fields are simply left out
-export const BUSINESS = {
-  nombre: 'Maho Boutique',
-  nit: '',
-  direccion: '',
-  ciudad: '',
-  telefono: '',
-  correo: '',
-  instagram: '',
-};
+import useSettings from '@/features/settings/store';
+import { formatDocument } from '@/shared/components/DocumentInput';
 
 const fmt = (n) => `$${n.toLocaleString('es-CO')}`;
 const fmtDateTime = (iso) =>
@@ -38,13 +29,14 @@ function Info({ label, value, className = '' }) {
 
 // Sale receipt shown after a sale, from the history, and sent by email
 export default function SaleReceipt({ sale }) {
+  const business = useSettings();
   const { subtotal, descuentoAmt, envio, total } = saleTotals(sale);
   const proof = sale.comprobante;
   const storeLines = [
-    BUSINESS.nit && `NIT ${BUSINESS.nit}`,
-    [BUSINESS.direccion, BUSINESS.ciudad].filter(Boolean).join(', '),
-    [BUSINESS.telefono, BUSINESS.correo].filter(Boolean).join(' · '),
-    BUSINESS.instagram,
+    business.nit && `NIT ${business.nit}`,
+    [business.direccion, business.ciudad].filter(Boolean).join(', '),
+    [business.telefono, business.correo].filter(Boolean).join(' · '),
+    business.instagram,
   ].filter(Boolean);
 
   return (
@@ -52,9 +44,9 @@ export default function SaleReceipt({ sale }) {
       {/* Store + receipt number */}
       <div className="flex items-start justify-between gap-6 pb-5 border-b-2 border-brand-800">
         <div className="flex items-center gap-3 min-w-0">
-          <img src={logoSrc} alt={BUSINESS.nombre} className="w-16 h-16 object-contain shrink-0" />
+          <img src={logoSrc} alt={business.nombre} className="w-16 h-16 object-contain shrink-0" />
           <div className="min-w-0 text-[11px] leading-relaxed text-brand-600">
-            <p className="text-base font-display text-brand-800">{BUSINESS.nombre}</p>
+            <p className="text-base font-display text-brand-800">{business.nombre}</p>
             {storeLines.map((l) => (
               <p key={l}>{l}</p>
             ))}
@@ -78,7 +70,7 @@ export default function SaleReceipt({ sale }) {
           <p className="text-[11px] font-semibold text-brand-800">Cliente</p>
           <div className="grid grid-cols-2 gap-2">
             <Info label="Nombre" value={sale.cliente || 'Cliente general'} className="col-span-2" />
-            <Info label="Cédula / NIT" value={sale.documento} />
+            <Info label="Documento" value={formatDocument(sale.tipoDocumento, sale.documento)} />
             <Info label="Teléfono" value={sale.telefono} />
             <Info label="Correo" value={sale.correo} className="col-span-2" />
           </div>
@@ -165,7 +157,7 @@ export default function SaleReceipt({ sale }) {
       </div>
 
       <p className="mt-6 pt-3 border-t border-brand-100 text-center text-[10px] text-brand-400">
-        Gracias por tu compra en {BUSINESS.nombre}
+        {business.mensajeRecibo}
       </p>
     </div>
   );

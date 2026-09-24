@@ -9,6 +9,8 @@ const titles = {
   users: 'Usuarios',
   reports: 'Reportes',
   categories: 'Categorías',
+  settings: 'Configuración',
+  profile: 'Mi perfil',
 };
 
 export default function Header({ current }) {
