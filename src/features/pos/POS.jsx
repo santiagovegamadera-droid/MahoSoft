@@ -24,8 +24,10 @@ import {
 import saleTotals from '@/features/sales/saleTotals';
 import { ReceiptModal } from '@/features/sales/SaleReceipt';
 import { registerSale as saveSale } from '@/features/sales/store';
-import useProducts, { SIZE_GROUPS, totalStock } from '@/features/products/store';
+import useProducts, { sortSizes, totalStock } from '@/features/products/store';
 import useCategories, { isActiveCategory } from '@/features/categories/store';
+import useSettings from '@/features/settings/store';
+import { useCurrentUser } from '@/features/users/store';
 import ProductCard from '@/features/pos/ProductCard';
 import CartItem from '@/features/pos/CartItem';
 import SendInvoice, { isEmail } from '@/features/pos/SendInvoice';
@@ -37,7 +39,6 @@ const PAYMENTS = [
   { id: 'tarjeta', label: 'Tarjeta', Icon: CreditCard },
   { id: 'transferencia', label: 'Transferencia', Icon: Landmark },
 ];
-const DISCOUNTS = [0, 5, 10, 15, 20, 30];
 const SALE_TYPES = [
   { id: 'tienda', label: 'En tienda', Icon: Store },
   { id: 'pedido', label: 'Pedido', Icon: Truck },
@@ -69,6 +70,8 @@ const normalize = (s) => s.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLow
 export default function POS() {
   const { items: products } = useProducts();
   const { items: categories } = useCategories();
+  const { descuentos, tallas } = useSettings();
+  const user = useCurrentUser();
   const [cart, setCart] = useState([]);
   const [payment, setPayment] = useState('tarjeta');
   const [discount, setDiscount] = useState(0);
@@ -94,7 +97,7 @@ export default function POS() {
   const catName = (id) => categories.find((c) => c.id === id)?.name ?? 'Otros';
   const cats = ['Todos', ...Array.from(new Set(catalog.map((p) => catName(p.catId))))];
   const countIn = (c) => (c === 'Todos' ? catalog.length : catalog.filter((p) => catName(p.catId) === c).length);
-  const allSizes = SIZE_GROUPS.flat().filter((t) => catalog.some((p) => t in p.stock));
+  const allSizes = sortSizes(catalog.flatMap((p) => Object.keys(p.stock)), tallas);
   const priceRange = PRICES.find((r) => r.id === priceFilter);
   const activeFilters = [sizeFilter, priceFilter !== 'todos', onlyAvailable, sort !== 'relevancia'].filter(Boolean).length;
 
@@ -190,9 +193,10 @@ export default function POS() {
     const sale = saveSale({
       tipo: saleType,
       cliente: customer.nombre.trim() || 'Cliente general',
+      tipoDocumento: customer.documento.trim() ? customer.tipoDocumento : '',
       documento: customer.documento.trim(),
       telefono: customer.telefono.trim(),
-      vendedor: 'Ana Martínez',
+      vendedor: user.name,
       pago: payment,
       descuento: discount,
       correo: customer.correo.trim(),
@@ -608,7 +612,7 @@ export default function POS() {
           <div>
             <p className="text-[11px] font-semibold mb-1.5 text-brand-600">Descuento</p>
             <div className="grid grid-cols-6 gap-1">
-              {DISCOUNTS.map((d) => (
+              {descuentos.map((d) => (
                 <button
                   key={d}
                   onClick={() => setDiscount(d)}

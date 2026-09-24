@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Plus, Shirt } from 'lucide-react';
+import useSettings from '@/features/settings/store';
 
 // Shows the product photo, or a placeholder when there is none or it fails to load
 export function ProductImage({ src, alt, className = '' }) {
@@ -16,7 +17,8 @@ export function ProductImage({ src, alt, className = '' }) {
 
 export default function ProductCard({ product, category, price, stockLeft, inCartQty, sizes, onAdd }) {
   const soldOut = stockLeft === 0 && inCartQty === 0;
-  const lowStock = !soldOut && stockLeft <= 3;
+  const { stockBajoProducto } = useSettings();
+  const lowStock = !soldOut && stockLeft <= stockBajoProducto;
 
   return (
     <div

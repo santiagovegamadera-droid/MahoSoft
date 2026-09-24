@@ -2,16 +2,23 @@ import { useState } from 'react';
 import { Truck } from 'lucide-react';
 import Modal from '@/shared/components/Modal';
 import { Button, Field, inputClass } from '@/shared/components/Form';
+import DocumentInput, { defaultDocType } from '@/shared/components/DocumentInput';
 import { isEmail } from '@/features/pos/SendInvoice';
+import useSettings from '@/features/settings/store';
 
-export const EMPTY_CUSTOMER = { nombre: '', documento: '', telefono: '', correo: '' };
+export const EMPTY_CUSTOMER = { nombre: '', tipoDocumento: '', documento: '', telefono: '', correo: '' };
 export const EMPTY_DELIVERY = { direccion: '', barrio: '', ciudad: '', fecha: '', envio: 0, notas: '' };
 
 // Orders can't be charged until we know who receives them and where
 export const deliveryMissing = (c, d) => !c.nombre.trim() || !c.telefono.trim() || !d.direccion.trim();
 
 export default function CustomerModal({ isOrder, customer, delivery, onSave, onClose }) {
-  const [c, setC] = useState(customer);
+  const { tiposDocumento } = useSettings();
+  // Customers start on CC (or the first configured type) until one is picked
+  const [c, setC] = useState({
+    ...customer,
+    tipoDocumento: customer.tipoDocumento || defaultDocType(tiposDocumento, 'CC'),
+  });
   const [d, setD] = useState(delivery);
   const [touched, setTouched] = useState(false);
   const setCustomer = (k) => (e) => setC({ ...c, [k]: e.target.value });
@@ -59,8 +66,14 @@ export default function CustomerModal({ isOrder, customer, delivery, onSave, onC
           <Field label="Nombre" error={touched && errors.nombre} className="col-span-2">
             <input value={c.nombre} onChange={setCustomer('nombre')} className={inputClass} autoFocus />
           </Field>
-          <Field label="Cédula / NIT">
-            <input value={c.documento} onChange={setCustomer('documento')} className={inputClass} inputMode="numeric" />
+          <Field label="Documento" group>
+            <DocumentInput
+              types={tiposDocumento}
+              tipo={c.tipoDocumento}
+              numero={c.documento}
+              onTipoChange={(tipoDocumento) => setC({ ...c, tipoDocumento })}
+              onNumeroChange={(documento) => setC({ ...c, documento })}
+            />
           </Field>
           <Field label="Teléfono / WhatsApp" error={touched && errors.telefono}>
             <input

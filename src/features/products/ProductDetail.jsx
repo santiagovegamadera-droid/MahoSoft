@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { ArrowLeft, Plus, Trash2, X } from 'lucide-react';
-import useProducts, { SIZE_GROUPS } from '@/features/products/store';
+import useProducts, { sortSizes } from '@/features/products/store';
 import useCategories, { isActiveCategory } from '@/features/categories/store';
 import useSuppliers from '@/features/suppliers/store';
+import useSettings from '@/features/settings/store';
+import ImageUpload from '@/features/products/ImageUpload';
 import ConfirmDialog from '@/shared/components/ConfirmDialog';
 import { Button, Field, StatusToggle, inputClass } from '@/shared/components/Form';
 
@@ -19,14 +21,16 @@ const emptyProduct = {
   img: '',
 };
 
-// Form keeps prices as strings while typing; ids come from selects as strings
-const toForm = (p) => ({ ...p, precio: String(p.precio || ''), costo: String(p.costo || '') });
+// Form keeps the price as a string while typing; ids come from selects as strings.
+// costo isn't edited here: it comes from the product's latest purchase
+const toForm = (p) => ({ ...p, precio: String(p.precio || '') });
 const toId = (v) => (v === '' ? null : Number(v));
 
 export default function ProductDetail({ productId, onBack }) {
   const { getById, create, update, remove } = useProducts();
   const { items: categories } = useCategories();
   const { items: suppliers } = useSuppliers();
+  const { tallas } = useSettings();
   const existing = productId != null ? getById(productId) : null;
 
   const [form, setForm] = useState(() => toForm(existing ?? { ...emptyProduct, catId: categories[0]?.id ?? null }));
@@ -37,6 +41,11 @@ export default function ProductDetail({ productId, onBack }) {
 
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
   const setId = (k) => (e) => setForm((f) => ({ ...f, [k]: toId(e.target.value) }));
+
+  // Sizes this product has that are no longer configured stay visible so they can be removed
+  const configured = tallas.flatMap((g) => g.valores);
+  const otherSizes = Object.keys(form.stock).filter((s) => !configured.includes(s));
+  const sizeGroups = otherSizes.length ? [...tallas, { nombre: 'Otras', valores: otherSizes }] : tallas;
 
   function toggleSize(s) {
     setForm((f) => {
@@ -63,21 +72,20 @@ export default function ProductDetail({ productId, onBack }) {
     setErrors(next);
     if (Object.keys(next).length > 0) return setTab('general');
 
-    const data = { ...form, name: form.name.trim(), precio: Number(form.precio), costo: Number(form.costo) || 0 };
+    const data = { ...form, name: form.name.trim(), precio: Number(form.precio), costo: existing?.costo ?? 0 };
     if (existing) update(existing.id, data);
     else create(data);
     onBack();
   }
 
   const precio = Number(form.precio) || 0;
-  const costo = Number(form.costo) || 0;
+  const costo = existing?.costo || 0;
   const margin = precio > 0 ? Math.round(((precio - costo) / precio) * 100) : 0;
-  const sizes = Object.keys(form.stock);
+  const sizes = sortSizes(Object.keys(form.stock), tallas);
 
   const tabs = [
     { id: 'general', label: 'Información general' },
     { id: 'inventario', label: 'Inventario por talla' },
-    { id: 'imagen', label: 'Imagen' },
   ];
 
   return (
@@ -112,22 +120,31 @@ export default function ProductDetail({ productId, onBack }) {
             <>
               <div className="bg-white rounded-2xl p-6 border border-brand-150 space-y-4">
                 <h3 className="text-sm font-semibold text-brand-800">Datos del producto</h3>
-                <Field label="Nombre" error={errors.name}>
-                  <input value={form.name} onChange={set('name')} className={inputClass} />
-                </Field>
+                <div className="flex gap-5">
+                  <ImageUpload
+                    value={form.img}
+                    onChange={(img) => setForm((f) => ({ ...f, img }))}
+                    alt={form.name}
+                  />
+                  <div className="flex-1 min-w-0 space-y-4">
+                    <Field label="Nombre" error={errors.name}>
+                      <input value={form.name} onChange={set('name')} className={inputClass} />
+                    </Field>
+                    <Field label="Categoría" error={errors.catId}>
+                      <select value={form.catId ?? ''} onChange={setId('catId')} className={inputClass}>
+                        <option value="">Elegir…</option>
+                        {categories
+                          .filter((c) => isActiveCategory(c) || c.id === form.catId)
+                          .map((c) => (
+                            <option key={c.id} value={c.id}>
+                              {c.name}
+                            </option>
+                          ))}
+                      </select>
+                    </Field>
+                  </div>
+                </div>
                 <div className="grid grid-cols-2 gap-3">
-                  <Field label="Categoría" error={errors.catId}>
-                    <select value={form.catId ?? ''} onChange={setId('catId')} className={inputClass}>
-                      <option value="">Elegir…</option>
-                      {categories
-                        .filter((c) => isActiveCategory(c) || c.id === form.catId)
-                        .map((c) => (
-                          <option key={c.id} value={c.id}>
-                            {c.name}
-                          </option>
-                        ))}
-                    </select>
-                  </Field>
                   <Field label="Proveedor">
                     <select value={form.proveedorId ?? ''} onChange={setId('proveedorId')} className={inputClass}>
                       <option value="">Sin proveedor</option>
@@ -138,23 +155,12 @@ export default function ProductDetail({ productId, onBack }) {
                       ))}
                     </select>
                   </Field>
-                </div>
-                <div className="grid grid-cols-2 gap-3">
                   <Field label="Precio de venta" error={errors.precio}>
                     <input
                       type="number"
                       min="0"
                       value={form.precio}
                       onChange={set('precio')}
-                      className={`${inputClass} font-mono`}
-                    />
-                  </Field>
-                  <Field label="Precio de costo">
-                    <input
-                      type="number"
-                      min="0"
-                      value={form.costo}
-                      onChange={set('costo')}
                       className={`${inputClass} font-mono`}
                     />
                   </Field>
@@ -173,13 +179,13 @@ export default function ProductDetail({ productId, onBack }) {
               <div className="bg-white rounded-2xl p-6 border border-brand-150">
                 <h3 className="text-sm font-semibold mb-4 text-brand-800">Tallas disponibles</h3>
                 <div className="space-y-2">
-                  {SIZE_GROUPS.map((group) => (
-                    <div key={group[0]} className="flex gap-2 flex-wrap">
-                      {group.map((s) => (
+                  {sizeGroups.map((group) => (
+                    <div key={group.nombre} className="flex gap-2 flex-wrap">
+                      {group.valores.map((s) => (
                         <button
                           key={s}
                           onClick={() => toggleSize(s)}
-                          className={`w-12 h-10 rounded-xl text-sm font-semibold border-2 transition-all ${
+                          className={`min-w-12 px-2 h-10 rounded-xl text-sm font-semibold border-2 transition-all ${
                             s in form.stock
                               ? 'bg-brand-600 border-brand-600 text-white'
                               : 'bg-white border-brand-200 text-brand-600'
@@ -271,21 +277,6 @@ export default function ProductDetail({ productId, onBack }) {
               )}
             </div>
           )}
-
-          {tab === 'imagen' && (
-            <div className="bg-white rounded-2xl p-6 border border-brand-150 space-y-4">
-              <Field label="URL de la imagen">
-                <input value={form.img} onChange={set('img')} placeholder="https://..." className={inputClass} />
-              </Field>
-              <div className="w-64 aspect-square rounded-2xl overflow-hidden bg-brand-50 flex items-center justify-center">
-                {form.img ? (
-                  <img src={form.img} alt={form.name} className="w-full h-full object-cover" />
-                ) : (
-                  <span className="text-xs text-brand-400">Sin imagen</span>
-                )}
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Sidebar */}
@@ -297,10 +288,21 @@ export default function ProductDetail({ productId, onBack }) {
 
           <div className="rounded-2xl p-5 border bg-brand-200 border-brand-400">
             <p className="text-xs font-semibold mb-2 uppercase tracking-wide text-brand-800">Margen de ganancia</p>
-            <p className="text-3xl font-bold text-brand-800">{margin}%</p>
-            <p className="text-xs mt-1 text-brand-600">
-              Costo: ${costo.toLocaleString('es-CO')} → Precio: ${precio.toLocaleString('es-CO')}
-            </p>
+            {costo > 0 ? (
+              <>
+                <p className="text-3xl font-bold text-brand-800">{margin}%</p>
+                <p className="text-xs mt-1 text-brand-600">
+                  Costo (última compra): ${costo.toLocaleString('es-CO')} → Precio: ${precio.toLocaleString('es-CO')}
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="text-3xl font-bold text-brand-800">—</p>
+                <p className="text-xs mt-1 text-brand-600">
+                  Sin compras aún. El costo se toma de la primera compra que registres.
+                </p>
+              </>
+            )}
           </div>
 
           <Button className="w-full py-3" onClick={save}>

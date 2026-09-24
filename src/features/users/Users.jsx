@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { Plus } from 'lucide-react';
-import useUsers, { PERMISSIONS, ROLES } from '@/features/users/store';
+import useUsers, { PERMISSIONS, ROLES, initials } from '@/features/users/store';
 import Modal from '@/shared/components/Modal';
 import ConfirmDialog from '@/shared/components/ConfirmDialog';
 import { Button, CheckboxList, Field, RowActions, StatusToggle, inputClass } from '@/shared/components/Form';
+import usePagination from '@/shared/lib/usePagination';
+import Pagination from '@/shared/components/Pagination';
 
 const rolColors = {
   Administradora: 'bg-brand-800 text-white',
@@ -19,12 +21,6 @@ const emptyUser = {
   estado: 'Activo',
   ultimo: '—',
 };
-const initials = (name) =>
-  name
-    .split(' ')
-    .map((n) => n[0])
-    .join('')
-    .slice(0, 2);
 
 function UserForm({ user, onSave, onClose }) {
   const [form, setForm] = useState(() =>
@@ -97,6 +93,7 @@ export default function Users() {
   const [deleting, setDeleting] = useState(null);
 
   const filtered = users.filter((u) => role === 'Todos' || u.rol === role);
+  const pager = usePagination(filtered, role);
 
   function save(data) {
     if (editing === 'new') create(data);
@@ -137,7 +134,7 @@ export default function Users() {
             </tr>
           </thead>
           <tbody className="divide-y divide-brand-50">
-            {filtered.map((user) => (
+            {pager.pageItems.map((user) => (
               <tr key={user.id} className="transition-colors hover:bg-brand-25">
                 <td className="px-5 py-3.5">
                   <div className="flex items-center gap-3">
@@ -189,6 +186,7 @@ export default function Users() {
           </tbody>
         </table>
         {filtered.length === 0 && <p className="px-5 py-10 text-center text-sm text-brand-400">No hay usuarios.</p>}
+        <Pagination pager={pager} label="usuarios" />
       </div>
 
       {editing && <UserForm user={editing === 'new' ? null : editing} onSave={save} onClose={() => setEditing(null)} />}

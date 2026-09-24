@@ -51,4 +51,19 @@ const useUsers = createCollection('users', [
   },
 ]);
 
+// Signed-in user until login is wired to real accounts
+export const CURRENT_USER_ID = 1;
+
+export function useCurrentUser() {
+  const { items } = useUsers();
+  return items.find((u) => u.id === CURRENT_USER_ID) ?? items[0];
+}
+
+export const initials = (name) =>
+  name
+    .split(' ')
+    .map((n) => n[0])
+    .join('')
+    .slice(0, 2);
+
 export default useUsers;

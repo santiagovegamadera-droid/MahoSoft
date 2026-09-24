@@ -3,15 +3,36 @@ import { Plus } from 'lucide-react';
 import useSuppliers from '@/features/suppliers/store';
 import useCategories from '@/features/categories/store';
 import useProducts from '@/features/products/store';
+import useSettings from '@/features/settings/store';
 import Modal from '@/shared/components/Modal';
 import ConfirmDialog from '@/shared/components/ConfirmDialog';
+import DocumentInput, { defaultDocType, formatDocument } from '@/shared/components/DocumentInput';
 import { Button, CheckboxList, Field, RowActions, StatusToggle, inputClass } from '@/shared/components/Form';
+import usePagination from '@/shared/lib/usePagination';
+import Pagination from '@/shared/components/Pagination';
 
-const emptySupplier = { name: '', contacto: '', email: '', tel: '', ciudad: '', categorias: [], estado: 'Activo' };
+const emptySupplier = {
+  name: '',
+  tipoDocumento: '',
+  documento: '',
+  contacto: '',
+  email: '',
+  tel: '',
+  ciudad: '',
+  categorias: [],
+  estado: 'Activo',
+};
 
-function SupplierForm({ supplier, categories, onSave, onClose }) {
-  const [form, setForm] = useState(supplier ?? emptySupplier);
-  const [error, setError] = useState('');
+function SupplierForm({ supplier, suppliers, categories, onSave, onClose }) {
+  const { tiposDocumento } = useSettings();
+  const initial = supplier ?? emptySupplier;
+  // Suppliers are usually companies, so new ones start on NIT
+  const [form, setForm] = useState({
+    ...emptySupplier,
+    ...initial,
+    tipoDocumento: initial.tipoDocumento || defaultDocType(tiposDocumento, 'NIT'),
+  });
+  const [errors, setErrors] = useState({});
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
 
   // CheckboxList works with names; the store keeps category ids
@@ -20,8 +41,19 @@ function SupplierForm({ supplier, categories, onSave, onClose }) {
 
   function submit(e) {
     e.preventDefault();
-    if (!form.name.trim()) return setError('El nombre es obligatorio');
-    onSave({ ...form, name: form.name.trim() });
+    const documento = form.documento.trim();
+    const errs = {};
+    if (!form.name.trim()) errs.name = 'El nombre es obligatorio';
+    if (!documento) errs.documento = 'El documento es obligatorio';
+    else if (
+      suppliers.some(
+        (s) => s.id !== supplier?.id && s.tipoDocumento === form.tipoDocumento && s.documento === documento,
+      )
+    )
+      errs.documento = 'Ya existe un proveedor con este documento';
+    setErrors(errs);
+    if (Object.keys(errs).length) return;
+    onSave({ ...form, name: form.name.trim(), documento });
   }
 
   return (
@@ -40,8 +72,17 @@ function SupplierForm({ supplier, categories, onSave, onClose }) {
       }
     >
       <form id="supplier-form" onSubmit={submit} className="space-y-4">
-        <Field label="Empresa" error={error}>
+        <Field label="Empresa" error={errors.name}>
           <input value={form.name} onChange={set('name')} className={inputClass} autoFocus />
+        </Field>
+        <Field label="Documento" error={errors.documento} group>
+          <DocumentInput
+            types={tiposDocumento}
+            tipo={form.tipoDocumento}
+            numero={form.documento}
+            onTipoChange={(tipoDocumento) => setForm((f) => ({ ...f, tipoDocumento }))}
+            onNumeroChange={(documento) => setForm((f) => ({ ...f, documento }))}
+          />
         </Field>
         <div className="grid grid-cols-2 gap-3">
           <Field label="Contacto">
@@ -82,6 +123,7 @@ export default function Suppliers() {
   const [deleting, setDeleting] = useState(null);
 
   const productCount = (s) => products.filter((p) => p.proveedorId === s.id).length;
+  const pager = usePagination(suppliers);
 
   function save(data) {
     if (editing === 'new') create(data);
@@ -103,24 +145,11 @@ export default function Suppliers() {
         </Button>
       </div>
 
-      <div className="grid grid-cols-3 gap-4 mb-6">
-        {[
-          { label: 'Total proveedores', val: suppliers.length },
-          { label: 'Activos', val: suppliers.filter((s) => s.estado === 'Activo').length },
-          { label: 'Productos surtidos', val: products.filter((p) => p.proveedorId).length },
-        ].map((k) => (
-          <div key={k.label} className="bg-white rounded-2xl p-5 border border-brand-150">
-            <p className="text-xs uppercase tracking-wide mb-1 text-brand-600">{k.label}</p>
-            <p className="text-2xl font-bold text-brand-800">{k.val}</p>
-          </div>
-        ))}
-      </div>
-
       <div className="bg-white rounded-2xl border overflow-hidden border-brand-150">
         <table className="w-full text-sm">
           <thead>
             <tr className="bg-brand-50">
-              {['Proveedor', 'Contacto', 'Ciudad', 'Categorías', 'Productos', 'Estado', ''].map((h) => (
+              {['Proveedor', 'Documento', 'Contacto', 'Ciudad', 'Categorías', 'Productos', 'Estado', ''].map((h) => (
                 <th
                   key={h}
                   className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-brand-600"
@@ -131,11 +160,14 @@ export default function Suppliers() {
             </tr>
           </thead>
           <tbody className="divide-y divide-brand-50">
-            {suppliers.map((s) => (
+            {pager.pageItems.map((s) => (
               <tr key={s.id} className="transition-colors hover:bg-brand-25">
                 <td className="px-5 py-3.5">
                   <p className="font-semibold text-brand-800">{s.name}</p>
                   <p className="text-xs text-brand-400">{s.email}</p>
+                </td>
+                <td className="px-5 py-3.5 text-xs font-mono text-brand-600">
+                  {formatDocument(s.tipoDocumento, s.documento) || <span className="font-sans text-brand-400">—</span>}
                 </td>
                 <td className="px-5 py-3.5">
                   <p className="text-sm text-brand-800">{s.contacto}</p>
@@ -168,11 +200,13 @@ export default function Suppliers() {
           </tbody>
         </table>
         {suppliers.length === 0 && <p className="px-5 py-10 text-center text-sm text-brand-400">No hay proveedores.</p>}
+        <Pagination pager={pager} label="proveedores" />
       </div>
 
       {editing && (
         <SupplierForm
           supplier={editing === 'new' ? null : editing}
+          suppliers={suppliers}
           categories={categories}
           onSave={save}
           onClose={() => setEditing(null)}
