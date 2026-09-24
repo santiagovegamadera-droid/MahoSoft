@@ -1,8 +1,6 @@
 import createCollection from '@/shared/lib/createCollection';
 import { adjustStock } from '@/features/products/store';
 
-export const PAYMENT_METHODS = ['efectivo', 'tarjeta', 'transferencia'];
-
 // Sample sales have no productId, so they never touch stock
 const useSales = createCollection('sales', [
   {

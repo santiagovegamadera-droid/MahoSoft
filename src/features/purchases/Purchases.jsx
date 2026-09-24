@@ -4,9 +4,14 @@ import useMovements, {
   MOVEMENT_TYPES,
   createMovement,
   movementDelta,
+  registerPurchase,
   removeMovement,
   updateMovement,
+  usePurchases,
 } from '@/features/purchases/store';
+import PurchaseForm from '@/features/purchases/PurchaseForm';
+import PurchaseOrders from '@/features/purchases/PurchaseOrders';
+import useSuppliers from '@/features/suppliers/store';
 import useProducts, { SIZE_GROUPS, totalStock } from '@/features/products/store';
 import useCategories from '@/features/categories/store';
 import Modal from '@/shared/components/Modal';
@@ -130,7 +135,10 @@ export default function Purchases() {
   const { items: movements } = useMovements();
   const { items: products } = useProducts();
   const { items: categories } = useCategories();
-  const [tab, setTab] = useState('stock');
+  const { items: purchases } = usePurchases();
+  const { items: suppliers } = useSuppliers();
+  const [tab, setTab] = useState('compras');
+  const [buying, setBuying] = useState(false);
   const [typeFilter, setTypeFilter] = useState('todos');
   const [editing, setEditing] = useState(null); // null | 'new' | movement
   const [deleting, setDeleting] = useState(null);
@@ -158,6 +166,7 @@ export default function Purchases() {
       <div className="flex items-center justify-between mb-6">
         <div className="flex gap-1 p-1 rounded-xl w-fit bg-brand-50">
           {[
+            ['compras', 'Compras'],
             ['stock', 'Stock actual'],
             ['movimientos', 'Movimientos'],
           ].map(([id, label]) => (
@@ -174,10 +183,25 @@ export default function Purchases() {
             </button>
           ))}
         </div>
-        <Button onClick={() => setEditing('new')} disabled={products.length === 0}>
-          <Plus size={16} /> Registrar movimiento
-        </Button>
+        {tab === 'compras' ? (
+          <Button onClick={() => setBuying(true)} disabled={products.length === 0}>
+            <Plus size={16} /> Nueva compra
+          </Button>
+        ) : (
+          <Button onClick={() => setEditing('new')} disabled={products.length === 0}>
+            <Plus size={16} /> Registrar movimiento
+          </Button>
+        )}
       </div>
+
+      {tab === 'compras' && (
+        <PurchaseOrders
+          purchases={purchases}
+          suppliers={suppliers}
+          products={products}
+          onNew={() => setBuying(true)}
+        />
+      )}
 
       {tab === 'stock' && (
         <>
@@ -348,6 +372,17 @@ export default function Purchases() {
         </div>
       )}
 
+      {buying && (
+        <PurchaseForm
+          products={products}
+          suppliers={suppliers}
+          onClose={() => setBuying(false)}
+          onSave={(data) => {
+            registerPurchase(data);
+            setBuying(false);
+          }}
+        />
+      )}
       {editing && (
         <MovementForm
           movement={editing === 'new' ? null : editing}

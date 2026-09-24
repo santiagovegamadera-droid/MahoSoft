@@ -69,4 +69,53 @@ export function removeMovement(id) {
   useMovements.api.remove(id);
 }
 
+// Supplier purchases; each item became an 'entrada' movement referencing the purchase number.
+// Sample purchases match the sample movements, so they are already in the stock.
+export const usePurchases = createCollection('purchases', [
+  {
+    id: 1,
+    numero: 'OC-2026-044',
+    fecha: '2026-09-21',
+    proveedorId: 4,
+    facturaProveedor: 'LF-10233',
+    notas: '',
+    usuario: 'Jorge Mejía',
+    items: [{ productId: 6, talla: 'XL', cant: 12, costo: 72000 }],
+  },
+  {
+    id: 2,
+    numero: 'OC-2026-045',
+    fecha: '2026-09-23',
+    proveedorId: 1,
+    facturaProveedor: 'TB-8841',
+    notas: 'Llegó completo',
+    usuario: 'Ana Martínez',
+    items: [{ productId: 1, talla: 'M', cant: 20, costo: 45000 }],
+  },
+]);
+
+export const purchaseTotal = (p) => p.items.reduce((s, i) => s + i.cant * i.costo, 0);
+export const purchaseUnits = (p) => p.items.reduce((s, i) => s + i.cant, 0);
+
+/** Saves a purchase with the next OC number and adds its units to stock through entrada movements */
+export function registerPurchase(data) {
+  const last = Math.max(0, ...usePurchases.api.getAll().map((p) => Number(p.numero.split('-').pop())));
+  const purchase = usePurchases.api.create({
+    ...data,
+    numero: `OC-${new Date().getFullYear()}-${String(last + 1).padStart(3, '0')}`,
+  });
+  purchase.items.forEach((i) =>
+    createMovement({
+      fecha: purchase.fecha,
+      tipo: 'entrada',
+      productId: i.productId,
+      talla: i.talla,
+      cant: i.cant,
+      ref: purchase.numero,
+      usuario: purchase.usuario,
+    }),
+  );
+  return purchase;
+}
+
 export default useMovements;
