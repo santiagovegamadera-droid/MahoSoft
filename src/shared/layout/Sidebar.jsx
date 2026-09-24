@@ -17,13 +17,6 @@ import Logo from '@/shared/components/Logo';
 const nav = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, group: 'Principal' },
   {
-    id: 'pos',
-    label: 'Punto de Venta',
-    icon: ShoppingCart,
-    group: 'Operaciones',
-    children: [{ id: 'sales-history', label: 'Historial de ventas', icon: ReceiptText }],
-  },
-  {
     id: 'purchases',
     label: 'Compras',
     icon: ShoppingBasket,
@@ -33,6 +26,13 @@ const nav = [
       { id: 'categories', label: 'Categorías', icon: Tags },
       { id: 'suppliers', label: 'Proveedores', icon: Truck },
     ],
+  },
+  {
+    id: 'pos',
+    label: 'Punto de Venta',
+    icon: ShoppingCart,
+    group: 'Operaciones',
+    children: [{ id: 'sales-history', label: 'Historial de ventas', icon: ReceiptText }],
   },
   { id: 'users', label: 'Usuarios', icon: UserCog, group: 'Relaciones' },
   { id: 'reports', label: 'Reportes', icon: ChartColumn, group: 'Análisis' },
