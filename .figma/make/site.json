@@ -1,5 +1,10 @@
 {
+  "title": "Maho Boutique",
   "description": "Centralized dashboard for managing women's clothing store operations including inventory, sales, products, clients, and reports with user-friendly tools.",
+  "language": "es",
+  "icons": {
+    "icon": "/favicon.png"
+  },
   "robots": {
     "index": false
   },
