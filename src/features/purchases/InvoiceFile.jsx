@@ -1,9 +1,11 @@
 import { useRef, useState } from 'react';
 import { FileText, Paperclip, X } from 'lucide-react';
-import { formatSize } from '@/shared/lib/fileStore';
+import { formatSize } from '@/shared/lib/files';
 
 export const MAX_INVOICE_FILE = 10 * 1024 * 1024;
-const isAccepted = (f) => f.type === 'application/pdf' || f.type.startsWith('image/');
+// Same types the server accepts (it checks the content too)
+const ACCEPTED = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp'];
+const isAccepted = (f) => ACCEPTED.includes(f.type);
 
 /** Drop zone for the supplier's invoice (the PDF from the e-invoice email, or a photo) */
 export default function InvoiceFile({ file, onChange, onError }) {
@@ -12,7 +14,7 @@ export default function InvoiceFile({ file, onChange, onError }) {
 
   function pick(f) {
     if (!f) return;
-    if (!isAccepted(f)) return onError('El documento debe ser un PDF o una imagen');
+    if (!isAccepted(f)) return onError('El documento debe ser un PDF o una imagen JPG, PNG o WebP');
     if (f.size > MAX_INVOICE_FILE) return onError('El documento no puede pesar más de 10 MB');
     onError('');
     onChange(f);
@@ -66,7 +68,7 @@ export default function InvoiceFile({ file, onChange, onError }) {
       <input
         ref={inputRef}
         type="file"
-        accept="application/pdf,image/*"
+        accept={ACCEPTED.join(',')}
         onChange={(e) => {
           pick(e.target.files[0]);
           e.target.value = '';

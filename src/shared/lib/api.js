@@ -51,3 +51,20 @@ export async function api(path, { method = 'GET', body, signal } = {}) {
   }
   return data;
 }
+
+/** Downloads a file with the session token (e.g. an invoice PDF) and returns it as a Blob */
+export async function apiBlob(path) {
+  const token = auth.token();
+  let res;
+  try {
+    res = await fetch(`${API_URL}${path}`, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+  } catch {
+    throw new ApiError('No se pudo conectar con el servidor. Revisa tu conexión e inténtalo de nuevo.', 0);
+  }
+  if (res.status === 401 && token) auth.onUnauthorized();
+  if (!res.ok) {
+    const data = await res.json().catch(() => null);
+    throw new ApiError(data?.detail ?? 'No se pudo descargar el archivo.', res.status);
+  }
+  return res.blob();
+}

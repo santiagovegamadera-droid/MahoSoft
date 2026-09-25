@@ -17,7 +17,7 @@ Frontend: este repositorio. Backend: repositorio `backend` (.NET 9 + SQL Server)
 
 ## 1. Conectar cada módulo a la API
 
-Hoy el **login**, las **categorías**, la **configuración**, los **proveedores** y los **productos** usan la base de datos. Todo lo demás sigue guardándose en el navegador (`store.js` de cada módulo).
+Hoy el **login**, las **categorías**, la **configuración**, los **proveedores**, los **productos** y las **compras** usan la base de datos. Todo lo demás sigue guardándose en el navegador (`store.js` de cada módulo).
 Para cada módulo: endpoints en el backend (con su permiso) y reemplazar su `store.js` por llamadas a la API, con mensajes de carga y de error.
 
 - [x] **Categorías**: listar, crear, editar, activar/desactivar; no eliminar si tiene productos.
@@ -31,13 +31,14 @@ Para cada módulo: endpoints en el backend (con su permiso) y reemplazar su `sto
 - [x] **Proveedores**
   - [x] CRUD con IVA que cobra; bloquear la eliminación si tiene compras (ofrecer desactivar).
   - [x] **"Categorías que surte" calculadas desde las compras** (decidido). Ya no se marcan a mano.
-> **Mientras Compras y Ventas sigan en el navegador:** registrar una compra o una venta **no cambia el stock ni el costo** de los productos (que ya están en la base). `adjustStock` y `setPurchaseCost` en `products/store.js` quedaron vacíos a propósito; se borran al conectar esos módulos.
+> **Mientras Ventas siga en el navegador:** registrar o anular una venta **no cambia el stock** de los productos (que ya están en la base). `adjustStock` en `products/store.js` quedó vacío a propósito; se borra al conectar Ventas.
 
-- [ ] **Compras**
-  - [ ] Registrar la compra: calcular los totales en el servidor, sumar el stock con movimientos de entrada y actualizar el costo del producto (sin IVA).
-  - [ ] Guardar el **PDF de la factura en el disco del servidor** (definir la carpeta en la configuración y validar tipo y tamaño en el servidor).
-  - [ ] No permitir registrar dos veces la misma factura del proveedor (la base de datos ya lo impide).
-  - [ ] Marcar como pagada; indicador "Por pagar".
+- [x] **Compras**
+  - [x] Registrar la compra: calcular los totales en el servidor, sumar el stock con movimientos de entrada y actualizar el costo del producto (sin IVA).
+  - [x] Guardar el **PDF de la factura en el disco del servidor** (carpeta en `Archivos:Carpeta`; tipo y tamaño validados en el servidor).
+  - [x] No permitir registrar dos veces la misma factura del proveedor.
+  - [x] Marcar como pagada; indicador "Por pagar".
+  - [ ] En producción, poner `Archivos:Carpeta` en un disco con **copia de seguridad** (las facturas no están en la base de datos).
 - [ ] **Ventas / Punto de venta**
   - [ ] Registrar la venta: número de factura consecutivo sin repetirse aunque dos cajas vendan a la vez, descontar el stock y guardar el costo del momento.
   - [ ] **Clientes**: buscar por documento o teléfono para no volver a escribir sus datos.

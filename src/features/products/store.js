@@ -39,10 +39,9 @@ export function uploadProductImage(file) {
 
 export const totalStock = (p) => Object.values(p.stock).reduce((a, b) => a + b, 0);
 
-// Stock and cost now change on the server only (adjustments here, and purchases and sales once they are
-// connected), so the sales and purchases still kept in the browser no longer touch them.
-// TODO: remove both when Compras and Ventas save through the API.
+// Stock changes on the server only (adjustments here, purchases, and sales once they are connected), so the
+// sales still kept in the browser no longer touch it.
+// TODO: remove when Ventas saves through the API.
 export function adjustStock() {}
-export function setPurchaseCost() {}
 
 export default useProducts;

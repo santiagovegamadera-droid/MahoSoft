@@ -5,6 +5,7 @@ import {
   Building2,
   CheckCircle2,
   FileText,
+  Loader2,
   Plus,
   ShoppingBag,
   Store,
@@ -14,8 +15,8 @@ import ProductSearch from '@/features/purchases/ProductSearch';
 import InvoiceFile from '@/features/purchases/InvoiceFile';
 import { DOCUMENT_TYPES, IVA_RATES, PAYMENT_TERMS, ivaLabel, purchaseTotals } from '@/features/purchases/store';
 import useSettings from '@/features/settings/store';
-import { useCurrentUser } from '@/features/users/store';
 import { formatDocument } from '@/shared/components/DocumentInput';
+import { ErrorAlert } from '@/shared/components/Feedback';
 import { Button, Field, inputClass } from '@/shared/components/Form';
 import { SegmentedTabs } from '@/shared/components/Toolbar';
 
@@ -64,7 +65,6 @@ function Detail({ label, value }) {
 }
 
 export default function PurchaseForm({ products, suppliers, onSave, onClose }) {
-  const user = useCurrentUser();
   const business = useSettings();
   const activeSuppliers = suppliers.filter((s) => s.activo);
   const [form, setForm] = useState({
@@ -76,9 +76,9 @@ export default function PurchaseForm({ products, suppliers, onSave, onClose }) {
     cufe: '',
     tipoComprobante: DOCUMENT_TYPES[0],
     valorComprobante: '',
-    condicionPago: 'contado',
+    condicionPago: 'Contado',
     vence: '',
-    estadoPago: 'pagada',
+    estadoPago: 'Pagada',
     // Starts on what the supplier usually charges; each invoice can still say otherwise
     iva: activeSuppliers[0]?.ivaPorcentaje ?? 0,
     ivaIncluido: false,
@@ -88,6 +88,7 @@ export default function PurchaseForm({ products, suppliers, onSave, onClose }) {
   const [lines, setLines] = useState([newLine(products[0])]);
   const [file, setFile] = useState(null);
   const [error, setError] = useState('');
+  const [saving, setSaving] = useState(false);
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
   const productOf = (id) => products.find((p) => p.id === id);
   const supplier = suppliers.find((s) => s.id === Number(form.proveedorId));
@@ -106,7 +107,7 @@ export default function PurchaseForm({ products, suppliers, onSave, onClose }) {
     iva: Number(form.iva),
     ivaIncluido: form.ivaIncluido,
     descuento: Number(form.descuento) || 0,
-    items: lines.map((l) => ({ cant: Number(l.cant) || 0, costo: Number(l.costo) || 0 })),
+    items: lines.map((l) => ({ cant: Number(l.cant) || 0, precio: Number(l.costo) || 0 })),
   };
   const totals = purchaseTotals(draft);
   // Compare with the "Valor" printed on the invoice / e-invoice email
@@ -115,41 +116,54 @@ export default function PurchaseForm({ products, suppliers, onSave, onClose }) {
   // Line total as the invoice prints it: with IVA
   const lineTotal = (l) => (Number(l.cant) || 0) * (Number(l.costo) || 0) * (form.ivaIncluido ? 1 : 1 + rate);
 
-  function submit(e) {
+  // Quick checks here; the server validates everything again and computes the totals
+  async function submit(e) {
     e.preventDefault();
     if (!form.proveedorId) return setError('Elige un proveedor');
     if (!form.facturaProveedor.trim()) return setError('Escribe el número de la factura del proveedor');
     const items = lines.map((l) => ({
-      ref: l.ref.trim(),
-      productId: l.productId,
+      productoId: l.productId,
       talla: l.talla,
-      cant: Number(l.cant),
-      costo: Number(l.costo),
+      referenciaProveedor: l.ref.trim(),
+      cantidad: Number(l.cant),
+      precioUnitario: Number(l.costo),
     }));
-    if (items.some((i) => !i.productId || !i.talla)) return setError('Cada línea necesita producto y talla');
-    if (items.some((i) => !Number.isInteger(i.cant) || i.cant <= 0))
+    if (items.some((i) => !i.productoId || !i.talla)) return setError('Cada línea necesita producto y talla');
+    if (items.some((i) => !Number.isInteger(i.cantidad) || i.cantidad <= 0))
       return setError('Las cantidades deben ser números enteros mayores a 0');
-    if (lines.some((l) => l.costo === '') || items.some((i) => !(i.costo >= 0)))
+    if (lines.some((l) => l.costo === '') || items.some((i) => !(i.precioUnitario >= 0)))
       return setError('Ingresa el precio unitario de cada línea');
     if (!(draft.descuento >= 0)) return setError('El descuento no puede ser negativo');
-    if (form.condicionPago === 'credito' && !form.vence) return setError('Indica cuándo vence el crédito');
-    onSave(
-      {
-        ...form,
-        proveedorId: Number(form.proveedorId),
-        facturaProveedor: form.facturaProveedor.trim(),
-        vendedorProveedor: form.vendedorProveedor.trim(),
-        cufe: form.cufe.trim(),
-        vence: form.condicionPago === 'credito' ? form.vence : '',
-        iva: draft.iva,
-        descuento: draft.descuento,
-        valorComprobante: valor,
-        notas: form.notas.trim(),
-        usuario: user.name,
-        items,
-      },
-      file,
-    );
+    if (form.condicionPago === 'Credito' && !form.vence) return setError('Indica cuándo vence el crédito');
+
+    setError('');
+    setSaving(true);
+    try {
+      await onSave(
+        {
+          proveedorId: Number(form.proveedorId),
+          tipoComprobante: form.tipoComprobante,
+          numeroComprobante: form.facturaProveedor.trim(),
+          fecha: form.fecha,
+          hora: form.hora,
+          vendedorProveedor: form.vendedorProveedor.trim(),
+          cufe: form.cufe.trim(),
+          condicionPago: form.condicionPago,
+          fechaVencimiento: form.condicionPago === 'Credito' ? form.vence : null,
+          estadoPago: form.estadoPago,
+          ivaPorcentaje: draft.iva,
+          preciosIncluyenIva: form.ivaIncluido,
+          descuento: draft.descuento,
+          valorComprobante: valor || null,
+          notas: form.notas.trim(),
+          items,
+        },
+        file,
+      );
+    } catch (err) {
+      setError(err.message);
+      setSaving(false);
+    }
   }
 
   return (
@@ -256,14 +270,14 @@ export default function PurchaseForm({ products, suppliers, onSave, onClose }) {
                   setForm((f) => ({
                     ...f,
                     condicionPago,
-                    estadoPago: condicionPago === 'credito' ? 'pendiente' : 'pagada',
+                    estadoPago: condicionPago === 'Credito' ? 'Pendiente' : 'Pagada',
                   }))
                 }
                 label="Condición de pago"
                 options={Object.entries(PAYMENT_TERMS)}
               />
             </Field>
-            {form.condicionPago === 'credito' ? (
+            {form.condicionPago === 'Credito' ? (
               <Field label="Vence" className="col-span-3">
                 <input type="date" value={form.vence} onChange={set('vence')} className={inputClass} />
               </Field>
@@ -444,7 +458,7 @@ export default function PurchaseForm({ products, suppliers, onSave, onClose }) {
               className={`${inputClass} resize-none`}
             />
           </Field>
-          {error && <p className="text-sm text-danger">{error}</p>}
+          <ErrorAlert message={error} />
         </div>
 
         <section className="bg-white rounded-2xl border border-brand-150 p-5 space-y-2 text-sm">
@@ -512,8 +526,8 @@ export default function PurchaseForm({ products, suppliers, onSave, onClose }) {
               onChange={(estadoPago) => setForm((f) => ({ ...f, estadoPago }))}
               label="Estado del pago"
               options={[
-                ['pagada', 'Pagada'],
-                ['pendiente', 'Pendiente'],
+                ['Pagada', 'Pagada'],
+                ['Pendiente', 'Pendiente'],
               ]}
             />
           </div>
@@ -521,8 +535,9 @@ export default function PurchaseForm({ products, suppliers, onSave, onClose }) {
             <Button variant="secondary" onClick={onClose} className="flex-1">
               Cancelar
             </Button>
-            <Button type="submit" className="flex-1">
-              Registrar compra
+            <Button type="submit" className="flex-1" disabled={saving}>
+              {saving && <Loader2 size={16} className="animate-spin" />}
+              {saving ? 'Registrando…' : 'Registrar compra'}
             </Button>
           </div>
         </section>

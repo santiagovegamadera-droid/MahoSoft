@@ -6,6 +6,7 @@ import { api } from '@/shared/lib/api';
  * Each screen that mounts the hook refreshes the list, so changes made elsewhere show up.
  * create/update/remove call the API and keep the list in sync; they throw ApiError with the
  * server's message so the screen can show it. `sort` keeps the list in the API's order after a change.
+ * `put` adds or replaces a record returned by some other endpoint (e.g. registering with a file).
  */
 export default function createApiStore(path, { sort } = {}) {
   let state = { items: [], loaded: false, loading: false, error: '' };
@@ -40,6 +41,11 @@ export default function createApiStore(path, { sort } = {}) {
       setItems(state.items.map((i) => (i.id === id ? item : i)));
       return item;
     },
+    put(item) {
+      const exists = state.items.some((i) => i.id === item.id);
+      setItems(exists ? state.items.map((i) => (i.id === item.id ? item : i)) : [...state.items, item]);
+      return item;
+    },
     async remove(id) {
       await api(`${path}/${id}`, { method: 'DELETE' });
       setItems(state.items.filter((i) => i.id !== id));
@@ -52,11 +58,13 @@ export default function createApiStore(path, { sort } = {}) {
   };
   const getSnapshot = () => state;
 
-  return function useApiStore() {
+  function useApiStore() {
     const current = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
     useEffect(() => {
       load();
     }, []);
     return { ...current, ...actions };
-  };
+  }
+  // The actions also work outside components, e.g. usePurchases.put(item)
+  return Object.assign(useApiStore, actions);
 }
