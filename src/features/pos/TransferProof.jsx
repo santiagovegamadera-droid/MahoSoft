@@ -24,11 +24,11 @@ export default function TransferProof({ value, onChange }) {
   const pick = (f) => f && onChange({ ...value, file: f });
   const set = (k) => (e) => onChange({ ...value, [k]: e.target.value });
   const fieldClass =
-    'min-w-0 px-2 py-1.5 rounded-md border text-[11px] outline-none bg-white border-brand-150 text-brand-800 placeholder:text-brand-400 focus:border-brand-600';
+    'min-w-0 px-2 py-1.5 rounded-md border text-xs outline-none bg-white border-brand-150 text-brand-800 placeholder:text-subtle focus:border-brand-600';
 
   return (
     <div className="p-2.5 rounded-xl border space-y-2 border-brand-150 bg-white">
-      <p className="text-[11px] font-semibold text-brand-600">Comprobante de transferencia</p>
+      <p className="text-xs font-semibold text-brand-600">Comprobante de transferencia</p>
 
       {file ? (
         <div className="flex items-center gap-2 p-1.5 rounded-lg border border-brand-100 bg-brand-25">
@@ -40,12 +40,12 @@ export default function TransferProof({ value, onChange }) {
             </div>
           )}
           <div className="min-w-0 flex-1">
-            <p className="text-[11px] font-semibold truncate text-brand-800">{file.name}</p>
-            <p className="text-[10px] text-brand-400">{kb(file.size)}</p>
+            <p className="text-xs font-semibold truncate text-brand-800">{file.name}</p>
+            <p className="text-xs text-subtle">{kb(file.size)}</p>
           </div>
           <button
             onClick={() => onChange({ ...value, file: null })}
-            className="p-1 rounded-md text-brand-400 hover:text-danger hover:bg-danger-soft"
+            className="p-1 rounded-md text-subtle hover:text-danger hover:bg-danger-soft"
             aria-label="Quitar comprobante"
           >
             <X size={13} />
@@ -65,7 +65,7 @@ export default function TransferProof({ value, onChange }) {
             setDragging(false);
             pick(e.dataTransfer.files[0]);
           }}
-          className={`w-full flex items-center justify-center gap-1.5 py-2.5 rounded-lg border border-dashed text-[11px] font-semibold transition-colors ${
+          className={`w-full flex items-center justify-center gap-1.5 py-2.5 rounded-lg border border-dashed text-xs font-semibold transition-colors ${
             dragging
               ? 'border-brand-600 bg-brand-50 text-brand-800'
               : 'border-brand-200 text-brand-600 hover:border-brand-400 hover:bg-brand-25'
@@ -86,7 +86,7 @@ export default function TransferProof({ value, onChange }) {
         className="hidden"
       />
 
-      <div className="grid grid-cols-2 gap-1.5">
+      <div className="grid grid-cols-[3fr_2fr] gap-1.5">
         <select value={value.banco} onChange={set('banco')} className={fieldClass} aria-label="Banco">
           <option value="">Banco / billetera</option>
           {bancos.map((b) => (
@@ -96,13 +96,13 @@ export default function TransferProof({ value, onChange }) {
         <input
           value={value.referencia}
           onChange={set('referencia')}
-          placeholder="N.º referencia"
+          placeholder="Referencia"
           className={fieldClass}
           aria-label="Número de referencia"
         />
       </div>
 
-      {!file && <p className="text-[10px] text-warning">Sin comprobante, la venta quedará pendiente de verificar</p>}
+      {!file && <p className="text-xs text-warning">Sin comprobante, la venta quedará pendiente de verificar</p>}
     </div>
   );
 }

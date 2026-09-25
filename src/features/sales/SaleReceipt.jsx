@@ -21,7 +21,7 @@ function Info({ label, value, className = '' }) {
   if (!value) return null;
   return (
     <div className={className}>
-      <p className="text-[10px] uppercase tracking-wider text-brand-400">{label}</p>
+      <p className="text-[10px] uppercase tracking-wider text-subtle">{label}</p>
       <p className="text-xs font-medium text-brand-800 wrap-break-word">{value}</p>
     </div>
   );
@@ -53,7 +53,7 @@ export default function SaleReceipt({ sale }) {
           </div>
         </div>
         <div className="text-right shrink-0">
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-brand-400">Comprobante de venta</p>
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-subtle">Comprobante de venta</p>
           <p className="text-lg font-bold font-mono">{sale.factura}</p>
           <p className="text-[11px] text-brand-600">{fmtDateTime(sale.fecha)}</p>
           {sale.tipo === 'pedido' && (
@@ -109,7 +109,7 @@ export default function SaleReceipt({ sale }) {
       {/* Items */}
       <table className="w-full mt-4 text-xs">
         <thead>
-          <tr className="text-[10px] uppercase tracking-wider text-left text-brand-400 border-b border-brand-150">
+          <tr className="text-[10px] uppercase tracking-wider text-left text-subtle border-b border-brand-150">
             <th className="py-2 font-semibold">Producto</th>
             <th className="py-2 font-semibold text-center">Talla</th>
             <th className="py-2 font-semibold text-center">Cant.</th>
@@ -156,7 +156,7 @@ export default function SaleReceipt({ sale }) {
         </div>
       </div>
 
-      <p className="mt-6 pt-3 border-t border-brand-100 text-center text-[10px] text-brand-400">
+      <p className="mt-6 pt-3 border-t border-brand-100 text-center text-[10px] text-subtle">
         {business.mensajeRecibo}
       </p>
     </div>

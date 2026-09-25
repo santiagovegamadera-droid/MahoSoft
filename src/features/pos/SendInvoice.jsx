@@ -21,7 +21,7 @@ export default function SendInvoice({ factura, email: initialEmail = '', sendNow
         <Loader2 size={18} className="shrink-0 animate-spin text-brand-600" />
         <div className="min-w-0">
           <p className="text-xs font-semibold text-brand-800">Enviando factura...</p>
-          <p className="text-[11px] truncate text-brand-400">{email}</p>
+          <p className="text-xs truncate text-subtle">{email}</p>
         </div>
       </div>
     );
@@ -33,9 +33,9 @@ export default function SendInvoice({ factura, email: initialEmail = '', sendNow
         <CheckCircle2 size={18} className="shrink-0 text-success" />
         <div className="min-w-0 flex-1">
           <p className="text-xs font-semibold text-success">Factura #{factura} enviada</p>
-          <p className="text-[11px] truncate text-brand-600">{email}</p>
+          <p className="text-xs truncate text-brand-600">{email}</p>
         </div>
-        <button onClick={() => setStatus('idle')} className="text-[11px] font-semibold text-brand-600 hover:text-brand-800">
+        <button onClick={() => setStatus('idle')} className="text-xs font-semibold text-brand-600 hover:text-brand-800">
           Cambiar
         </button>
       </div>
@@ -60,7 +60,7 @@ export default function SendInvoice({ factura, email: initialEmail = '', sendNow
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="correo@cliente.com"
-          className="flex-1 min-w-0 px-2.5 py-1.5 rounded-lg border text-xs outline-none bg-white border-brand-150 text-brand-800 placeholder:text-brand-400 focus:border-brand-600"
+          className="flex-1 min-w-0 px-2.5 py-1.5 rounded-lg border text-xs outline-none bg-white border-brand-150 text-brand-800 placeholder:text-subtle focus:border-brand-600"
           aria-label="Correo del cliente"
         />
         <button

@@ -19,8 +19,8 @@ export default function Pagination({ pager, label = 'registros' }) {
   if (total === 0) return null;
 
   return (
-    <div className="flex items-center justify-between gap-3 px-5 py-3 border-t border-brand-50">
-      <p className="text-xs text-brand-400">
+    <div className="flex items-center justify-between gap-3 px-4 py-2.5 border-t border-brand-50">
+      <p className="text-xs text-subtle">
         Mostrando {start + 1}–{Math.min(start + pageSize, total)} de {total} {label}
       </p>
       {pageCount > 1 && (
@@ -30,7 +30,7 @@ export default function Pagination({ pager, label = 'registros' }) {
           </button>
           {pageList(page, pageCount).map((p, i) =>
             p === null ? (
-              <span key={`gap-${i}`} className="w-7 text-center text-xs text-brand-400">
+              <span key={`gap-${i}`} className="w-7 text-center text-xs text-subtle">
                 …
               </span>
             ) : (

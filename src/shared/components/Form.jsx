@@ -1,14 +1,14 @@
 import { Pencil, Trash2 } from 'lucide-react';
 
 export const inputClass =
-  'w-full px-4 py-2.5 rounded-xl border text-sm outline-none bg-white border-brand-200 text-brand-800 focus:border-brand-600 focus:ring-3 focus:ring-brand-600/15';
+  'w-full px-3 py-2 rounded-xl border text-sm outline-none bg-white border-brand-200 text-brand-800 focus:border-brand-600 focus:ring-3 focus:ring-brand-600/15';
 
 // Use group for fields holding several controls (checkbox lists), which can't live inside a <label>
 export function Field({ label, error, children, className = '', group = false }) {
   const Tag = group ? 'div' : 'label';
   return (
     <Tag className={`block ${className}`}>
-      <span className="block text-xs font-semibold mb-1.5 uppercase tracking-wide text-brand-800">{label}</span>
+      <span className="block text-xs font-semibold mb-1 uppercase tracking-wide text-brand-800">{label}</span>
       {children}
       {error && <span className="block mt-1 text-xs text-danger">{error}</span>}
     </Tag>
@@ -43,13 +43,21 @@ const buttonVariants = {
   secondary: 'border border-brand-200 text-brand-600 hover:bg-brand-50',
   soft: 'bg-brand-200 text-brand-800 hover:bg-brand-400',
   danger: 'bg-danger text-white hover:brightness-110',
+  dangerGhost: 'text-danger hover:bg-danger-soft',
 };
 
-export function Button({ variant = 'primary', className = '', ...props }) {
+// Pick a size instead of overriding padding through className: conflicting utilities don't reliably win
+const buttonSizes = {
+  md: 'gap-2 px-3.5 py-2 rounded-xl text-sm',
+  sm: 'gap-1.5 px-3 py-1.5 rounded-lg text-xs',
+  lg: 'gap-2 px-4 py-2.5 rounded-xl text-sm',
+};
+
+export function Button({ variant = 'primary', size = 'md', className = '', ...props }) {
   return (
     <button
       type="button"
-      className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-40 ${buttonVariants[variant]} ${className}`}
+      className={`flex items-center justify-center font-semibold transition-all disabled:opacity-40 ${buttonSizes[size]} ${buttonVariants[variant]} ${className}`}
       {...props}
     />
   );

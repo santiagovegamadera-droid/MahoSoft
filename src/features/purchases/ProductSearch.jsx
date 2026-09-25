@@ -57,7 +57,7 @@ export default function ProductSearch({ products, value, onChange, className }) 
 
   return (
     <div className="relative">
-      <Search size={13} className="absolute left-2 top-1/2 -translate-y-1/2 text-brand-400 pointer-events-none" />
+      <Search size={13} className="absolute left-2 top-1/2 -translate-y-1/2 text-subtle pointer-events-none" />
       <input
         ref={inputRef}
         value={open ? query : (selected?.name ?? '')}
@@ -98,7 +98,7 @@ export default function ProductSearch({ products, value, onChange, className }) 
               {p.name}
             </li>
           ))}
-          {results.length === 0 && <li className="px-3 py-2 text-xs text-brand-400">Sin resultados</li>}
+          {results.length === 0 && <li className="px-3 py-2 text-xs text-subtle">Sin resultados</li>}
         </ul>
       )}
     </div>

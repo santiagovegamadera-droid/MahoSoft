@@ -62,7 +62,7 @@ export default function CustomerModal({ isOrder, customer, delivery, onSave, onC
         }}
         className="space-y-5"
       >
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-[3fr_2fr] gap-3">
           <Field label="Nombre" error={touched && errors.nombre} className="col-span-2">
             <input value={c.nombre} onChange={setCustomer('nombre')} className={inputClass} autoFocus />
           </Field>

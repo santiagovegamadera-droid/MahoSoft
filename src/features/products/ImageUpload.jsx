@@ -86,9 +86,9 @@ export default function ImageUpload({ value, onChange, alt }) {
             onClick={() => inputRef.current.click()}
             className="w-full h-full flex flex-col items-center justify-center gap-1.5 px-3 text-center text-brand-600 hover:bg-brand-25"
           >
-            <ImagePlus size={26} strokeWidth={1.5} className="text-brand-400" />
+            <ImagePlus size={26} strokeWidth={1.5} className="text-subtle" />
             <span className="text-xs font-semibold">Subir imagen</span>
-            <span className="text-[10px] text-brand-400">o arrástrala aquí</span>
+            <span className="text-xs text-subtle">o arrástrala aquí</span>
           </button>
         )}
       </div>

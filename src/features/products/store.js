@@ -9,13 +9,12 @@ export function sortSizes(sizes, groups) {
 
 const img = (id) => `https://images.unsplash.com/photo-${id}?w=300&h=300&fit=crop&auto=format`;
 
-// catId / proveedorId reference the other stores; stock maps each size to units
+// catId references the categories store; stock maps each size to units. Suppliers come from purchases
 const useProducts = createCollection('products', [
   {
     id: 1,
     name: 'Vestido Floral Verano',
     catId: 1,
-    proveedorId: 1,
     precio: 89900,
     costo: 45000,
     descripcion: 'Vestido floral de verano en tela fresca y liviana.',
@@ -28,7 +27,6 @@ const useProducts = createCollection('products', [
     id: 2,
     name: 'Blusa Seda Negra',
     catId: 2,
-    proveedorId: 2,
     precio: 65000,
     costo: 30000,
     descripcion: 'Blusa de seda con caída suave.',
@@ -41,7 +39,6 @@ const useProducts = createCollection('products', [
     id: 3,
     name: 'Jean Skinny Azul',
     catId: 3,
-    proveedorId: 3,
     precio: 119000,
     costo: 60000,
     descripcion: 'Jean tiro alto con elasticidad.',
@@ -54,7 +51,6 @@ const useProducts = createCollection('products', [
     id: 4,
     name: 'Falda Plisada Beige',
     catId: 4,
-    proveedorId: 1,
     precio: 75000,
     costo: 35000,
     descripcion: 'Falda midi plisada.',
@@ -67,7 +63,6 @@ const useProducts = createCollection('products', [
     id: 5,
     name: 'Conjunto Lino Blanco',
     catId: 5,
-    proveedorId: 4,
     precio: 185000,
     costo: 90000,
     descripcion: 'Conjunto de dos piezas en lino.',
@@ -80,7 +75,6 @@ const useProducts = createCollection('products', [
     id: 6,
     name: 'Cardigan Tejido Crema',
     catId: 6,
-    proveedorId: 5,
     precio: 145000,
     costo: 70000,
     descripcion: 'Cardigan tejido de punto grueso.',
@@ -93,7 +87,6 @@ const useProducts = createCollection('products', [
     id: 7,
     name: 'Top Crop Lentejuelas',
     catId: 7,
-    proveedorId: 6,
     precio: 98000,
     costo: 45000,
     descripcion: 'Top corto con lentejuelas para la noche.',
@@ -106,7 +99,6 @@ const useProducts = createCollection('products', [
     id: 8,
     name: 'Pantalón Palazzo Rojo',
     catId: 3,
-    proveedorId: 2,
     precio: 109000,
     costo: 52000,
     descripcion: 'Pantalón palazzo de pierna ancha.',

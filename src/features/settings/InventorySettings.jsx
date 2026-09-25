@@ -24,7 +24,7 @@ export default function InventorySettings({ form, update, errors }) {
           onChange={set('stockBajoProducto')}
           className={`${inputClass} font-mono`}
         />
-        <span className="block mt-1 text-xs text-brand-400">Se usa en Productos y en el Punto de Venta.</span>
+        <span className="block mt-1 text-xs text-subtle">Se usa en Productos y en el punto de venta.</span>
       </Field>
       <Field label="Stock bajo por talla (unidades)" error={errors.stockBajoTalla}>
         <input
@@ -34,7 +34,7 @@ export default function InventorySettings({ form, update, errors }) {
           onChange={set('stockBajoTalla')}
           className={`${inputClass} font-mono`}
         />
-        <span className="block mt-1 text-xs text-brand-400">Se usa en Productos → Stock actual.</span>
+        <span className="block mt-1 text-xs text-subtle">Se usa en Productos → Stock actual.</span>
       </Field>
     </div>
   );

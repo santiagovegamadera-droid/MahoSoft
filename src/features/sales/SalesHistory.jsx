@@ -6,12 +6,18 @@ import useSales, { voidSale } from '@/features/sales/store';
 import ConfirmDialog from '@/shared/components/ConfirmDialog';
 import usePagination from '@/shared/lib/usePagination';
 import Pagination from '@/shared/components/Pagination';
+import StatCard from '@/shared/components/StatCard';
+import { Button } from '@/shared/components/Form';
+import { ClickableRow, EmptyState, Table, TableCard } from '@/shared/components/Table';
+import { FilterSelect, SearchInput, Toolbar } from '@/shared/components/Toolbar';
 
 const paymentIcons = { efectivo: Banknote, tarjeta: CreditCard, transferencia: Landmark };
 
 const fmt = (n) => `$${n.toLocaleString('es-CO')}`;
 const fmtDate = (iso) =>
   new Date(iso).toLocaleString('es-CO', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+const fmtDay = (iso) => new Date(iso).toLocaleDateString('es-CO', { day: '2-digit', month: 'short' });
+const fmtTime = (iso) => new Date(iso).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
 const isToday = (iso) => new Date(iso).toDateString() === new Date().toDateString();
 
 export default function SalesHistory() {
@@ -40,102 +46,67 @@ export default function SalesHistory() {
   const todayTotal = today.reduce((sum, s) => sum + s.total, 0);
 
   return (
-    <div className="p-5 space-y-4">
-      {/* KPIs */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        {[
-          { label: 'Ventas de hoy', value: today.length },
-          { label: 'Vendido hoy', value: fmt(todayTotal) },
-          { label: 'Ventas registradas', value: rows.length },
-        ].map((k) => (
-          <div key={k.label} className="bg-white rounded-xl px-4 py-3 border border-brand-150">
-            <p className="text-[10px] font-medium uppercase tracking-wide mb-1 text-brand-600">{k.label}</p>
-            <p className="text-lg font-bold text-brand-800">{k.value}</p>
-          </div>
-        ))}
+    <div className="p-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+        <StatCard label="Ventas de hoy" value={today.length} />
+        <StatCard label="Vendido hoy" value={fmt(todayTotal)} />
+        <StatCard label="Ventas registradas" value={rows.length} />
       </div>
 
-      <div className="flex gap-4 items-start">
-        <div className="flex-1 min-w-0">
-          {/* Filters */}
-          <div className="flex items-center gap-2 mb-3">
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Buscar por factura o cliente..."
-              className="px-3 py-1.5 text-xs rounded-lg border outline-none border-brand-200 bg-white text-brand-800 w-56 focus:border-brand-600"
-            />
-            <select
-              value={payment}
-              onChange={(e) => setPayment(e.target.value)}
-              className="px-2.5 py-1.5 text-xs rounded-lg border outline-none border-brand-200 bg-white text-brand-800"
-            >
-              <option value="todos">Todos los pagos</option>
-              <option value="efectivo">Efectivo</option>
-              <option value="tarjeta">Tarjeta</option>
-              <option value="transferencia">Transferencia</option>
-            </select>
-          </div>
+      <Toolbar>
+        <SearchInput value={search} onChange={setSearch} placeholder="Buscar por factura o cliente..." />
+        <FilterSelect
+          value={payment}
+          onChange={setPayment}
+          label="Método de pago"
+          options={[
+            ['todos', 'Todos los pagos'],
+            ['efectivo', 'Efectivo'],
+            ['tarjeta', 'Tarjeta'],
+            ['transferencia', 'Transferencia'],
+          ]}
+        />
+      </Toolbar>
 
-          {/* Table */}
-          <div className="bg-white rounded-xl border overflow-hidden border-brand-150">
-            <table className="w-full text-xs">
-              <thead>
-                <tr className="bg-brand-50">
-                  {['Factura', 'Fecha', 'Cliente', 'Prendas', 'Pago', 'Total'].map((h) => (
-                    <th
-                      key={h}
-                      className="px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wide text-brand-600"
-                    >
-                      {h}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-brand-50">
-                {pager.pageItems.map((s) => {
-                  const PayIcon = paymentIcons[s.pago];
-                  return (
-                    <tr
-                      key={s.id}
-                      onClick={() => setSelectedId(s.id)}
-                      className={`cursor-pointer transition-colors hover:bg-brand-25 ${
-                        selectedId === s.id ? 'bg-brand-25' : ''
-                      }`}
-                    >
-                      <td className="px-3 py-2 font-mono text-[11px] font-semibold text-brand-800">{s.factura}</td>
-                      <td className="px-3 py-2 text-[11px] text-brand-600">{fmtDate(s.fecha)}</td>
-                      <td className="px-3 py-2 text-brand-800">{s.cliente}</td>
-                      <td className="px-3 py-2 text-brand-600">{s.items.reduce((n, i) => n + i.qty, 0)}</td>
-                      <td className="px-3 py-2">
-                        <span className="inline-flex items-center gap-1 text-[11px] capitalize text-brand-600">
-                          <PayIcon size={12} />
-                          {s.pago}
-                        </span>
-                      </td>
-                      <td className="px-3 py-2 font-mono font-semibold text-brand-800">{fmt(s.total)}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-            {filtered.length === 0 && (
-              <p className="px-4 py-8 text-center text-xs text-brand-400">
-                No hay ventas que coincidan con la búsqueda.
-              </p>
-            )}
-            <Pagination pager={pager} label="ventas" />
-          </div>
-        </div>
+      <div className="flex gap-4 items-start">
+        <TableCard className="flex-1 min-w-0">
+          <Table columns={['Factura', 'Fecha', 'Cliente', 'Prendas', 'Pago', 'Total']}>
+            {pager.pageItems.map((s) => {
+              const PayIcon = paymentIcons[s.pago];
+              return (
+                <ClickableRow key={s.id} onOpen={() => setSelectedId(s.id)} selected={selectedId === s.id}>
+                  <td className="px-4 py-2.5 whitespace-nowrap font-mono font-semibold text-brand-800">{s.factura}</td>
+                  <td className="px-4 py-2.5 whitespace-nowrap">
+                    <p className="text-brand-800">{fmtDay(s.fecha)}</p>
+                    <p className="text-xs text-subtle">{fmtTime(s.fecha)}</p>
+                  </td>
+                  <td className="px-4 py-2.5 text-brand-800">{s.cliente}</td>
+                  <td className="px-4 py-2.5 text-brand-600">{s.items.reduce((n, i) => n + i.qty, 0)}</td>
+                  <td className="px-4 py-2.5">
+                    <span className="inline-flex items-center gap-1.5 capitalize text-brand-600">
+                      <PayIcon size={14} />
+                      {s.pago}
+                    </span>
+                  </td>
+                  <td className="px-4 py-2.5 whitespace-nowrap font-mono font-semibold text-brand-800">{fmt(s.total)}</td>
+                </ClickableRow>
+              );
+            })}
+          </Table>
+          {filtered.length === 0 && (
+            <EmptyState icon={ReceiptText} message="No hay ventas que coincidan con la búsqueda." />
+          )}
+          <Pagination pager={pager} label="ventas" />
+        </TableCard>
 
         {/* Detail */}
-        <div className="w-64 shrink-0 bg-white rounded-xl border border-brand-150">
+        <div className="w-64 shrink-0 bg-white rounded-2xl border border-brand-150">
           {selected ? (
             <>
-              <div className="p-3 border-b border-brand-50">
-                <p className="font-mono text-xs font-semibold text-brand-800">{selected.factura}</p>
-                <p className="text-[11px] mt-0.5 text-brand-400">{fmtDate(selected.fecha)}</p>
-                <div className="mt-2 space-y-0.5 text-[11px] text-brand-600">
+              <div className="p-4 border-b border-brand-50">
+                <p className="font-mono text-sm font-semibold text-brand-800">{selected.factura}</p>
+                <p className="text-xs mt-0.5 text-subtle">{fmtDate(selected.fecha)}</p>
+                <div className="mt-2 space-y-0.5 text-xs text-brand-600">
                   <p>
                     Cliente: <span className="font-medium text-brand-800">{selected.cliente}</span>
                   </p>
@@ -147,17 +118,17 @@ export default function SalesHistory() {
                   </p>
                 </div>
               </div>
-              <div className="p-3 space-y-1.5 border-b border-brand-50">
+              <div className="p-4 space-y-1.5 border-b border-brand-50">
                 {selected.items.map((i) => (
-                  <div key={i.name + i.talla} className="flex justify-between gap-2 text-[11px]">
+                  <div key={i.name + i.talla} className="flex justify-between gap-2 text-xs">
                     <span className="text-brand-800">
-                      {i.qty} × {i.name} <span className="text-brand-400">· {i.talla}</span>
+                      {i.qty} × {i.name} <span className="text-subtle">· {i.talla}</span>
                     </span>
                     <span className="font-mono text-brand-800">{fmt(i.price * i.qty)}</span>
                   </div>
                 ))}
               </div>
-              <div className="p-3 space-y-1.5 text-[11px]">
+              <div className="p-4 space-y-1.5 text-xs">
                 <div className="flex justify-between text-brand-600">
                   <span>Subtotal</span>
                   <span className="font-mono">{fmt(selected.subtotal)}</span>
@@ -178,25 +149,18 @@ export default function SalesHistory() {
                   <span>Total</span>
                   <span className="font-mono">{fmt(selected.total)}</span>
                 </div>
-                <button
-                  onClick={() => setReceipt(selected)}
-                  className="w-full mt-2 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-semibold bg-brand-200 text-brand-800 hover:bg-brand-400"
-                >
-                  <FileText size={13} /> Ver comprobante
-                </button>
-                <button
-                  onClick={() => setVoiding(selected)}
-                  className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-semibold text-danger hover:bg-danger-soft"
-                >
-                  <Ban size={13} /> Anular venta
-                </button>
+                <div className="pt-2 space-y-1">
+                  <Button variant="soft" onClick={() => setReceipt(selected)} className="w-full">
+                    <FileText size={16} /> Ver comprobante
+                  </Button>
+                  <Button variant="dangerGhost" onClick={() => setVoiding(selected)} className="w-full">
+                    <Ban size={16} /> Anular venta
+                  </Button>
+                </div>
               </div>
             </>
           ) : (
-            <div className="p-6 text-center">
-              <ReceiptText size={26} strokeWidth={1.5} className="mx-auto mb-2 text-brand-200" />
-              <p className="text-xs text-brand-400">Selecciona una venta para ver el detalle</p>
-            </div>
+            <EmptyState icon={ReceiptText} message="Selecciona una venta para ver el detalle" />
           )}
         </div>
       </div>

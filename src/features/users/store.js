@@ -1,4 +1,5 @@
 import createCollection from '@/shared/lib/createCollection';
+import { useSession } from '@/features/auth/session';
 
 export const ROLES = ['Administradora', 'Vendedora', 'Bodega'];
 export const PERMISSIONS = ['Dashboard', 'POS', 'Compras', 'Proveedores', 'Usuarios', 'Reportes'];
@@ -51,12 +52,17 @@ const useUsers = createCollection('users', [
   },
 ]);
 
-// Signed-in user until login is wired to real accounts
-export const CURRENT_USER_ID = 1;
-
+/**
+ * The signed-in user. Identity, role and permissions come from the API session; the rest (phone,
+ * document…) still comes from the local record until the Usuarios module moves to the API.
+ */
 export function useCurrentUser() {
+  const session = useSession();
   const { items } = useUsers();
-  return items.find((u) => u.id === CURRENT_USER_ID) ?? items[0];
+  if (!session) return null;
+  const { id, nombre, email, rol, permisos } = session.usuario;
+  const local = items.find((u) => u.id === id);
+  return { ...local, id, name: nombre, email, rol, permisos };
 }
 
 export const initials = (name) =>

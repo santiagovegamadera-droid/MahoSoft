@@ -1,15 +1,31 @@
 import { useState } from 'react';
-import { ArrowRight, Eye, EyeOff, Heart, Lock, Mail } from 'lucide-react';
+import { AlertCircle, ArrowRight, Eye, EyeOff, Heart, Info, Loader2, Lock, Mail } from 'lucide-react';
+import { login } from '@/features/auth/session';
 import Logo from '@/shared/components/Logo';
 import fondo from '@/assets/public/fondo.png';
 import logoSrc from '@/assets/public/logo.png';
 
-export default function Login({ onLogin }) {
+export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [remember, setRemember] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [info, setInfo] = useState('');
 
-  function handleSubmit(e) {
+  // On success the session changes and the app replaces this screen
+  async function handleSubmit(e) {
     e.preventDefault();
-    onLogin();
+    setError('');
+    setInfo('');
+    setLoading(true);
+    try {
+      await login(email.trim(), password, remember);
+    } catch (err) {
+      setError(err.message);
+      setLoading(false);
+    }
   }
 
   return (
@@ -78,7 +94,12 @@ export default function Login({ onLogin }) {
                 <input
                   id="login-email"
                   type="email"
-                  defaultValue="admin@mahoboutique.co"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  autoComplete="username"
+                  placeholder="tu@correo.com"
+                  required
+                  autoFocus
                   className="w-full py-[clamp(8px,1.4vh,12px)] text-sm outline-none bg-transparent"
                 />
               </div>
@@ -96,7 +117,10 @@ export default function Login({ onLogin }) {
                 <input
                   id="login-password"
                   type={showPassword ? 'text' : 'password'}
-                  defaultValue="maho2026"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  autoComplete="current-password"
+                  required
                   className="w-full py-[clamp(8px,1.4vh,12px)] text-sm outline-none bg-transparent"
                 />
                 <button
@@ -112,23 +136,57 @@ export default function Login({ onLogin }) {
 
             <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
               <label className="flex items-center gap-2 cursor-pointer text-brand-600">
-                <input type="checkbox" defaultChecked className="w-4 h-4 accent-brand-800" />
+                <input
+                  type="checkbox"
+                  checked={remember}
+                  onChange={(e) => setRemember(e.target.checked)}
+                  className="w-4 h-4 accent-brand-800"
+                />
                 Recordarme
               </label>
               <button
                 type="button"
+                onClick={() => {
+                  setError('');
+                  setInfo('Pídele a la administradora que te asigne una contraseña nueva desde Usuarios.');
+                }}
                 className="font-semibold underline underline-offset-2 text-brand-600 hover:text-brand-800"
               >
                 ¿Olvidaste tu contraseña?
               </button>
             </div>
 
+            {error && (
+              <p
+                role="alert"
+                className="flex items-start gap-2 px-3 py-2.5 rounded-xl text-sm bg-danger-soft text-danger"
+              >
+                <AlertCircle size={17} className="shrink-0 mt-px" />
+                {error}
+              </p>
+            )}
+            {info && (
+              <p className="flex items-start gap-2 px-3 py-2.5 rounded-xl text-sm bg-brand-50 text-brand-800">
+                <Info size={17} className="shrink-0 mt-px text-brand-600" />
+                {info}
+              </p>
+            )}
+
             <button
               type="submit"
-              className="mt-1 w-full py-[clamp(10px,1.6vh,14px)] rounded-xl flex items-center justify-center gap-2 text-base font-semibold text-white transition-all hover:brightness-110 bg-linear-90 from-brand-500 to-brand-700 shadow-[0_6px_20px_rgba(94,47,112,0.35)]"
+              disabled={loading}
+              className="mt-1 w-full disabled:opacity-70 disabled:cursor-wait py-[clamp(10px,1.6vh,14px)] rounded-xl flex items-center justify-center gap-2 text-base font-semibold text-white transition-all hover:brightness-110 bg-linear-90 from-brand-500 to-brand-700 shadow-[0_6px_20px_rgba(94,47,112,0.35)]"
             >
-              Ingresar al sistema
-              <ArrowRight size={18} strokeWidth={1.75} />
+              {loading ? (
+                <>
+                  <Loader2 size={18} strokeWidth={1.75} className="animate-spin" /> Ingresando…
+                </>
+              ) : (
+                <>
+                  Ingresar al sistema
+                  <ArrowRight size={18} strokeWidth={1.75} />
+                </>
+              )}
             </button>
           </form>
         </div>
