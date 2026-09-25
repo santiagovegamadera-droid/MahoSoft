@@ -1,11 +1,13 @@
 import { useState } from 'react';
-import { Plus } from 'lucide-react';
+import { Plus, UserCog } from 'lucide-react';
 import useUsers, { PERMISSIONS, ROLES, initials } from '@/features/users/store';
 import Modal from '@/shared/components/Modal';
 import ConfirmDialog from '@/shared/components/ConfirmDialog';
 import { Button, CheckboxList, Field, RowActions, StatusToggle, inputClass } from '@/shared/components/Form';
 import usePagination from '@/shared/lib/usePagination';
 import Pagination from '@/shared/components/Pagination';
+import { EmptyState, Table, TableCard } from '@/shared/components/Table';
+import { FilterSelect, Toolbar } from '@/shared/components/Toolbar';
 
 const rolColors = {
   Administradora: 'bg-brand-800 text-white',
@@ -102,92 +104,64 @@ export default function Users() {
   }
 
   return (
-    <div className="p-8">
-      <div className="flex justify-between mb-5">
-        <select
-          value={role}
-          onChange={(e) => setRole(e.target.value)}
-          className="px-3 py-2.5 text-sm rounded-xl border outline-none border-brand-200 bg-white text-brand-800"
-        >
-          <option value="Todos">Todos los roles</option>
-          {ROLES.map((r) => (
-            <option key={r}>{r}</option>
-          ))}
-        </select>
-        <Button onClick={() => setEditing('new')}>
+    <div className="p-6">
+      <Toolbar>
+        <FilterSelect value={role} onChange={setRole} label="Rol" options={[['Todos', 'Todos los roles'], ...ROLES]} />
+        <Button onClick={() => setEditing('new')} className="ml-auto">
           <Plus size={16} /> Nuevo usuario
         </Button>
-      </div>
+      </Toolbar>
 
-      <div className="bg-white rounded-2xl border overflow-hidden border-brand-150">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="bg-brand-50">
-              {['Usuario', 'Rol', 'Permisos', 'Último acceso', 'Estado', ''].map((h) => (
-                <th
-                  key={h}
-                  className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-brand-600"
-                >
-                  {h}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-brand-50">
-            {pager.pageItems.map((user) => (
-              <tr key={user.id} className="transition-colors hover:bg-brand-25">
-                <td className="px-5 py-3.5">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 bg-brand-200 text-brand-800">
-                      {initials(user.name)}
-                    </div>
-                    <div>
-                      <p className="font-medium text-brand-800">{user.name}</p>
-                      <p className="text-xs text-brand-400">{user.email}</p>
-                    </div>
+      <TableCard>
+        <Table columns={['Usuario', 'Rol', 'Permisos', 'Último acceso', 'Estado', '']}>
+          {pager.pageItems.map((user) => (
+            <tr key={user.id} className="transition-colors hover:bg-brand-25">
+              <td className="px-4 py-2.5">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 bg-brand-200 text-brand-800">
+                    {initials(user.name)}
                   </div>
-                </td>
-                <td className="px-5 py-3.5">
-                  <span className={`text-xs px-2.5 py-1 rounded-full font-semibold ${rolColors[user.rol]}`}>
-                    {user.rol}
-                  </span>
-                </td>
-                <td className="px-5 py-3.5">
-                  <div className="flex gap-1 flex-wrap">
-                    {PERMISSIONS.every((p) => user.permisos.includes(p)) ? (
-                      <span className="text-[10px] px-1.5 py-0.5 rounded border border-brand-400 text-brand-600">
-                        Todo
+                  <div>
+                    <p className="font-medium text-brand-800">{user.name}</p>
+                    <p className="text-xs text-subtle">{user.email}</p>
+                  </div>
+                </div>
+              </td>
+              <td className="px-4 py-2.5">
+                <span className={`text-xs px-2.5 py-1 rounded-full font-semibold ${rolColors[user.rol]}`}>
+                  {user.rol}
+                </span>
+              </td>
+              <td className="px-4 py-2.5">
+                <div className="flex gap-1 flex-wrap">
+                  {PERMISSIONS.every((p) => user.permisos.includes(p)) ? (
+                    <span className="text-xs px-1.5 py-0.5 rounded border border-brand-400 text-brand-600">Todo</span>
+                  ) : (
+                    PERMISSIONS.filter((p) => user.permisos.includes(p)).map((p) => (
+                      <span key={p} className="text-xs px-1.5 py-0.5 rounded border border-brand-400 text-brand-600">
+                        {p}
                       </span>
-                    ) : (
-                      PERMISSIONS.filter((p) => user.permisos.includes(p)).map((p) => (
-                        <span
-                          key={p}
-                          className="text-[10px] px-1.5 py-0.5 rounded border border-brand-400 text-brand-600"
-                        >
-                          {p}
-                        </span>
-                      ))
-                    )}
-                  </div>
-                </td>
-                <td className="px-5 py-3.5 text-xs font-mono text-brand-600">{user.ultimo}</td>
-                <td className="px-5 py-3.5">
-                  <StatusToggle
-                    value={user.estado}
-                    label={user.name}
-                    onChange={(estado) => update(user.id, { estado })}
-                  />
-                </td>
-                <td className="px-5 py-3.5">
-                  <RowActions label={user.name} onEdit={() => setEditing(user)} onDelete={() => setDeleting(user)} />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        {filtered.length === 0 && <p className="px-5 py-10 text-center text-sm text-brand-400">No hay usuarios.</p>}
+                    ))
+                  )}
+                </div>
+              </td>
+              <td className="px-4 py-2.5 text-xs font-mono text-brand-600">{user.ultimo}</td>
+              <td className="px-4 py-2.5">
+                <StatusToggle
+                  value={user.estado}
+                  label={user.name}
+                  onChange={(estado) => update(user.id, { estado })}
+                />
+              </td>
+              <td className="px-4 py-2.5">
+                <RowActions label={user.name} onEdit={() => setEditing(user)} onDelete={() => setDeleting(user)} />
+              </td>
+            </tr>
+          ))}
+        </Table>
+        {filtered.length === 0 && <EmptyState icon={UserCog} message="No hay usuarios." />}
         <Pagination pager={pager} label="usuarios" />
-      </div>
+      </TableCard>
 
       {editing && <UserForm user={editing === 'new' ? null : editing} onSave={save} onClose={() => setEditing(null)} />}
       {deleting && (

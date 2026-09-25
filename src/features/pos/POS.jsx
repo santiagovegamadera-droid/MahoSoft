@@ -229,7 +229,7 @@ export default function POS() {
 
   if (completed) {
     return (
-      <div className="flex items-center justify-center h-[calc(100vh-73px)] bg-canvas p-6">
+      <div className="flex items-center justify-center h-full bg-canvas p-6">
         <div className="w-full max-w-sm rounded-3xl bg-white border border-brand-150 shadow-xl p-8 text-center">
           <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-5 bg-success-soft text-success">
             <Check size={32} strokeWidth={2.5} />
@@ -237,23 +237,23 @@ export default function POS() {
           <h2 className="text-2xl font-display text-brand-800">
             {completed.tipo === 'pedido' ? 'Pedido registrado' : 'Venta registrada'}
           </h2>
-          <p className="text-xs mt-1 text-brand-400">Factura #{completed.factura}</p>
+          <p className="text-xs mt-1 text-subtle">Factura #{completed.factura}</p>
 
           <div className="my-6 py-4 border-y border-dashed border-brand-200">
-            <p className="text-xs uppercase tracking-wider text-brand-400">Total cobrado</p>
+            <p className="text-xs uppercase tracking-wider text-subtle">Total cobrado</p>
             <p className="text-3xl font-bold mt-1 text-brand-800 font-mono">{fmt(completed.total)}</p>
             <p className="text-xs mt-2 text-brand-600 capitalize">
               {completed.units} {completed.units === 1 ? 'prenda' : 'prendas'} · {completed.pago}
             </p>
             {completed.comprobante &&
               (completed.comprobante.archivo ? (
-                <p className="inline-flex items-center gap-1 mt-2 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-success-soft text-success">
+                <p className="inline-flex items-center gap-1 mt-2 px-2 py-0.5 rounded-full text-xs font-semibold bg-success-soft text-success">
                   <Paperclip size={11} />
                   Comprobante adjunto
                   {completed.comprobante.banco && ` · ${completed.comprobante.banco}`}
                 </p>
               ) : (
-                <p className="inline-flex items-center gap-1 mt-2 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-warning-soft text-warning">
+                <p className="inline-flex items-center gap-1 mt-2 px-2 py-0.5 rounded-full text-xs font-semibold bg-warning-soft text-warning">
                   <CircleAlert size={11} />
                   Transferencia pendiente de verificar
                 </p>
@@ -266,7 +266,7 @@ export default function POS() {
                 <Truck size={14} />
                 Entregar a {completed.cliente}
               </p>
-              <div className="space-y-1 text-[11px] text-brand-600">
+              <div className="space-y-1 text-xs text-brand-600">
                 <p className="flex items-start gap-1.5">
                   <MapPin size={12} className="shrink-0 mt-px" />
                   {fullAddress(completed.entrega)}
@@ -312,24 +312,24 @@ export default function POS() {
   }
 
   return (
-    <div className="flex h-[calc(100vh-73px)] bg-canvas">
+    <div className="flex h-full bg-canvas">
       {/* Products panel */}
       <div className="flex-1 min-w-0 flex flex-col overflow-hidden">
         <div className="px-4 pt-3 pb-3 space-y-2.5 border-b border-brand-150 bg-white">
           <div className="flex gap-2">
             <div className="relative flex-1">
-              <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-400" />
+              <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-subtle" />
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Buscar por nombre, categoría o color..."
-                className="w-full pl-9 pr-9 py-2 rounded-xl border text-xs outline-none transition-colors bg-brand-25 border-brand-150 text-brand-800 placeholder:text-brand-400 focus:bg-white focus:border-brand-600"
+                className="w-full pl-9 pr-9 py-2 rounded-xl border text-xs outline-none transition-colors bg-brand-25 border-brand-150 text-brand-800 placeholder:text-subtle focus:bg-white focus:border-brand-600"
                 aria-label="Buscar producto"
               />
               {query && (
                 <button
                   onClick={() => setQuery('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-md text-brand-400 hover:text-brand-800"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-md text-subtle hover:text-brand-800"
                   aria-label="Limpiar búsqueda"
                 >
                   <X size={14} />
@@ -356,13 +356,13 @@ export default function POS() {
           {showFilters && (
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2 p-3 rounded-xl border border-brand-150 bg-brand-25">
               <div className="flex items-center gap-1.5">
-                <span className="text-[11px] font-semibold text-brand-400">Talla</span>
+                <span className="text-xs font-semibold text-subtle">Talla</span>
                 <div className="flex flex-wrap gap-0.5">
                   {allSizes.map((t) => (
                     <button
                       key={t}
                       onClick={() => setSizeFilter(sizeFilter === t ? '' : t)}
-                      className={`min-w-7 px-1.5 py-1 rounded-md border text-[11px] font-semibold transition-colors ${chipClass(
+                      className={`min-w-7 px-1.5 py-1 rounded-md border text-xs font-semibold transition-colors ${chipClass(
                         sizeFilter === t,
                       )}`}
                     >
@@ -373,7 +373,7 @@ export default function POS() {
               </div>
 
               <label className="flex items-center gap-1.5">
-                <span className="text-[11px] font-semibold text-brand-400">Precio</span>
+                <span className="text-xs font-semibold text-subtle">Precio</span>
                 <select value={priceFilter} onChange={(e) => setPriceFilter(e.target.value)} className={selectClass}>
                   {PRICES.map((r) => (
                     <option key={r.id} value={r.id}>
@@ -384,7 +384,7 @@ export default function POS() {
               </label>
 
               <label className="flex items-center gap-1.5">
-                <span className="text-[11px] font-semibold text-brand-400">Ordenar</span>
+                <span className="text-xs font-semibold text-subtle">Ordenar</span>
                 <select value={sort} onChange={(e) => setSort(e.target.value)} className={selectClass}>
                   {SORTS.map((s) => (
                     <option key={s.id} value={s.id}>
@@ -407,7 +407,7 @@ export default function POS() {
               {activeFilters > 0 && (
                 <button
                   onClick={clearFilters}
-                  className="ml-auto flex items-center gap-1 text-xs font-semibold text-brand-400 hover:text-danger"
+                  className="ml-auto flex items-center gap-1 text-xs font-semibold text-subtle hover:text-danger"
                 >
                   <X size={13} />
                   Limpiar filtros
@@ -428,7 +428,7 @@ export default function POS() {
                 {c}
                 <span
                   className={`min-w-5 px-1 py-px rounded-full text-[10px] ${
-                    catFilter === c ? 'bg-white/20 text-white' : 'bg-brand-50 text-brand-400'
+                    catFilter === c ? 'bg-white/20 text-white' : 'bg-brand-50 text-subtle'
                   }`}
                 >
                   {countIn(c)}
@@ -443,7 +443,7 @@ export default function POS() {
             <div className="flex flex-col items-center justify-center py-20 text-center">
               <Search size={36} strokeWidth={1.5} className="mb-3 text-brand-200" />
               <p className="text-sm font-semibold text-brand-600">No hay productos que coincidan</p>
-              <p className="text-xs mt-1 text-brand-400">Prueba con otro nombre, categoría o filtro</p>
+              <p className="text-xs mt-1 text-subtle">Prueba con otro nombre, categoría o filtro</p>
               {(query || activeFilters > 0 || catFilter !== 'Todos') && (
                 <button
                   onClick={showAll}
@@ -455,7 +455,7 @@ export default function POS() {
             </div>
           ) : (
             <>
-              <p className="mb-2 text-[11px] text-brand-400">
+              <p className="mb-2 text-xs text-subtle">
                 {filtered.length} {filtered.length === 1 ? 'producto' : 'productos'}
               </p>
               <div className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-3">
@@ -488,7 +488,7 @@ export default function POS() {
               <ShoppingBag size={15} className="text-brand-800" />
               <h3 className="text-sm font-semibold text-brand-800">Venta actual</h3>
               {units > 0 && (
-                <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-brand-100 text-brand-700">
+                <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-brand-100 text-brand-700">
                   {units}
                 </span>
               )}
@@ -496,7 +496,7 @@ export default function POS() {
             {cart.length > 0 && (
               <button
                 onClick={() => setCart([])}
-                className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold text-brand-400 hover:text-danger hover:bg-danger-soft transition-colors"
+                className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold text-subtle hover:text-danger hover:bg-danger-soft transition-colors"
               >
                 <Trash2 size={13} />
                 Vaciar
@@ -511,7 +511,7 @@ export default function POS() {
                 onClick={() => setSaleType(id)}
                 aria-pressed={saleType === id}
                 className={`flex items-center justify-center gap-1.5 py-1 rounded-md text-xs font-semibold transition-colors ${
-                  saleType === id ? 'bg-white text-brand-800 shadow-sm' : 'text-brand-400 hover:text-brand-600'
+                  saleType === id ? 'bg-white text-brand-800 shadow-sm' : 'text-subtle hover:text-brand-600'
                 }`}
               >
                 <Icon size={13} />
@@ -529,25 +529,25 @@ export default function POS() {
                     {customer.nombre || 'Sin nombre'}
                   </p>
                   {customer.telefono && (
-                    <p className="flex items-center gap-1.5 text-[11px] text-brand-600">
+                    <p className="flex items-center gap-1.5 text-xs text-brand-600">
                       <Phone size={11} className="shrink-0" />
                       {customer.telefono}
                     </p>
                   )}
                   {sendsInvoice && (
-                    <p className="flex items-center gap-1.5 text-[11px] text-brand-600" title="La factura se enviará a este correo">
+                    <p className="flex items-center gap-1.5 text-xs text-brand-600" title="La factura se enviará a este correo">
                       <Mail size={11} className="shrink-0" />
                       <span className="truncate">{customer.correo}</span>
                     </p>
                   )}
                   {isOrder && delivery.direccion && (
-                    <p className="flex items-start gap-1.5 text-[11px] text-brand-600">
+                    <p className="flex items-start gap-1.5 text-xs text-brand-600">
                       <MapPin size={11} className="shrink-0 mt-px" />
                       <span className="line-clamp-2">{fullAddress(delivery)}</span>
                     </p>
                   )}
                   {isOrder && delivery.fecha && (
-                    <p className="flex items-center gap-1.5 text-[11px] capitalize text-brand-600">
+                    <p className="flex items-center gap-1.5 text-xs capitalize text-brand-600">
                       <CalendarDays size={11} className="shrink-0" />
                       {fmtDate(delivery.fecha)}
                     </p>
@@ -555,14 +555,14 @@ export default function POS() {
                 </div>
                 <button
                   onClick={() => setEditingCustomer(true)}
-                  className="shrink-0 p-1 rounded-md text-brand-400 hover:text-brand-800 hover:bg-brand-100"
+                  className="shrink-0 p-1 rounded-md text-subtle hover:text-brand-800 hover:bg-brand-100"
                   aria-label="Editar datos del cliente"
                 >
                   <Pencil size={13} />
                 </button>
               </div>
               {missingDelivery && (
-                <p className="mt-1.5 text-[10px] font-semibold text-warning">Faltan: {missingFields.join(', ')}</p>
+                <p className="mt-1.5 text-xs font-semibold text-warning">Faltan: {missingFields.join(', ')}</p>
               )}
             </div>
           ) : (
@@ -587,7 +587,7 @@ export default function POS() {
                 <ShoppingBag size={28} strokeWidth={1.5} />
               </div>
               <p className="text-sm font-semibold text-brand-600">El carrito está vacío</p>
-              <p className="text-xs mt-1 text-brand-400">Toca un producto o una talla para agregarlo</p>
+              <p className="text-xs mt-1 text-subtle">Toca un producto o una talla para agregarlo</p>
             </div>
           ) : (
             cart.map((item) => (
@@ -610,13 +610,13 @@ export default function POS() {
         {/* Summary */}
         <div className="p-4 space-y-3 border-t border-brand-100 bg-brand-25">
           <div>
-            <p className="text-[11px] font-semibold mb-1.5 text-brand-600">Descuento</p>
+            <p className="text-xs font-semibold mb-1.5 text-brand-600">Descuento</p>
             <div className="grid grid-cols-6 gap-1">
               {descuentos.map((d) => (
                 <button
                   key={d}
                   onClick={() => setDiscount(d)}
-                  className={`py-1 rounded-md text-[11px] font-semibold border transition-colors ${chipClass(
+                  className={`py-1 rounded-md text-xs font-semibold border transition-colors ${chipClass(
                     discount === d,
                   )}`}
                 >
@@ -654,10 +654,10 @@ export default function POS() {
               <button
                 key={id}
                 onClick={() => setPayment(id)}
-                className={`flex flex-col items-center gap-0.5 py-1.5 rounded-lg text-[10px] font-semibold border transition-colors ${
+                className={`flex flex-col items-center gap-0.5 py-1.5 rounded-lg text-[11px] font-semibold border transition-colors ${
                   payment === id
                     ? 'bg-brand-100 border-brand-600 text-brand-800'
-                    : 'bg-white border-brand-150 text-brand-400 hover:border-brand-300'
+                    : 'bg-white border-brand-150 text-subtle hover:border-brand-300'
                 }`}
               >
                 <Icon size={15} />

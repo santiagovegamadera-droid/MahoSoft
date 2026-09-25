@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { Plus } from 'lucide-react';
+import { Plus, Truck } from 'lucide-react';
 import useSuppliers from '@/features/suppliers/store';
 import useCategories from '@/features/categories/store';
-import useProducts from '@/features/products/store';
+import { IVA_RATES, productsOfSupplier, usePurchases } from '@/features/purchases/store';
 import useSettings from '@/features/settings/store';
 import Modal from '@/shared/components/Modal';
 import ConfirmDialog from '@/shared/components/ConfirmDialog';
@@ -10,6 +10,8 @@ import DocumentInput, { defaultDocType, formatDocument } from '@/shared/componen
 import { Button, CheckboxList, Field, RowActions, StatusToggle, inputClass } from '@/shared/components/Form';
 import usePagination from '@/shared/lib/usePagination';
 import Pagination from '@/shared/components/Pagination';
+import { EmptyState, Table, TableCard } from '@/shared/components/Table';
+import { SegmentedTabs, Toolbar } from '@/shared/components/Toolbar';
 
 const emptySupplier = {
   name: '',
@@ -18,10 +20,14 @@ const emptySupplier = {
   contacto: '',
   email: '',
   tel: '',
+  direccion: '',
   ciudad: '',
+  iva: 0, // rate it usually charges; purchases start from it
   categorias: [],
   estado: 'Activo',
 };
+
+const supplierIvaLabel = (rate) => (rate ? `Cobra IVA ${rate}%` : 'No cobra IVA');
 
 function SupplierForm({ supplier, suppliers, categories, onSave, onClose }) {
   const { tiposDocumento } = useSettings();
@@ -71,35 +77,62 @@ function SupplierForm({ supplier, suppliers, categories, onSave, onClose }) {
         </>
       }
     >
-      <form id="supplier-form" onSubmit={submit} className="space-y-4">
-        <Field label="Empresa" error={errors.name}>
-          <input value={form.name} onChange={set('name')} className={inputClass} autoFocus />
-        </Field>
-        <Field label="Documento" error={errors.documento} group>
-          <DocumentInput
-            types={tiposDocumento}
-            tipo={form.tipoDocumento}
-            numero={form.documento}
-            onTipoChange={(tipoDocumento) => setForm((f) => ({ ...f, tipoDocumento }))}
-            onNumeroChange={(documento) => setForm((f) => ({ ...f, documento }))}
-          />
-        </Field>
-        <div className="grid grid-cols-2 gap-3">
-          <Field label="Contacto">
+      <form id="supplier-form" onSubmit={submit} className="space-y-5">
+        {/* Same data a supplier prints at the top of its invoice */}
+        <fieldset className="space-y-3">
+          <legend className="mb-2 text-sm font-semibold text-brand-800">Datos de la empresa</legend>
+          <Field label="Nombre o razón social" error={errors.name}>
+            <input value={form.name} onChange={set('name')} className={inputClass} autoFocus />
+          </Field>
+          <Field label="Documento" error={errors.documento} group>
+            <DocumentInput
+              types={tiposDocumento}
+              tipo={form.tipoDocumento}
+              numero={form.documento}
+              onTipoChange={(tipoDocumento) => setForm((f) => ({ ...f, tipoDocumento }))}
+              onNumeroChange={(documento) => setForm((f) => ({ ...f, documento }))}
+            />
+          </Field>
+          <Field label="IVA que cobra" group>
+            <SegmentedTabs
+              value={String(form.iva ?? 0)}
+              onChange={(v) => setForm((f) => ({ ...f, iva: Number(v) }))}
+              label="IVA que cobra"
+              options={IVA_RATES.map((r) => [String(r), r ? `${r}%` : 'No cobra IVA'])}
+            />
+            <span className="block mt-1 text-xs text-subtle">
+              Se usa por defecto al registrar sus compras; cada factura se puede cambiar.
+            </span>
+          </Field>
+          <div className="grid grid-cols-[3fr_2fr] gap-3">
+            <Field label="Dirección">
+              <input
+                value={form.direccion}
+                onChange={set('direccion')}
+                placeholder="Calle, número, local"
+                className={inputClass}
+              />
+            </Field>
+            <Field label="Ciudad">
+              <input value={form.ciudad} onChange={set('ciudad')} className={inputClass} />
+            </Field>
+          </div>
+        </fieldset>
+
+        <fieldset className="space-y-3">
+          <legend className="mb-2 text-sm font-semibold text-brand-800">Contacto</legend>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Teléfono">
+              <input value={form.tel} onChange={set('tel')} inputMode="tel" className={inputClass} />
+            </Field>
+            <Field label="Email">
+              <input type="email" value={form.email} onChange={set('email')} className={inputClass} />
+            </Field>
+          </div>
+          <Field label="Persona de contacto / vendedor">
             <input value={form.contacto} onChange={set('contacto')} className={inputClass} />
           </Field>
-          <Field label="Teléfono">
-            <input value={form.tel} onChange={set('tel')} className={inputClass} />
-          </Field>
-        </div>
-        <div className="grid grid-cols-2 gap-3">
-          <Field label="Email">
-            <input type="email" value={form.email} onChange={set('email')} className={inputClass} />
-          </Field>
-          <Field label="Ciudad">
-            <input value={form.ciudad} onChange={set('ciudad')} className={inputClass} />
-          </Field>
-        </div>
+        </fieldset>
         <Field label="Categorías que surte" group>
           <CheckboxList
             options={categories.map((c) => c.name)}
@@ -118,11 +151,13 @@ function SupplierForm({ supplier, suppliers, categories, onSave, onClose }) {
 export default function Suppliers() {
   const { items: suppliers, create, update, remove } = useSuppliers();
   const { items: categories } = useCategories();
-  const { items: products, update: updateProduct } = useProducts();
+  const { items: purchases } = usePurchases();
   const [editing, setEditing] = useState(null); // null | 'new' | supplier
   const [deleting, setDeleting] = useState(null);
 
-  const productCount = (s) => products.filter((p) => p.proveedorId === s.id).length;
+  // Products a supplier provides are the ones bought from it in Compras
+  const productCount = (s) => productsOfSupplier(purchases, s.id).length;
+  const purchaseCount = (s) => purchases.filter((p) => p.proveedorId === s.id).length;
   const pager = usePagination(suppliers);
 
   function save(data) {
@@ -131,77 +166,70 @@ export default function Suppliers() {
     setEditing(null);
   }
 
-  function confirmDelete() {
-    products.filter((p) => p.proveedorId === deleting.id).forEach((p) => updateProduct(p.id, { proveedorId: null }));
-    remove(deleting.id);
+  // A supplier with purchases can't be removed: its invoices would lose who issued them
+  const blocked = deleting && purchaseCount(deleting) > 0;
+  function deactivate() {
+    update(deleting.id, { estado: 'Inactivo' });
     setDeleting(null);
   }
 
   return (
-    <div className="p-8">
-      <div className="flex justify-end items-center mb-5">
-        <Button onClick={() => setEditing('new')}>
+    <div className="p-6">
+      <Toolbar>
+        <Button onClick={() => setEditing('new')} className="ml-auto">
           <Plus size={16} /> Nuevo proveedor
         </Button>
-      </div>
+      </Toolbar>
 
-      <div className="bg-white rounded-2xl border overflow-hidden border-brand-150">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="bg-brand-50">
-              {['Proveedor', 'Documento', 'Contacto', 'Ciudad', 'Categorías', 'Productos', 'Estado', ''].map((h) => (
-                <th
-                  key={h}
-                  className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-brand-600"
-                >
-                  {h}
-                </th>
-              ))}
+      <TableCard>
+        <Table columns={['Proveedor', 'Documento', 'Contacto', 'Ubicación', 'Categorías', 'Productos', 'Estado', '']}>
+          {pager.pageItems.map((s) => (
+            <tr key={s.id} className="transition-colors hover:bg-brand-25">
+              <td className="px-4 py-2.5">
+                <p className="font-semibold text-brand-800">{s.name}</p>
+                <p className="text-xs text-subtle">{s.email}</p>
+              </td>
+              <td className="px-4 py-2.5 whitespace-nowrap">
+                <p className="text-xs font-mono text-brand-600">
+                  {formatDocument(s.tipoDocumento, s.documento) || <span className="font-sans text-subtle">—</span>}
+                </p>
+                <p className="text-xs text-subtle">{supplierIvaLabel(s.iva)}</p>
+              </td>
+              <td className="px-4 py-2.5">
+                <p className="text-sm text-brand-800">{s.contacto}</p>
+                <p className="text-xs text-subtle">{s.tel}</p>
+              </td>
+              <td className="px-4 py-2.5">
+                <p className="text-xs text-brand-800">{s.ciudad || '—'}</p>
+                {s.direccion && <p className="text-xs text-subtle">{s.direccion}</p>}
+              </td>
+              <td className="px-4 py-2.5">
+                <div className="flex flex-wrap gap-1">
+                  {s.categorias.map((id) => {
+                    const cat = categories.find((c) => c.id === id);
+                    return (
+                      cat && (
+                        <span key={id} className="text-xs px-1.5 py-0.5 rounded bg-brand-200 text-brand-800">
+                          {cat.name}
+                        </span>
+                      )
+                    );
+                  })}
+                </div>
+              </td>
+              <td className="px-4 py-2.5 font-semibold text-brand-800">{productCount(s)}</td>
+              <td className="px-4 py-2.5">
+                <StatusToggle value={s.estado} label={s.name} onChange={(estado) => update(s.id, { estado })} />
+              </td>
+              <td className="px-4 py-2.5">
+                <RowActions label={s.name} onEdit={() => setEditing(s)} onDelete={() => setDeleting(s)} />
+              </td>
             </tr>
-          </thead>
-          <tbody className="divide-y divide-brand-50">
-            {pager.pageItems.map((s) => (
-              <tr key={s.id} className="transition-colors hover:bg-brand-25">
-                <td className="px-5 py-3.5">
-                  <p className="font-semibold text-brand-800">{s.name}</p>
-                  <p className="text-xs text-brand-400">{s.email}</p>
-                </td>
-                <td className="px-5 py-3.5 text-xs font-mono text-brand-600">
-                  {formatDocument(s.tipoDocumento, s.documento) || <span className="font-sans text-brand-400">—</span>}
-                </td>
-                <td className="px-5 py-3.5">
-                  <p className="text-sm text-brand-800">{s.contacto}</p>
-                  <p className="text-xs text-brand-400">{s.tel}</p>
-                </td>
-                <td className="px-5 py-3.5 text-xs text-brand-600">{s.ciudad}</td>
-                <td className="px-5 py-3.5">
-                  <div className="flex flex-wrap gap-1">
-                    {s.categorias.map((id) => {
-                      const cat = categories.find((c) => c.id === id);
-                      return (
-                        cat && (
-                          <span key={id} className="text-[10px] px-1.5 py-0.5 rounded bg-brand-200 text-brand-800">
-                            {cat.name}
-                          </span>
-                        )
-                      );
-                    })}
-                  </div>
-                </td>
-                <td className="px-5 py-3.5 font-semibold text-brand-800">{productCount(s)}</td>
-                <td className="px-5 py-3.5">
-                  <StatusToggle value={s.estado} label={s.name} onChange={(estado) => update(s.id, { estado })} />
-                </td>
-                <td className="px-5 py-3.5">
-                  <RowActions label={s.name} onEdit={() => setEditing(s)} onDelete={() => setDeleting(s)} />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        {suppliers.length === 0 && <p className="px-5 py-10 text-center text-sm text-brand-400">No hay proveedores.</p>}
+          ))}
+        </Table>
+        {suppliers.length === 0 && <EmptyState icon={Truck} message="No hay proveedores." />}
         <Pagination pager={pager} label="proveedores" />
-      </div>
+      </TableCard>
 
       {editing && (
         <SupplierForm
@@ -212,18 +240,37 @@ export default function Suppliers() {
           onClose={() => setEditing(null)}
         />
       )}
-      {deleting && (
-        <ConfirmDialog
-          title="Eliminar proveedor"
-          message={
-            productCount(deleting) > 0
-              ? `¿Eliminar a ${deleting.name}? Sus ${productCount(deleting)} productos quedarán sin proveedor.`
-              : `¿Eliminar a ${deleting.name}?`
-          }
-          onCancel={() => setDeleting(null)}
-          onConfirm={confirmDelete}
-        />
-      )}
+      {deleting &&
+        (blocked ? (
+          <Modal
+            title="No se puede eliminar"
+            onClose={() => setDeleting(null)}
+            footer={
+              <>
+                <Button variant="secondary" onClick={() => setDeleting(null)}>
+                  Cancelar
+                </Button>
+                <Button onClick={deactivate}>Desactivar proveedor</Button>
+              </>
+            }
+          >
+            <p className="text-sm text-brand-600">
+              {deleting.name} tiene {purchaseCount(deleting)}{' '}
+              {purchaseCount(deleting) === 1 ? 'compra registrada' : 'compras registradas'}. Si lo eliminas, esas
+              facturas quedarían sin proveedor. Puedes desactivarlo para que ya no aparezca al registrar compras.
+            </p>
+          </Modal>
+        ) : (
+          <ConfirmDialog
+            title="Eliminar proveedor"
+            message={`¿Eliminar a ${deleting.name}?`}
+            onCancel={() => setDeleting(null)}
+            onConfirm={() => {
+              remove(deleting.id);
+              setDeleting(null);
+            }}
+          />
+        ))}
     </div>
   );
 }

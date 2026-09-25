@@ -25,12 +25,14 @@
   --color-brand-50: #f5f0f7;
   --color-brand-25: #faf7fc;
   --color-canvas: #f8f5fa;
+  /* Secondary text: muted lilac grey with at least 4.5:1 contrast on white and canvas */
+  --color-subtle: #7d6b85;
   --color-orchid: #f2c8f7;
 
   --color-success: #1a7a45;
   --color-success-dark: #2d6a4f;
   --color-success-soft: #d1f5e0;
-  --color-warning: #a0640a;
+  --color-warning: #9a6009;
   --color-warning-soft: #fef3e2;
   --color-warning-tint: #fffbf0;
   --color-warning-line: #fde8c0;
@@ -49,9 +51,17 @@ body {
   font-family: var(--font-sans);
 }
 
+/* Keyboard focus in brand color; in the base layer so utilities like outline-none still win */
+@layer base {
+  :focus-visible {
+    outline: 2px solid var(--color-brand-600);
+    outline-offset: 2px;
+  }
+}
+
 * {
   scrollbar-width: thin;
-  scrollbar-color: #b695c0 transparent;
+  scrollbar-color: var(--color-brand-400) transparent;
 }
 
 ::-webkit-scrollbar {
@@ -62,6 +72,6 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #b695c0;
+  background: var(--color-brand-400);
   border-radius: 9999px;
 }

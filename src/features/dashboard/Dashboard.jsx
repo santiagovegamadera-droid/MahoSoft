@@ -11,6 +11,9 @@ import {
   Cell,
 } from 'recharts';
 import { TrendingDown, TrendingUp } from 'lucide-react';
+import chartTheme from '@/shared/lib/chartTheme';
+import StatCard from '@/shared/components/StatCard';
+import { Button } from '@/shared/components/Form';
 
 const salesData = [
   { mes: 'Abr', ventas: 8200000, meta: 9000000 },
@@ -28,8 +31,6 @@ const categoryData = [
   { name: 'Faldas', value: 13 },
   { name: 'Otros', value: 9 },
 ];
-
-const COLORS = ['#503459', '#81638b', '#b695c0', '#dac9df', '#e8dff0'];
 
 const topProducts = [
   {
@@ -83,8 +84,9 @@ const fmt = (n) =>
   }).format(n);
 
 export default function Dashboard() {
+  const chart = chartTheme();
   return (
-    <div className="p-8 space-y-6">
+    <div className="p-6 space-y-5">
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {[
@@ -110,9 +112,7 @@ export default function Dashboard() {
             up: true,
           },
         ].map((card) => (
-          <div key={card.label} className="bg-white rounded-2xl p-5 border border-brand-150">
-            <p className="text-xs font-medium uppercase tracking-wide mb-3 text-brand-600">{card.label}</p>
-            <p className="text-2xl font-bold mb-1 text-brand-800">{card.value}</p>
+          <StatCard key={card.label} label={card.label} value={card.value}>
             <div className="flex items-center gap-1.5">
               <span
                 className={`flex items-center gap-1 text-xs font-semibold px-1.5 py-0.5 rounded ${
@@ -122,27 +122,27 @@ export default function Dashboard() {
                 {card.up ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
                 {card.delta}
               </span>
-              <span className="text-xs text-brand-400">{card.sub}</span>
+              <span className="text-xs text-subtle">{card.sub}</span>
             </div>
-          </div>
+          </StatCard>
         ))}
       </div>
 
       {/* Charts row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Area chart */}
-        <div className="lg:col-span-2 bg-white rounded-2xl p-5 border border-brand-150">
+        <div className="lg:col-span-2 bg-white rounded-2xl p-4 border border-brand-150">
           <div className="flex items-center justify-between mb-5">
             <div>
               <h3 className="text-sm font-semibold text-brand-800">Ingresos vs. Meta</h3>
-              <p className="text-xs text-brand-400">Últimos 6 meses</p>
+              <p className="text-xs text-subtle">Últimos 6 meses</p>
             </div>
             <div className="flex gap-3 text-xs">
               <span className="flex items-center gap-1.5 text-brand-600">
                 <span className="inline-block w-3 h-0.5 rounded bg-brand-600" />
                 Ventas
               </span>
-              <span className="flex items-center gap-1.5 text-brand-200">
+              <span className="flex items-center gap-1.5 text-brand-600">
                 <span className="inline-block w-3 h-0.5 rounded border border-dashed border-brand-400" />
                 Meta
               </span>
@@ -152,39 +152,31 @@ export default function Dashboard() {
             <AreaChart data={salesData}>
               <defs>
                 <linearGradient id="gVentas" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#81638b" stopOpacity={0.25} />
-                  <stop offset="95%" stopColor="#81638b" stopOpacity={0} />
+                  <stop offset="5%" stopColor={chart.primary} stopOpacity={0.25} />
+                  <stop offset="95%" stopColor={chart.primary} stopOpacity={0} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0e8f5" />
-              <XAxis dataKey="mes" tick={{ fontSize: 11, fill: '#b695c0' }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 10, fill: '#b695c0' }} axisLine={false} tickLine={false} tickFormatter={fmt} />
-              <Tooltip
-                formatter={(v) => [`$${fmt(v)}`, '']}
-                contentStyle={{
-                  border: '1px solid #e8dff0',
-                  borderRadius: 10,
-                  fontSize: 12,
-                  color: '#503459',
-                }}
-              />
+              <CartesianGrid strokeDasharray="3 3" stroke={chart.grid} />
+              <XAxis dataKey="mes" tick={chart.tick} axisLine={false} tickLine={false} />
+              <YAxis tick={chart.tick} axisLine={false} tickLine={false} tickFormatter={fmt} />
+              <Tooltip formatter={(v) => [`$${fmt(v)}`, '']} contentStyle={chart.tooltip} />
               <Area
                 type="monotone"
                 dataKey="meta"
-                stroke="#dac9df"
+                stroke={chart.muted}
                 strokeWidth={1.5}
                 strokeDasharray="4 4"
                 fill="none"
               />
-              <Area type="monotone" dataKey="ventas" stroke="#81638b" strokeWidth={2.5} fill="url(#gVentas)" />
+              <Area type="monotone" dataKey="ventas" stroke={chart.primary} strokeWidth={2.5} fill="url(#gVentas)" />
             </AreaChart>
           </ResponsiveContainer>
         </div>
 
         {/* Pie chart */}
-        <div className="bg-white rounded-2xl p-5 border border-brand-150">
+        <div className="bg-white rounded-2xl p-4 border border-brand-150">
           <h3 className="text-sm font-semibold mb-1 text-brand-800">Ventas por categoría</h3>
-          <p className="text-xs mb-4 text-brand-400">Mes actual</p>
+          <p className="text-xs mb-4 text-subtle">Mes actual</p>
           <ResponsiveContainer width="100%" height={140}>
             <PieChart>
               <Pie
@@ -197,24 +189,17 @@ export default function Dashboard() {
                 paddingAngle={2}
               >
                 {categoryData.map((_, i) => (
-                  <Cell key={i} fill={COLORS[i]} />
+                  <Cell key={i} fill={chart.series[i]} />
                 ))}
               </Pie>
-              <Tooltip
-                formatter={(v) => [`${v}%`, '']}
-                contentStyle={{
-                  fontSize: 12,
-                  borderRadius: 8,
-                  border: '1px solid #e8dff0',
-                }}
-              />
+              <Tooltip formatter={(v) => [`${v}%`, '']} contentStyle={chart.tooltip} />
             </PieChart>
           </ResponsiveContainer>
           <div className="space-y-1.5 mt-3">
             {categoryData.map((c, i) => (
               <div key={c.name} className="flex items-center justify-between text-xs">
                 <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-sm" style={{ background: COLORS[i] }} />
+                  <span className="w-2.5 h-2.5 rounded-sm" style={{ background: chart.series[i] }} />
                   <span className="text-brand-800">{c.name}</span>
                 </div>
                 <span className="font-semibold text-brand-600">{c.value}%</span>
@@ -228,13 +213,13 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Top products */}
         <div className="bg-white rounded-2xl border border-brand-150">
-          <div className="px-5 py-4 border-b border-brand-100">
+          <div className="px-4 py-3 border-b border-brand-100">
             <h3 className="text-sm font-semibold text-brand-800">Productos más vendidos</h3>
-            <p className="text-xs text-brand-400">Este mes</p>
+            <p className="text-xs text-subtle">Este mes</p>
           </div>
           <div className="divide-y divide-brand-50">
             {topProducts.map((p, i) => (
-              <div key={p.name} className="flex items-center justify-between px-5 py-3">
+              <div key={p.name} className="flex items-center justify-between px-4 py-2.5">
                 <div className="flex items-center gap-3">
                   <span
                     className={`w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold shrink-0 ${
@@ -245,12 +230,12 @@ export default function Dashboard() {
                   </span>
                   <div>
                     <p className="text-sm font-medium text-brand-800">{p.name}</p>
-                    <p className="text-xs text-brand-400">{p.cat}</p>
+                    <p className="text-xs text-subtle">{p.cat}</p>
                   </div>
                 </div>
                 <div className="text-right">
                   <p className="text-sm font-semibold text-brand-800">{p.ingresos}</p>
-                  <p className="text-xs text-brand-400">{p.ventas} uds.</p>
+                  <p className="text-xs text-subtle">{p.ventas} uds.</p>
                 </div>
                 <span
                   className={`ml-3 text-xs px-2 py-0.5 rounded-full font-medium ${
@@ -261,7 +246,7 @@ export default function Dashboard() {
                         : 'bg-brand-200 text-brand-800'
                   }`}
                 >
-                  {p.stock === 0 ? 'Agotado' : `${p.stock} left`}
+                  {p.stock === 0 ? 'Agotado' : `${p.stock} disp.`}
                 </span>
               </div>
             ))}
@@ -270,16 +255,16 @@ export default function Dashboard() {
 
         {/* Stock alerts */}
         <div className="bg-white rounded-2xl border border-brand-150">
-          <div className="px-5 py-4 border-b flex items-center justify-between border-brand-100">
+          <div className="px-4 py-3 border-b flex items-center justify-between border-brand-100">
             <div>
               <h3 className="text-sm font-semibold text-brand-800">Alertas de stock bajo</h3>
-              <p className="text-xs text-brand-400">Requieren reabastecimiento</p>
+              <p className="text-xs text-subtle">Requieren reabastecimiento</p>
             </div>
             <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-danger-soft text-danger">
               {alerts.length} alertas
             </span>
           </div>
-          <div className="p-5 space-y-3">
+          <div className="p-4 space-y-2.5">
             {alerts.map((a) => (
               <div
                 key={a.product + a.talla}
@@ -289,15 +274,15 @@ export default function Dashboard() {
               >
                 <div>
                   <p className="text-sm font-medium text-brand-800">{a.product}</p>
-                  <p className="text-xs text-brand-400">Talla {a.talla}</p>
+                  <p className="text-xs text-subtle">Talla {a.talla}</p>
                 </div>
                 <div className="text-right">
                   <p className={`text-lg font-bold ${a.stock === 0 ? 'text-danger' : 'text-warning'}`}>{a.stock}</p>
-                  <p className="text-xs text-brand-400">/ mín. {a.min}</p>
+                  <p className="text-xs text-subtle">/ mín. {a.min}</p>
                 </div>
-                <button className="ml-3 text-xs px-3 py-1.5 rounded-lg font-semibold bg-brand-600 text-white">
+                <Button size="sm" className="ml-3">
                   Pedir
-                </button>
+                </Button>
               </div>
             ))}
           </div>

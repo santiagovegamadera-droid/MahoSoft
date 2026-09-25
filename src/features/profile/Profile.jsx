@@ -14,11 +14,11 @@ const profileKeys = ['name', 'email', 'telefono', 'tipoDocumento', 'documento'];
 function Card({ icon: Icon, title, children, className = '' }) {
   return (
     <section className={`bg-white rounded-2xl border border-brand-150 ${className}`}>
-      <div className="flex items-center gap-2 px-6 py-4 border-b border-brand-50">
+      <div className="flex items-center gap-2 px-5 py-3 border-b border-brand-50">
         <Icon size={16} strokeWidth={1.75} className="text-brand-600" />
         <h2 className="text-sm font-semibold text-brand-800">{title}</h2>
       </div>
-      <div className="px-6 py-5">{children}</div>
+      <div className="px-5 py-4">{children}</div>
     </section>
   );
 }
@@ -122,9 +122,9 @@ export default function Profile() {
   const sold = (list) => list.reduce((sum, s) => sum + saleTotals(s).total, 0);
 
   return (
-    <div className="p-8 space-y-6 max-w-5xl">
+    <div className="p-6 space-y-6 max-w-5xl">
       {/* Summary */}
-      <div className="bg-white rounded-2xl border border-brand-150 p-6 flex items-center gap-5">
+      <div className="bg-white rounded-2xl border border-brand-150 p-5 flex items-center gap-4">
         <div className="w-16 h-16 rounded-full flex items-center justify-center text-xl font-bold shrink-0 bg-brand-600 text-white">
           {initials(user.name)}
         </div>

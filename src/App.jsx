@@ -1,7 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Sidebar from '@/shared/layout/Sidebar';
 import Header from '@/shared/layout/Header';
 import Login from '@/features/auth/Login';
+import { logout, refreshUser, useSession } from '@/features/auth/session';
+import { canView, homeView } from '@/features/auth/access';
+import { useCurrentUser } from '@/features/users/store';
 import Dashboard from '@/features/dashboard/Dashboard';
 import Products from '@/features/products/Products';
 import ProductDetail from '@/features/products/ProductDetail';
@@ -16,13 +19,24 @@ import Settings from '@/features/settings/Settings';
 import Profile from '@/features/profile/Profile';
 
 export default function App() {
-  const [authenticated, setAuthenticated] = useState(false);
-  const [view, setView] = useState('dashboard');
+  const session = useSession();
+  if (!session) return <Login />;
+  // Keyed by user so signing in as someone else starts on their own home screen
+  return <Workspace key={session.usuario.id} />;
+}
+
+function Workspace() {
+  const user = useCurrentUser();
+  const [view, setView] = useState(() => homeView(user));
   const [editingProduct, setEditingProduct] = useState(undefined);
 
-  if (!authenticated) {
-    return <Login onLogin={() => setAuthenticated(true)} />;
-  }
+  // Permissions may have changed since the session started; an invalid session signs out on its own
+  useEffect(() => {
+    refreshUser().catch(() => {});
+  }, []);
+
+  // Never show a screen the user lost access to
+  const current = canView(user, view) ? view : homeView(user);
 
   function goToProducts() {
     setView('products');
@@ -36,32 +50,27 @@ export default function App() {
     setEditingProduct(undefined);
     setView('product-detail');
   }
-  function logout() {
-    setAuthenticated(false);
-    setView('dashboard');
-    setEditingProduct(undefined);
-  }
 
   return (
-    <div className="flex min-h-screen bg-canvas">
-      <Sidebar current={view} onChange={setView} onLogout={logout} />
+    <div className="flex h-screen bg-canvas">
+      <Sidebar current={current} onChange={setView} onLogout={logout} />
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <Header current={view} />
-        <main className="flex-1 overflow-y-auto">
-          {view === 'dashboard' && <Dashboard />}
-          {view === 'products' && <Products onEdit={editProduct} onNew={newProduct} />}
-          {view === 'product-detail' && (
+        <Header current={current} />
+        <main className="flex-1 min-h-0 overflow-y-auto">
+          {current === 'dashboard' && <Dashboard />}
+          {current === 'products' && <Products onEdit={editProduct} onNew={newProduct} />}
+          {current === 'product-detail' && (
             <ProductDetail key={editingProduct ?? 'new'} productId={editingProduct} onBack={goToProducts} />
           )}
-          {view === 'purchases' && <Purchases />}
-          {view === 'pos' && <POS />}
-          {view === 'sales-history' && <SalesHistory />}
-          {view === 'suppliers' && <Suppliers />}
-          {view === 'users' && <Users />}
-          {view === 'reports' && <Reports />}
-          {view === 'categories' && <Categories />}
-          {view === 'settings' && <Settings />}
-          {view === 'profile' && <Profile />}
+          {current === 'purchases' && <Purchases />}
+          {current === 'pos' && <POS />}
+          {current === 'sales-history' && <SalesHistory />}
+          {current === 'suppliers' && <Suppliers />}
+          {current === 'users' && <Users />}
+          {current === 'reports' && <Reports />}
+          {current === 'categories' && <Categories />}
+          {current === 'settings' && <Settings />}
+          {current === 'profile' && <Profile />}
         </main>
       </div>
     </div>

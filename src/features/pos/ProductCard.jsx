@@ -1,19 +1,6 @@
-import { useState } from 'react';
-import { Plus, Shirt } from 'lucide-react';
+import ProductImage from '@/shared/components/ProductImage';
+import { Plus } from 'lucide-react';
 import useSettings from '@/features/settings/store';
-
-// Shows the product photo, or a placeholder when there is none or it fails to load
-export function ProductImage({ src, alt, className = '' }) {
-  const [failed, setFailed] = useState(false);
-  if (!src || failed) {
-    return (
-      <div className={`flex items-center justify-center bg-brand-100 text-brand-300 ${className}`}>
-        <Shirt size={22} strokeWidth={1.5} />
-      </div>
-    );
-  }
-  return <img src={src} alt={alt} onError={() => setFailed(true)} className={`object-cover ${className}`} />;
-}
 
 export default function ProductCard({ product, category, price, stockLeft, inCartQty, sizes, onAdd }) {
   const soldOut = stockLeft === 0 && inCartQty === 0;
@@ -39,7 +26,7 @@ export default function ProductCard({ product, category, price, stockLeft, inCar
       >
         <ProductImage src={product.img} alt={product.name} className="w-full h-24" />
 
-        <span className="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded-full text-[9px] font-semibold bg-white/90 text-brand-700 backdrop-blur">
+        <span className="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded-full text-xs font-semibold bg-white/90 text-brand-700 backdrop-blur">
           {category}
         </span>
 
@@ -50,7 +37,7 @@ export default function ProductCard({ product, category, price, stockLeft, inCar
         )}
 
         {soldOut ? (
-          <span className="absolute inset-x-0 bottom-0 py-1 text-center text-[10px] font-bold uppercase tracking-wider text-white bg-brand-900/70">
+          <span className="absolute inset-x-0 bottom-0 py-1 text-center text-xs font-bold uppercase tracking-wider text-white bg-brand-900/70">
             Agotado
           </span>
         ) : (
@@ -68,7 +55,7 @@ export default function ProductCard({ product, category, price, stockLeft, inCar
         <div className="flex items-end justify-between gap-2 mt-auto">
           <p className="text-xs font-bold text-brand-800 font-mono">{price}</p>
           {!soldOut && (
-            <p className={`text-[10px] font-medium ${lowStock ? 'text-warning' : 'text-brand-400'}`}>
+            <p className={`text-xs font-medium ${lowStock ? 'text-warning' : 'text-subtle'}`}>
               {lowStock ? `Quedan ${stockLeft}` : `${stockLeft} disp.`}
             </p>
           )}
@@ -83,7 +70,7 @@ export default function ProductCard({ product, category, price, stockLeft, inCar
                 onClick={() => onAdd(talla)}
                 disabled={left === 0}
                 title={left === 0 ? 'Sin unidades' : `Agregar talla ${talla}`}
-                className="min-w-6 px-1 py-0.5 rounded border text-[10px] font-semibold transition-colors border-brand-150 text-brand-600 enabled:hover:bg-brand-800 enabled:hover:border-brand-800 enabled:hover:text-white disabled:text-brand-200 disabled:line-through disabled:cursor-not-allowed"
+                className="min-w-6 px-1 py-0.5 rounded border text-xs font-semibold transition-colors border-brand-150 text-brand-600 enabled:hover:bg-brand-800 enabled:hover:border-brand-800 enabled:hover:text-white disabled:text-brand-200 disabled:line-through disabled:cursor-not-allowed"
               >
                 {talla}
               </button>

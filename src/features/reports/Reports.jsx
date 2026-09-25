@@ -1,6 +1,11 @@
 import { useState } from 'react';
 import { FileSpreadsheet, FileText } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
+import chartTheme from '@/shared/lib/chartTheme';
+import StatCard from '@/shared/components/StatCard';
+import { Button } from '@/shared/components/Form';
+import { Table, TableCard, TableTitle } from '@/shared/components/Table';
+import { SegmentedTabs } from '@/shared/components/Toolbar';
 
 const weeklyData = [
   { dia: 'Lun', ventas: 1850000, transacciones: 22 },
@@ -29,33 +34,29 @@ const fmtFull = (n) => `$${n.toLocaleString('es-CO')}`;
 
 export default function Reports() {
   const [period, setPeriod] = useState('semana');
+  const chart = chartTheme();
 
   return (
-    <div className="p-8 space-y-6">
+    <div className="p-6 space-y-5">
       {/* Header controls */}
       <div className="flex items-center justify-between">
-        <div className="flex gap-1 p-1 rounded-xl bg-brand-50">
-          {['semana', 'mes', 'año'].map((p) => (
-            <button
-              key={p}
-              onClick={() => setPeriod(p)}
-              className={`px-4 py-2 rounded-lg text-sm font-semibold capitalize transition-all ${
-                period === p
-                  ? 'bg-white text-brand-800 shadow-[0_1px_3px_rgba(80,52,89,0.1)]'
-                  : 'bg-transparent text-brand-600 shadow-none'
-              }`}
-            >
-              {p}
-            </button>
-          ))}
-        </div>
+        <SegmentedTabs
+          value={period}
+          onChange={setPeriod}
+          label="Periodo"
+          options={[
+            ['semana', 'Semana'],
+            ['mes', 'Mes'],
+            ['año', 'Año'],
+          ]}
+        />
         <div className="flex gap-2">
-          <button className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border transition-all border-brand-200 text-brand-800">
+          <Button variant="secondary">
             <FileText size={16} /> Exportar PDF
-          </button>
-          <button className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white transition-all bg-brand-600">
+          </Button>
+          <Button>
             <FileSpreadsheet size={16} /> Exportar Excel
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -70,58 +71,43 @@ export default function Reports() {
           { label: 'Transacciones', val: '271', sub: '+24% vs. semana pasada' },
           { label: 'Margen bruto', val: '52%', sub: '+2pp vs. semana pasada' },
         ].map((k) => (
-          <div key={k.label} className="bg-white rounded-2xl p-5 border border-brand-150">
-            <p className="text-xs uppercase tracking-wide mb-2 text-brand-600">{k.label}</p>
-            <p className="text-2xl font-bold mb-1 text-brand-800">{k.val}</p>
-            <p className="text-xs text-brand-400">{k.sub}</p>
-          </div>
+          <StatCard key={k.label} label={k.label} value={k.val}>
+            <p className="text-xs text-subtle">{k.sub}</p>
+          </StatCard>
         ))}
       </div>
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div className="bg-white rounded-2xl p-5 border border-brand-150">
+        <div className="bg-white rounded-2xl p-4 border border-brand-150">
           <h3 className="text-sm font-semibold mb-1 text-brand-800">Ventas diarias</h3>
-          <p className="text-xs mb-4 text-brand-400">Esta semana</p>
+          <p className="text-xs mb-4 text-subtle">Esta semana</p>
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={weeklyData} barSize={28}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0e8f5" />
-              <XAxis dataKey="dia" tick={{ fontSize: 11, fill: '#b695c0' }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 10, fill: '#b695c0' }} axisLine={false} tickLine={false} tickFormatter={fmt} />
-              <Tooltip
-                formatter={(v) => [fmtFull(v), 'Ventas']}
-                contentStyle={{
-                  fontSize: 12,
-                  borderRadius: 8,
-                  border: '1px solid #e8dff0',
-                }}
-              />
-              <Bar dataKey="ventas" fill="#81638b" radius={[5, 5, 0, 0]} />
+              <CartesianGrid strokeDasharray="3 3" stroke={chart.grid} />
+              <XAxis dataKey="dia" tick={chart.tick} axisLine={false} tickLine={false} />
+              <YAxis tick={chart.tick} axisLine={false} tickLine={false} tickFormatter={fmt} />
+              <Tooltip formatter={(v) => [fmtFull(v), 'Ventas']} contentStyle={chart.tooltip} />
+              <Bar dataKey="ventas" fill={chart.primary} radius={[5, 5, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
 
-        <div className="bg-white rounded-2xl p-5 border border-brand-150">
+        <div className="bg-white rounded-2xl p-4 border border-brand-150">
           <h3 className="text-sm font-semibold mb-1 text-brand-800">Transacciones diarias</h3>
-          <p className="text-xs mb-4 text-brand-400">Esta semana</p>
+          <p className="text-xs mb-4 text-subtle">Esta semana</p>
           <ResponsiveContainer width="100%" height={200}>
             <LineChart data={weeklyData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0e8f5" />
-              <XAxis dataKey="dia" tick={{ fontSize: 11, fill: '#b695c0' }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 10, fill: '#b695c0' }} axisLine={false} tickLine={false} />
-              <Tooltip
-                contentStyle={{
-                  fontSize: 12,
-                  borderRadius: 8,
-                  border: '1px solid #e8dff0',
-                }}
-              />
+              <CartesianGrid strokeDasharray="3 3" stroke={chart.grid} />
+              <XAxis dataKey="dia" tick={chart.tick} axisLine={false} tickLine={false} />
+              <YAxis tick={chart.tick} axisLine={false} tickLine={false} />
+              <Tooltip contentStyle={chart.tooltip} />
               <Line
                 type="monotone"
                 dataKey="transacciones"
-                stroke="#503459"
+                stroke={chart.dark}
                 strokeWidth={2.5}
-                dot={{ fill: '#503459', r: 4 }}
+                dot={{ fill: chart.dark, r: 4 }}
               />
             </LineChart>
           </ResponsiveContainer>
@@ -129,55 +115,39 @@ export default function Reports() {
       </div>
 
       {/* Top products table */}
-      <div className="bg-white rounded-2xl border overflow-hidden border-brand-150">
-        <div className="px-5 py-4 border-b border-brand-50">
-          <h3 className="text-sm font-semibold text-brand-800">Productos más vendidos — {period}</h3>
-        </div>
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="bg-brand-50">
-              {['#', 'Producto', 'Unidades vendidas', 'Ingresos', 'Part. de ventas'].map((h) => (
-                <th
-                  key={h}
-                  className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-brand-600"
-                >
-                  {h}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-brand-50">
-            {topProducts.map((p, i) => {
-              const totalIngresos = topProducts.reduce((s, x) => s + x.ingresos, 0);
-              const pct = Math.round((p.ingresos / totalIngresos) * 100);
-              return (
-                <tr key={p.nombre} className="hover:bg-brand-25">
-                  <td className="px-5 py-3">
-                    <span
-                      className={`w-6 h-6 rounded-lg inline-flex items-center justify-center text-xs font-bold ${
-                        i === 0 ? 'bg-brand-800 text-white' : 'bg-brand-200 text-brand-800'
-                      }`}
-                    >
-                      {i + 1}
-                    </span>
-                  </td>
-                  <td className="px-5 py-3 font-medium text-brand-800">{p.nombre}</td>
-                  <td className="px-5 py-3 font-mono font-semibold text-brand-800">{p.uds}</td>
-                  <td className="px-5 py-3 font-mono font-semibold text-brand-800">{fmtFull(p.ingresos)}</td>
-                  <td className="px-5 py-3">
-                    <div className="flex items-center gap-2">
-                      <div className="flex-1 h-1.5 rounded-full overflow-hidden bg-brand-100">
-                        <div className="h-full rounded-full bg-brand-600" style={{ width: `${pct}%` }} />
-                      </div>
-                      <span className="text-xs font-semibold w-8 text-brand-800">{pct}%</span>
+      <TableCard>
+        <TableTitle title={`Productos más vendidos — ${period}`} />
+        <Table columns={['#', 'Producto', 'Unidades vendidas', 'Ingresos', 'Part. de ventas']}>
+          {topProducts.map((p, i) => {
+            const totalIngresos = topProducts.reduce((s, x) => s + x.ingresos, 0);
+            const pct = Math.round((p.ingresos / totalIngresos) * 100);
+            return (
+              <tr key={p.nombre} className="hover:bg-brand-25">
+                <td className="px-4 py-2.5">
+                  <span
+                    className={`w-6 h-6 rounded-lg inline-flex items-center justify-center text-xs font-bold ${
+                      i === 0 ? 'bg-brand-800 text-white' : 'bg-brand-200 text-brand-800'
+                    }`}
+                  >
+                    {i + 1}
+                  </span>
+                </td>
+                <td className="px-4 py-2.5 font-medium text-brand-800">{p.nombre}</td>
+                <td className="px-4 py-2.5 font-mono font-semibold text-brand-800">{p.uds}</td>
+                <td className="px-4 py-2.5 font-mono font-semibold text-brand-800">{fmtFull(p.ingresos)}</td>
+                <td className="px-4 py-2.5">
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 h-1.5 rounded-full overflow-hidden bg-brand-100">
+                      <div className="h-full rounded-full bg-brand-600" style={{ width: `${pct}%` }} />
                     </div>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+                    <span className="text-xs font-semibold w-8 text-brand-800">{pct}%</span>
+                  </div>
+                </td>
+              </tr>
+            );
+          })}
+        </Table>
+      </TableCard>
     </div>
   );
 }

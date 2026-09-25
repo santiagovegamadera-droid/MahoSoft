@@ -35,7 +35,7 @@ export default function ChipList({ values, onChange, parse, format = (v) => v, p
             </button>
           </span>
         ))}
-        {values.length === 0 && <span className="text-xs text-brand-400">Lista vacía</span>}
+        {values.length === 0 && <span className="text-xs text-subtle">Lista vacía</span>}
       </div>
       <div className="flex gap-2">
         <input

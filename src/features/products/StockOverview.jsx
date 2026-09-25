@@ -2,6 +2,8 @@ import { sortSizes, totalStock } from '@/features/products/store';
 import useSettings from '@/features/settings/store';
 import usePagination from '@/shared/lib/usePagination';
 import Pagination from '@/shared/components/Pagination';
+import StatCard from '@/shared/components/StatCard';
+import { TableCard, TableTitle } from '@/shared/components/Table';
 
 export default function StockOverview({ products, catName }) {
   const { stockBajoTalla, tallas } = useSettings();
@@ -28,25 +30,20 @@ export default function StockOverview({ products, catName }) {
             color: 'text-success-dark',
           },
         ].map((k) => (
-          <div key={k.label} className="bg-white rounded-2xl p-4 border border-brand-150">
-            <p className="text-xs uppercase tracking-wide mb-1 text-brand-600">{k.label}</p>
-            <p className={`text-2xl font-bold ${k.color}`}>{k.val}</p>
-          </div>
+          <StatCard key={k.label} label={k.label} value={k.val} valueClassName={k.color} />
         ))}
       </div>
 
-      <div className="bg-white rounded-2xl border overflow-hidden border-brand-150">
-        <div className="px-5 py-4 border-b border-brand-50">
-          <h3 className="text-sm font-semibold text-brand-800">Inventario por talla</h3>
-        </div>
+      <TableCard>
+        <TableTitle title="Inventario por talla" />
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-brand-50">
-                <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-brand-600">
+                <th className="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-brand-600">
                   Producto
                 </th>
-                <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-brand-600">
+                <th className="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-brand-600">
                   Categoría
                 </th>
                 {usedSizes.map((t) => (
@@ -57,7 +54,7 @@ export default function StockOverview({ products, catName }) {
                     {t}
                   </th>
                 ))}
-                <th className="px-5 py-3 text-center text-xs font-semibold uppercase tracking-wide text-brand-600">
+                <th className="px-4 py-2.5 text-center text-xs font-semibold uppercase tracking-wide text-brand-600">
                   Total
                 </th>
               </tr>
@@ -65,8 +62,8 @@ export default function StockOverview({ products, catName }) {
             <tbody className="divide-y divide-brand-50">
               {pager.pageItems.map((p) => (
                 <tr key={p.id} className="hover:bg-brand-25">
-                  <td className="px-5 py-3 font-medium text-brand-800">{p.name}</td>
-                  <td className="px-5 py-3">
+                  <td className="px-4 py-2.5 font-medium text-brand-800">{p.name}</td>
+                  <td className="px-4 py-2.5">
                     <span className="text-xs px-2 py-0.5 rounded-full bg-brand-200 text-brand-800">
                       {catName(p.catId)}
                     </span>
@@ -93,7 +90,7 @@ export default function StockOverview({ products, catName }) {
                       </td>
                     );
                   })}
-                  <td className="px-5 py-3 text-center">
+                  <td className="px-4 py-2.5 text-center">
                     <span className="font-bold text-sm text-brand-800">{totalStock(p)}</span>
                   </td>
                 </tr>
@@ -102,7 +99,7 @@ export default function StockOverview({ products, catName }) {
           </table>
         </div>
         <Pagination pager={pager} label="productos" />
-      </div>
+      </TableCard>
     </>
   );
 }
