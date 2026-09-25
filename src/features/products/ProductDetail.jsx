@@ -85,7 +85,7 @@ export default function ProductDetail({ productId, onBack }) {
   const costo = existing?.costo || 0;
   const supplierIds = existing ? suppliersOfProduct(purchases, existing.id) : [];
   const lastPurchase = existing ? lastPurchaseOf(purchases, existing.id) : null;
-  const supplierName = (id) => suppliers.find((s) => s.id === id)?.name ?? 'Proveedor eliminado';
+  const supplierName = (id) => suppliers.find((s) => s.id === id)?.nombre ?? 'Proveedor eliminado';
   const margin = precio > 0 ? Math.round(((precio - costo) / precio) * 100) : 0;
   const sizes = sortSizes(Object.keys(form.stock), tallas);
 

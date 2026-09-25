@@ -66,7 +66,7 @@ function Detail({ label, value }) {
 export default function PurchaseForm({ products, suppliers, onSave, onClose }) {
   const user = useCurrentUser();
   const business = useSettings();
-  const activeSuppliers = suppliers.filter((s) => s.estado === 'Activo');
+  const activeSuppliers = suppliers.filter((s) => s.activo);
   const [form, setForm] = useState({
     proveedorId: activeSuppliers[0]?.id ?? '',
     facturaProveedor: '',
@@ -80,7 +80,7 @@ export default function PurchaseForm({ products, suppliers, onSave, onClose }) {
     vence: '',
     estadoPago: 'pagada',
     // Starts on what the supplier usually charges; each invoice can still say otherwise
-    iva: activeSuppliers[0]?.iva ?? 0,
+    iva: activeSuppliers[0]?.ivaPorcentaje ?? 0,
     ivaIncluido: false,
     descuento: '',
     notas: '',
@@ -180,21 +180,26 @@ export default function PurchaseForm({ products, suppliers, onSave, onClose }) {
                 value={form.proveedorId}
                 onChange={(e) => {
                   const next = suppliers.find((s) => s.id === Number(e.target.value));
-                  setForm((f) => ({ ...f, proveedorId: e.target.value, iva: next?.iva ?? 0, ivaIncluido: false }));
+                  setForm((f) => ({
+                    ...f,
+                    proveedorId: e.target.value,
+                    iva: next?.ivaPorcentaje ?? 0,
+                    ivaIncluido: false,
+                  }));
                 }}
                 className={inputClass}
                 aria-label="Proveedor"
               >
                 {activeSuppliers.map((s) => (
                   <option key={s.id} value={s.id}>
-                    {s.name}
+                    {s.nombre}
                   </option>
                 ))}
               </select>
               {supplier && (
                 <div className="grid grid-cols-2 gap-x-4 gap-y-3">
                   <Detail label="Documento" value={formatDocument(supplier.tipoDocumento, supplier.documento)} />
-                  <Detail label="Teléfono" value={supplier.tel} />
+                  <Detail label="Teléfono" value={supplier.telefono} />
                   <Detail label="Dirección" value={supplier.direccion} />
                   <Detail label="Ciudad" value={supplier.ciudad} />
                   <Detail label="Email" value={supplier.email} />

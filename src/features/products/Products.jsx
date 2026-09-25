@@ -30,7 +30,7 @@ export default function Products({ onEdit, onNew }) {
   // Who the product was last bought from, according to Compras
   const lastSupplier = (p) => {
     const last = lastPurchaseOf(purchases, p.id);
-    return last && (suppliers.find((s) => s.id === last.proveedorId)?.name ?? 'Proveedor eliminado');
+    return last && (suppliers.find((s) => s.id === last.proveedorId)?.nombre ?? 'Proveedor eliminado');
   };
 
   const filtered = products.filter(

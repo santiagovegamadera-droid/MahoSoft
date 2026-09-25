@@ -58,12 +58,12 @@ function PurchaseDetail({ purchase, supplier, productName, onMarkPaid, onClose }
       <div className="grid grid-cols-2 gap-4 mb-4 text-sm">
         <div>
           <p className="text-xs uppercase tracking-wide text-subtle mb-1">Proveedor</p>
-          <p className="font-semibold text-brand-800">{supplier?.name ?? 'Proveedor eliminado'}</p>
+          <p className="font-semibold text-brand-800">{supplier?.nombre ?? 'Proveedor eliminado'}</p>
           {supplier && (
             <div className="text-xs text-brand-600 space-y-0.5 mt-0.5">
               <p>{formatDocument(supplier.tipoDocumento, supplier.documento)}</p>
               <p>{[supplier.direccion, supplier.ciudad].filter(Boolean).join(' · ')}</p>
-              <p>{supplier.tel}</p>
+              <p>{supplier.telefono}</p>
             </div>
           )}
         </div>
@@ -187,7 +187,7 @@ export default function PurchaseOrders({ purchases, suppliers, products, onNew, 
   const [search, setSearch] = useState('');
   const [viewingId, setViewingId] = useState(null);
   const supplierOf = (id) => suppliers.find((s) => s.id === id);
-  const supplierName = (id) => supplierOf(id)?.name ?? 'Proveedor eliminado';
+  const supplierName = (id) => supplierOf(id)?.nombre ?? 'Proveedor eliminado';
   const productName = (id) => products.find((p) => p.id === id)?.name ?? 'Producto eliminado';
   const viewing = purchases.find((p) => p.id === viewingId);
 

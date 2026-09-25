@@ -162,11 +162,6 @@ export const suppliersOfProduct = (purchases, productId) => [
   ),
 ];
 
-/** Ids of the distinct products bought from a supplier */
-export const productsOfSupplier = (purchases, supplierId) => [
-  ...new Set(purchases.filter((p) => p.proveedorId === supplierId).flatMap((p) => p.items.map((i) => i.productId))),
-];
-
 // Key of a purchase's attached invoice file in the browser file store
 export const purchaseFileKey = (p) => `purchase-${p.id}`;
 

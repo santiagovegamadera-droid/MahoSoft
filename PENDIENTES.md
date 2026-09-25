@@ -17,7 +17,7 @@ Frontend: este repositorio. Backend: repositorio `backend` (.NET 9 + SQL Server)
 
 ## 1. Conectar cada módulo a la API
 
-Hoy el **login**, las **categorías** y la **configuración** usan la base de datos. Todo lo demás sigue guardándose en el navegador (`store.js` de cada módulo).
+Hoy el **login**, las **categorías**, la **configuración** y los **proveedores** usan la base de datos. Todo lo demás sigue guardándose en el navegador (`store.js` de cada módulo).
 Para cada módulo: endpoints en el backend (con su permiso) y reemplazar su `store.js` por llamadas a la API, con mensajes de carga y de error.
 
 - [x] **Categorías**: listar, crear, editar, activar/desactivar; no eliminar si tiene productos.
@@ -27,9 +27,9 @@ Para cada módulo: endpoints en el backend (con su permiso) y reemplazar su `sto
   - [ ] "Proveedores" y "Último proveedor" calculados desde las compras.
 - [x] **Configuración**: datos del negocio, tipos de documento, tallas, bancos, descuentos del POS y umbrales de stock bajo.
   - [ ] Completar los **datos del negocio** (NIT o cédula, dirección, teléfono, correo): salen en los recibos y como comprador en las compras.
-- [ ] **Proveedores**
-  - [ ] CRUD con IVA que cobra; bloquear la eliminación si tiene compras (ofrecer desactivar).
-  - [ ] **"Categorías que surte" calculadas desde las compras** (decidido). Hoy en el frontend se marcan a mano: quitar ese campo.
+- [x] **Proveedores**
+  - [x] CRUD con IVA que cobra; bloquear la eliminación si tiene compras (ofrecer desactivar).
+  - [x] **"Categorías que surte" calculadas desde las compras** (decidido). Ya no se marcan a mano.
 - [ ] **Compras**
   - [ ] Registrar la compra: calcular los totales en el servidor, sumar el stock con movimientos de entrada y actualizar el costo del producto (sin IVA).
   - [ ] Guardar el **PDF de la factura en el disco del servidor** (definir la carpeta en la configuración y validar tipo y tamaño en el servidor).
