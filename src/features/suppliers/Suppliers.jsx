@@ -42,8 +42,8 @@ function SupplierForm({ supplier, suppliers, categories, onSave, onClose }) {
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
 
   // CheckboxList works with names; the store keeps category ids
-  const nameOf = (id) => categories.find((c) => c.id === id)?.name;
-  const idOf = (name) => categories.find((c) => c.name === name)?.id;
+  const nameOf = (id) => categories.find((c) => c.id === id)?.nombre;
+  const idOf = (name) => categories.find((c) => c.nombre === name)?.id;
 
   function submit(e) {
     e.preventDefault();
@@ -135,7 +135,7 @@ function SupplierForm({ supplier, suppliers, categories, onSave, onClose }) {
         </fieldset>
         <Field label="Categorías que surte" group>
           <CheckboxList
-            options={categories.map((c) => c.name)}
+            options={categories.map((c) => c.nombre)}
             value={form.categorias.map(nameOf).filter(Boolean)}
             onChange={(names) => setForm((f) => ({ ...f, categorias: names.map(idOf) }))}
           />
@@ -210,7 +210,7 @@ export default function Suppliers() {
                     return (
                       cat && (
                         <span key={id} className="text-xs px-1.5 py-0.5 rounded bg-brand-200 text-brand-800">
-                          {cat.name}
+                          {cat.nombre}
                         </span>
                       )
                     );

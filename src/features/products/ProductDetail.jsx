@@ -143,7 +143,7 @@ export default function ProductDetail({ productId, onBack }) {
                           .filter((c) => isActiveCategory(c) || c.id === form.catId)
                           .map((c) => (
                             <option key={c.id} value={c.id}>
-                              {c.name}
+                              {c.nombre}
                             </option>
                           ))}
                       </select>

@@ -94,7 +94,7 @@ export default function POS() {
   const catalog = products.filter(
     (p) => p.estado === 'Activo' && isActiveCategory(categories.find((c) => c.id === p.catId)),
   );
-  const catName = (id) => categories.find((c) => c.id === id)?.name ?? 'Otros';
+  const catName = (id) => categories.find((c) => c.id === id)?.nombre ?? 'Otros';
   const cats = ['Todos', ...Array.from(new Set(catalog.map((p) => catName(p.catId))))];
   const countIn = (c) => (c === 'Todos' ? catalog.length : catalog.filter((p) => catName(p.catId) === c).length);
   const allSizes = sortSizes(catalog.flatMap((p) => Object.keys(p.stock)), tallas);

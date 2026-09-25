@@ -26,7 +26,7 @@ export default function Products({ onEdit, onNew }) {
   const [search, setSearch] = useState('');
   const [deleting, setDeleting] = useState(null);
 
-  const catName = (id) => categories.find((c) => c.id === id)?.name ?? '—';
+  const catName = (id) => categories.find((c) => c.id === id)?.nombre ?? '—';
   // Who the product was last bought from, according to Compras
   const lastSupplier = (p) => {
     const last = lastPurchaseOf(purchases, p.id);
@@ -73,7 +73,7 @@ export default function Products({ onEdit, onNew }) {
             </Button>
           </Toolbar>
           <div className="flex flex-wrap gap-1.5 mb-5">
-            {[{ id: 'all', name: 'Todas' }, ...categories].map((c) => (
+            {[{ id: 'all', nombre: 'Todas' }, ...categories].map((c) => (
               <button
                 key={c.id}
                 onClick={() => setCatId(c.id)}
@@ -83,7 +83,7 @@ export default function Products({ onEdit, onNew }) {
                     : 'bg-white text-brand-600 border-brand-200 hover:border-brand-400'
                 }`}
               >
-                {c.name}
+                {c.nombre}
               </button>
             ))}
           </div>
