@@ -17,7 +17,7 @@ Frontend: este repositorio. Backend: repositorio `backend` (.NET 9 + SQL Server)
 
 ## 1. Conectar cada módulo a la API
 
-Hoy el **login** y las **categorías** usan la base de datos. Todo lo demás sigue guardándose en el navegador (`store.js` de cada módulo).
+Hoy el **login**, las **categorías** y la **configuración** usan la base de datos. Todo lo demás sigue guardándose en el navegador (`store.js` de cada módulo).
 Para cada módulo: endpoints en el backend (con su permiso) y reemplazar su `store.js` por llamadas a la API, con mensajes de carga y de error.
 
 - [x] **Categorías**: listar, crear, editar, activar/desactivar; no eliminar si tiene productos.
@@ -25,7 +25,7 @@ Para cada módulo: endpoints en el backend (con su permiso) y reemplazar su `sto
   - [ ] CRUD con tallas, colores y stock por talla.
   - [ ] Subir fotos a **Cloudinary** (crear la cuenta y guardar las claves con `user-secrets`).
   - [ ] "Proveedores" y "Último proveedor" calculados desde las compras.
-- [ ] **Configuración**: datos del negocio, tipos de documento, tallas, bancos, descuentos del POS y umbrales de stock bajo.
+- [x] **Configuración**: datos del negocio, tipos de documento, tallas, bancos, descuentos del POS y umbrales de stock bajo.
   - [ ] Completar los **datos del negocio** (NIT o cédula, dirección, teléfono, correo): salen en los recibos y como comprador en las compras.
 - [ ] **Proveedores**
   - [ ] CRUD con IVA que cobra; bloquear la eliminación si tiene compras (ofrecer desactivar).
