@@ -54,9 +54,9 @@ const PRICES = [
 ];
 const SORTS = [
   { id: 'relevancia', label: 'Relevancia', compare: () => 0 },
-  { id: 'nombre', label: 'Nombre (A–Z)', compare: (a, b) => a.name.localeCompare(b.name, 'es') },
-  { id: 'precio-asc', label: 'Menor precio', compare: (a, b) => a.precio - b.precio },
-  { id: 'precio-desc', label: 'Mayor precio', compare: (a, b) => b.precio - a.precio },
+  { id: 'nombre', label: 'Nombre (A–Z)', compare: (a, b) => a.nombre.localeCompare(b.nombre, 'es') },
+  { id: 'precio-asc', label: 'Menor precio', compare: (a, b) => a.precioVenta - b.precioVenta },
+  { id: 'precio-desc', label: 'Mayor precio', compare: (a, b) => b.precioVenta - a.precioVenta },
   { id: 'stock', label: 'Más stock', compare: (a, b) => totalStock(b) - totalStock(a) },
 ];
 const selectClass =
@@ -92,11 +92,11 @@ export default function POS() {
 
   // Only active products from active categories can be sold
   const catalog = products.filter(
-    (p) => p.estado === 'Activo' && isActiveCategory(categories.find((c) => c.id === p.catId)),
+    (p) => p.activo && isActiveCategory(categories.find((c) => c.id === p.categoriaId)),
   );
   const catName = (id) => categories.find((c) => c.id === id)?.nombre ?? 'Otros';
-  const cats = ['Todos', ...Array.from(new Set(catalog.map((p) => catName(p.catId))))];
-  const countIn = (c) => (c === 'Todos' ? catalog.length : catalog.filter((p) => catName(p.catId) === c).length);
+  const cats = ['Todos', ...Array.from(new Set(catalog.map((p) => catName(p.categoriaId))))];
+  const countIn = (c) => (c === 'Todos' ? catalog.length : catalog.filter((p) => catName(p.categoriaId) === c).length);
   const allSizes = sortSizes(catalog.flatMap((p) => Object.keys(p.stock)), tallas);
   const priceRange = PRICES.find((r) => r.id === priceFilter);
   const activeFilters = [sizeFilter, priceFilter !== 'todos', onlyAvailable, sort !== 'relevancia'].filter(Boolean).length;
@@ -104,17 +104,17 @@ export default function POS() {
   // Search matches name, category and colors, ignoring accents
   const terms = normalize(query.trim()).split(/\s+/).filter(Boolean);
   const matchesQuery = (p) => {
-    const text = normalize([p.name, catName(p.catId), ...(p.colores ?? [])].join(' '));
+    const text = normalize([p.nombre, catName(p.categoriaId), ...(p.colores ?? [])].join(' '));
     return terms.every((t) => text.includes(t));
   };
   const filtered = catalog
     .filter(
       (p) =>
-        (catFilter === 'Todos' || catName(p.catId) === catFilter) &&
+        (catFilter === 'Todos' || catName(p.categoriaId) === catFilter) &&
         matchesQuery(p) &&
         (!sizeFilter || (p.stock[sizeFilter] ?? 0) > 0) &&
-        p.precio >= priceRange.min &&
-        p.precio <= priceRange.max &&
+        p.precioVenta >= priceRange.min &&
+        p.precioVenta <= priceRange.max &&
         (!onlyAvailable || totalStock(p) > 0),
     )
     .sort(SORTS.find((s) => s.id === sort).compare);
@@ -144,7 +144,7 @@ export default function POS() {
     setCart((prev) => {
       const ex = prev.find((c) => c.id === p.id && c.talla === size);
       if (ex) return prev.map((c) => (c === ex ? { ...c, qty: c.qty + 1 } : c));
-      return [...prev, { id: p.id, name: p.name, price: p.precio, img: p.img, qty: 1, talla: size }];
+      return [...prev, { id: p.id, name: p.nombre, price: p.precioVenta, img: p.imagenUrl, qty: 1, talla: size }];
     });
   }
   function removeLine(line) {
@@ -465,8 +465,8 @@ export default function POS() {
                     <ProductCard
                       key={p.id}
                       product={p}
-                      category={catName(p.catId)}
-                      price={fmt(p.precio)}
+                      category={catName(p.categoriaId)}
+                      price={fmt(p.precioVenta)}
                       sizes={sizes}
                       stockLeft={sizes.reduce((s, x) => s + x.left, 0)}
                       inCartQty={cart.filter((c) => c.id === p.id).reduce((s, c) => s + c.qty, 0)}

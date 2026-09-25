@@ -1,8 +1,9 @@
 import { useRef, useState } from 'react';
-import { ImagePlus, RefreshCw, Trash2 } from 'lucide-react';
+import { ImagePlus, Loader2, RefreshCw, Trash2 } from 'lucide-react';
+import { uploadProductImage } from '@/features/products/store';
 
-// Shrinks the photo and returns it as a data URL, so it fits in localStorage with the rest of the data
-function resizeImage(file, max = 600) {
+// Shrinks the photo before uploading (phone photos are several MB); the server keeps at most 1200 px anyway
+function resizeImage(file, max = 1200) {
   return new Promise((resolve, reject) => {
     const url = URL.createObjectURL(file);
     const img = new Image();
@@ -13,7 +14,9 @@ function resizeImage(file, max = 600) {
       canvas.height = Math.round(img.height * scale);
       canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
       URL.revokeObjectURL(url);
-      resolve(canvas.toDataURL('image/jpeg', 0.85));
+      const done = (blob) =>
+        blob ? resolve(new File([blob], 'foto.jpg', { type: 'image/jpeg' })) : reject(new Error('unreadable'));
+      canvas.toBlob(done, 'image/jpeg', 0.85);
     };
     img.onerror = () => {
       URL.revokeObjectURL(url);
@@ -23,19 +26,30 @@ function resizeImage(file, max = 600) {
   });
 }
 
-export default function ImageUpload({ value, onChange, alt }) {
+/** Product photo: uploads it to the server right away and reports { id, url } (or null when removed) */
+export default function ImageUpload({ url, onChange, alt }) {
   const inputRef = useRef(null);
   const [dragging, setDragging] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
 
   async function pick(file) {
-    if (!file) return;
+    if (!file || uploading) return;
     if (!file.type.startsWith('image/')) return setError('El archivo debe ser una imagen');
+    setError('');
+    setUploading(true);
     try {
-      onChange(await resizeImage(file));
-      setError('');
-    } catch {
-      setError('No se pudo leer la imagen');
+      let photo;
+      try {
+        photo = await resizeImage(file);
+      } catch {
+        return setError('No se pudo leer la imagen');
+      }
+      onChange(await uploadProductImage(photo));
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setUploading(false);
     }
   }
 
@@ -53,12 +67,17 @@ export default function ImageUpload({ value, onChange, alt }) {
           pick(e.dataTransfer.files[0]);
         }}
         className={`group relative w-40 aspect-square rounded-2xl overflow-hidden border-2 transition-colors ${
-          dragging ? 'border-brand-600 bg-brand-50' : value ? 'border-transparent' : 'border-dashed border-brand-200'
+          dragging ? 'border-brand-600 bg-brand-50' : url ? 'border-transparent' : 'border-dashed border-brand-200'
         }`}
       >
-        {value ? (
+        {uploading ? (
+          <div className="w-full h-full flex flex-col items-center justify-center gap-1.5 text-brand-600" role="status">
+            <Loader2 size={24} className="animate-spin" />
+            <span className="text-xs font-semibold">Subiendo…</span>
+          </div>
+        ) : url ? (
           <>
-            <img src={value} alt={alt} className="w-full h-full object-cover" />
+            <img src={url} alt={alt} className="w-full h-full object-cover" />
             <div className="absolute inset-0 flex items-center justify-center gap-2 bg-brand-900/45 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
               <button
                 type="button"
@@ -71,7 +90,7 @@ export default function ImageUpload({ value, onChange, alt }) {
               </button>
               <button
                 type="button"
-                onClick={() => onChange('')}
+                onClick={() => onChange(null)}
                 className="p-2 rounded-lg bg-white text-danger hover:bg-danger-soft"
                 aria-label="Quitar imagen"
                 title="Quitar imagen"
@@ -95,7 +114,7 @@ export default function ImageUpload({ value, onChange, alt }) {
       <input
         ref={inputRef}
         type="file"
-        accept="image/*"
+        accept="image/jpeg,image/png,image/webp"
         onChange={(e) => {
           pick(e.target.files[0]);
           e.target.value = '';

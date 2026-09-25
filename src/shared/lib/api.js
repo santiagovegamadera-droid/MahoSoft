@@ -13,21 +13,23 @@ let auth = { token: () => null, onUnauthorized: () => {} };
 export const configureApiAuth = (config) => (auth = config);
 
 /**
- * fetch() against the API: sends JSON and the session token, returns the parsed body,
- * and throws ApiError with the server's message (ProblemDetails `detail`) when it fails.
+ * fetch() against the API: sends JSON (or a FormData, for file uploads) and the session token, returns the
+ * parsed body, and throws ApiError with the server's message (ProblemDetails `detail`) when it fails.
  */
 export async function api(path, { method = 'GET', body, signal } = {}) {
   const token = auth.token();
+  const isForm = body instanceof FormData;
   let res;
   try {
     res = await fetch(`${API_URL}${path}`, {
       method,
       signal,
       headers: {
-        ...(body !== undefined && { 'Content-Type': 'application/json' }),
+        // The browser sets the multipart boundary itself for a FormData
+        ...(body !== undefined && !isForm && { 'Content-Type': 'application/json' }),
         ...(token && { Authorization: `Bearer ${token}` }),
       },
-      body: body !== undefined ? JSON.stringify(body) : undefined,
+      body: body === undefined || isForm ? body : JSON.stringify(body),
     });
   } catch (e) {
     if (e.name === 'AbortError') throw e;
@@ -35,6 +37,7 @@ export async function api(path, { method = 'GET', body, signal } = {}) {
   }
 
   if (res.status === 401 && token) auth.onUnauthorized();
+  if (res.status === 413) throw new ApiError('El archivo es demasiado grande.', 413);
   if (res.status === 204) return null;
 
   const data = await res.json().catch(() => null);

@@ -17,19 +17,22 @@ Frontend: este repositorio. Backend: repositorio `backend` (.NET 9 + SQL Server)
 
 ## 1. Conectar cada módulo a la API
 
-Hoy el **login**, las **categorías**, la **configuración** y los **proveedores** usan la base de datos. Todo lo demás sigue guardándose en el navegador (`store.js` de cada módulo).
+Hoy el **login**, las **categorías**, la **configuración**, los **proveedores** y los **productos** usan la base de datos. Todo lo demás sigue guardándose en el navegador (`store.js` de cada módulo).
 Para cada módulo: endpoints en el backend (con su permiso) y reemplazar su `store.js` por llamadas a la API, con mensajes de carga y de error.
 
 - [x] **Categorías**: listar, crear, editar, activar/desactivar; no eliminar si tiene productos.
-- [ ] **Productos**
-  - [ ] CRUD con tallas, colores y stock por talla.
-  - [ ] Subir fotos a **Cloudinary** (crear la cuenta y guardar las claves con `user-secrets`).
-  - [ ] "Proveedores" y "Último proveedor" calculados desde las compras.
+- [x] **Productos**
+  - [x] CRUD con tallas, colores y stock por talla (cambiar el stock registra un movimiento de ajuste).
+  - [x] Subir fotos a **Cloudinary** (claves guardadas con `user-secrets`).
+  - [x] "Proveedores" y "Último proveedor" calculados desde las compras.
+  - [ ] **Regenerar el secreto de Cloudinary** antes de producción (se compartió por chat).
 - [x] **Configuración**: datos del negocio, tipos de documento, tallas, bancos, descuentos del POS y umbrales de stock bajo.
   - [ ] Completar los **datos del negocio** (NIT o cédula, dirección, teléfono, correo): salen en los recibos y como comprador en las compras.
 - [x] **Proveedores**
   - [x] CRUD con IVA que cobra; bloquear la eliminación si tiene compras (ofrecer desactivar).
   - [x] **"Categorías que surte" calculadas desde las compras** (decidido). Ya no se marcan a mano.
+> **Mientras Compras y Ventas sigan en el navegador:** registrar una compra o una venta **no cambia el stock ni el costo** de los productos (que ya están en la base). `adjustStock` y `setPurchaseCost` en `products/store.js` quedaron vacíos a propósito; se borran al conectar esos módulos.
+
 - [ ] **Compras**
   - [ ] Registrar la compra: calcular los totales en el servidor, sumar el stock con movimientos de entrada y actualizar el costo del producto (sin IVA).
   - [ ] Guardar el **PDF de la factura en el disco del servidor** (definir la carpeta en la configuración y validar tipo y tamaño en el servidor).

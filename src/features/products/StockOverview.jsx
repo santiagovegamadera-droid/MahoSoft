@@ -62,10 +62,10 @@ export default function StockOverview({ products, catName }) {
             <tbody className="divide-y divide-brand-50">
               {pager.pageItems.map((p) => (
                 <tr key={p.id} className="hover:bg-brand-25">
-                  <td className="px-4 py-2.5 font-medium text-brand-800">{p.name}</td>
+                  <td className="px-4 py-2.5 font-medium text-brand-800">{p.nombre}</td>
                   <td className="px-4 py-2.5">
                     <span className="text-xs px-2 py-0.5 rounded-full bg-brand-200 text-brand-800">
-                      {catName(p.catId)}
+                      {catName(p.categoriaId)}
                     </span>
                   </td>
                   {usedSizes.map((t) => {

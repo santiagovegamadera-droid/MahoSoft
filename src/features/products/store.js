@@ -1,4 +1,5 @@
-import createCollection from '@/shared/lib/createCollection';
+import createApiStore from '@/shared/lib/createApiStore';
+import { api } from '@/shared/lib/api';
 
 // Sizes in the order configured in Settings (`tallas` groups); sizes no longer configured go last
 export function sortSizes(sizes, groups) {
@@ -7,120 +8,41 @@ export function sortSizes(sizes, groups) {
   return [...order.filter((s) => unique.includes(s)), ...unique.filter((s) => !order.includes(s))];
 }
 
-const img = (id) => `https://images.unsplash.com/photo-${id}?w=300&h=300&fit=crop&auto=format`;
+/**
+ * Products from the API: { id, nombre, categoriaId, precioVenta, costo, descripcion, colores,
+ * stock: { talla: units }, activo, imagenId, imagenUrl, proveedores: [{ id, nombre }],
+ * ultimaCompra: { numero, fecha, proveedorId, proveedor } }.
+ * costo, proveedores and ultimaCompra come from purchases. Saving a different stock records an adjustment.
+ */
+const useProducts = createApiStore('/api/productos', {
+  sort: (a, b) => a.nombre.localeCompare(b.nombre, 'es'),
+});
 
-// catId references the categories store; stock maps each size to units. Suppliers come from purchases
-const useProducts = createCollection('products', [
-  {
-    id: 1,
-    name: 'Vestido Floral Verano',
-    catId: 1,
-    precio: 89900,
-    costo: 45000,
-    descripcion: 'Vestido floral de verano en tela fresca y liviana.',
-    colores: ['Rosa', 'Azul'],
-    stock: { XS: 4, S: 8, M: 10, L: 6 },
-    estado: 'Activo',
-    img: img('1572804013309-59a88b7e92f1'),
-  },
-  {
-    id: 2,
-    name: 'Blusa Seda Negra',
-    catId: 2,
-    precio: 65000,
-    costo: 30000,
-    descripcion: 'Blusa de seda con caída suave.',
-    colores: ['Negro', 'Blanco'],
-    stock: { XS: 2, S: 5, M: 5, L: 3, XL: 0 },
-    estado: 'Activo',
-    img: img('1485462537746-965f33f7f6a7'),
-  },
-  {
-    id: 3,
-    name: 'Jean Skinny Azul',
-    catId: 3,
-    precio: 119000,
-    costo: 60000,
-    descripcion: 'Jean tiro alto con elasticidad.',
-    colores: ['Azul oscuro'],
-    stock: { 25: 1, 26: 0, 28: 2, 30: 0 },
-    estado: 'Activo',
-    img: img('1541099649105-f69ad21f3246'),
-  },
-  {
-    id: 4,
-    name: 'Falda Plisada Beige',
-    catId: 4,
-    precio: 75000,
-    costo: 35000,
-    descripcion: 'Falda midi plisada.',
-    colores: ['Beige', 'Negro'],
-    stock: { XS: 3, S: 6, M: 8, L: 5 },
-    estado: 'Activo',
-    img: img('1583496661160-fb5886a0aaaa'),
-  },
-  {
-    id: 5,
-    name: 'Conjunto Lino Blanco',
-    catId: 5,
-    precio: 185000,
-    costo: 90000,
-    descripcion: 'Conjunto de dos piezas en lino.',
-    colores: ['Blanco'],
-    stock: { S: 0, M: 0, L: 0 },
-    estado: 'Activo',
-    img: img('1515886657613-9f3515b0c78f'),
-  },
-  {
-    id: 6,
-    name: 'Cardigan Tejido Crema',
-    catId: 6,
-    precio: 145000,
-    costo: 70000,
-    descripcion: 'Cardigan tejido de punto grueso.',
-    colores: ['Crema', 'Gris'],
-    stock: { S: 3, M: 5, L: 4, XL: 6 },
-    estado: 'Activo',
-    img: img('1434389677669-e08b4cac3105'),
-  },
-  {
-    id: 7,
-    name: 'Top Crop Lentejuelas',
-    catId: 7,
-    precio: 98000,
-    costo: 45000,
-    descripcion: 'Top corto con lentejuelas para la noche.',
-    colores: ['Dorado', 'Plateado'],
-    stock: { XS: 3, S: 4, M: 2 },
-    estado: 'Activo',
-    img: img('1594938298603-c8148c4b4017'),
-  },
-  {
-    id: 8,
-    name: 'Pantalón Palazzo Rojo',
-    catId: 3,
-    precio: 109000,
-    costo: 52000,
-    descripcion: 'Pantalón palazzo de pierna ancha.',
-    colores: ['Rojo'],
-    stock: { XS: 2, S: 4, M: 3, L: 2 },
-    estado: 'Inactivo',
-    img: img('1506629082955-511b1aa562c8'),
-  },
-]);
+/** Fields the API takes when saving a product */
+export const toProductRequest = (p) => ({
+  nombre: p.nombre,
+  categoriaId: p.categoriaId,
+  precioVenta: p.precioVenta,
+  descripcion: p.descripcion,
+  colores: p.colores,
+  stock: p.stock,
+  imagenId: p.imagenId,
+  activo: p.activo,
+});
+
+/** Uploads a product photo; save the product with the returned id to use it. Returns { id, url } */
+export function uploadProductImage(file) {
+  const body = new FormData();
+  body.append('archivo', file);
+  return api('/api/productos/imagenes', { method: 'POST', body });
+}
 
 export const totalStock = (p) => Object.values(p.stock).reduce((a, b) => a + b, 0);
 
-/** Adds delta units to one size of a product (negative to subtract), never below 0 */
-export function adjustStock(productId, talla, delta) {
-  const p = useProducts.api.getById(productId);
-  if (!p) return;
-  useProducts.api.update(productId, { stock: { ...p.stock, [talla]: Math.max(0, (p.stock[talla] ?? 0) + delta) } });
-}
-
-/** A product's cost is the unit cost it had in its most recent purchase */
-export function setPurchaseCost(productId, costo) {
-  if (useProducts.api.getById(productId)) useProducts.api.update(productId, { costo });
-}
+// Stock and cost now change on the server only (adjustments here, and purchases and sales once they are
+// connected), so the sales and purchases still kept in the browser no longer touch them.
+// TODO: remove both when Compras and Ventas save through the API.
+export function adjustStock() {}
+export function setPurchaseCost() {}
 
 export default useProducts;

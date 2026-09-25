@@ -188,7 +188,7 @@ export default function PurchaseOrders({ purchases, suppliers, products, onNew, 
   const [viewingId, setViewingId] = useState(null);
   const supplierOf = (id) => suppliers.find((s) => s.id === id);
   const supplierName = (id) => supplierOf(id)?.nombre ?? 'Proveedor eliminado';
-  const productName = (id) => products.find((p) => p.id === id)?.name ?? 'Producto eliminado';
+  const productName = (id) => products.find((p) => p.id === id)?.nombre ?? 'Producto eliminado';
   const viewing = purchases.find((p) => p.id === viewingId);
 
   const q = search.trim().toLowerCase();

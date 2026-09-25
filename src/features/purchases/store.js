@@ -146,22 +146,6 @@ export function unitCost(p, item) {
 
 export const isPending = (p) => p.estadoPago === 'pendiente';
 
-// A product's suppliers come from its purchases, not from the product itself
-const newestFirst = (purchases) => [...purchases].sort((a, b) => b.fecha.localeCompare(a.fecha) || b.id - a.id);
-const buys = (p, productId) => p.items.some((i) => i.productId === productId);
-
-/** Latest purchase that included the product, or undefined if it was never bought */
-export const lastPurchaseOf = (purchases, productId) => newestFirst(purchases).find((p) => buys(p, productId));
-
-/** Ids of every supplier the product was bought from, most recent first */
-export const suppliersOfProduct = (purchases, productId) => [
-  ...new Set(
-    newestFirst(purchases)
-      .filter((p) => buys(p, productId))
-      .map((p) => p.proveedorId),
-  ),
-];
-
 // Key of a purchase's attached invoice file in the browser file store
 export const purchaseFileKey = (p) => `purchase-${p.id}`;
 
