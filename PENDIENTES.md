@@ -9,8 +9,8 @@ Frontend: este repositorio. Backend: repositorio `backend` (.NET 9 + SQL Server)
 
 ## 0. Antes que nada
 
-- [ ] **Hacer commit** de todo lo trabajado en la rama `santiago`, en los dos repositorios (frontend y backend). Hoy no hay nada guardado en git.
-- [ ] **Push** a GitHub cuando se decida.
+- [x] **Hacer commit** de todo lo trabajado en la rama `santiago`, en los dos repositorios (frontend `189f56b`, backend `2a4d106`).
+- [x] **Push** de `santiago` a GitHub en los dos repositorios. Falta decidir cuándo pasarlo a `develop` / `main`.
 - [ ] **No usar `npm run format`** hasta configurar el formateador: `oxfmt` no toma el estilo del proyecto (comillas simples, punto y coma, 120 columnas) y reescribe todos los archivos. Hay que agregarle su archivo de configuración o cambiarlo por Prettier.
 
 ---
