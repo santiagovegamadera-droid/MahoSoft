@@ -70,9 +70,9 @@ Para cada módulo: endpoints en el backend (con su permiso) y reemplazar su `sto
 
 ## 3. Seguridad y puesta en producción
 
-- [ ] **Cambiar la contraseña de ejemplo `Maho2026!`** de todos los usuarios antes de usar el sistema de verdad.
-- [ ] Definir **dónde se publica**: la API, la base de datos SQL Server y el frontend.
-- [ ] En producción: clave JWT y cadena de conexión como variables de entorno (nunca en el código), HTTPS y el dominio real del frontend en `Cors:Origenes`.
+- [x] **Contraseña de ejemplo `Maho2026!`**: en producción no se cargan los datos de ejemplo; la primera administradora se crea con las variables `Inicial__AdminEmail` e `Inicial__AdminPassword` (mínimo 12 caracteres, no puede ser la de ejemplo).
+- [ ] Definir **dónde se publica**: la API, la base de datos SQL Server y el frontend. La app ya está lista para cualquier proveedor; falta elegirlo para escribir el paso a paso (ver "Publicar" en el README del backend).
+- [x] En producción: toda la configuración por variables de entorno (la API no arranca si falta una obligatoria), HSTS/HTTPS, y el dominio real del frontend en `Cors__Origenes__0` y `App__UrlFrontend`.
 - [ ] **Copias de seguridad** automáticas de la base de datos y de la carpeta de PDF.
 - [x] Revisar qué puede hacer cada rol en cada endpoint (Vendedora, Bodega, Administradora): cubierto por las pruebas de permisos.
 - [x] **Pruebas automáticas del backend** (`backend/tests/MahoSoft.Pruebas`, `dotnet test`): 29 pruebas de totales, stock, concurrencia, anulaciones, ajustes y permisos, contra una base aparte.
