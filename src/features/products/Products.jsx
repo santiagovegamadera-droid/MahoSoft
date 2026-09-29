@@ -1,12 +1,11 @@
 import { useState } from 'react';
 import { Plus, Shirt } from 'lucide-react';
-import useProducts, { totalStock } from '@/features/products/store';
+import useProducts, { toProductRequest, totalStock } from '@/features/products/store';
 import useCategories from '@/features/categories/store';
-import useSuppliers from '@/features/suppliers/store';
-import { lastPurchaseOf, usePurchases } from '@/features/purchases/store';
 import StockOverview from '@/features/products/StockOverview';
 import useSettings from '@/features/settings/store';
 import ConfirmDialog from '@/shared/components/ConfirmDialog';
+import { ErrorAlert, LoadingState } from '@/shared/components/Feedback';
 import { Button, RowActions, StatusToggle } from '@/shared/components/Form';
 import usePagination from '@/shared/lib/usePagination';
 import Pagination from '@/shared/components/Pagination';
@@ -15,34 +14,45 @@ import { FilterSelect, SearchInput, SegmentedTabs, Toolbar } from '@/shared/comp
 import ProductImage from '@/shared/components/ProductImage';
 
 export default function Products({ onEdit, onNew }) {
-  const { items: products, update, remove } = useProducts();
+  const { items: products, loaded, loading, error, reload, update, remove } = useProducts();
   const { items: categories } = useCategories();
-  const { items: suppliers } = useSuppliers();
-  const { items: purchases } = usePurchases();
   const { stockBajoProducto } = useSettings();
   const [tab, setTab] = useState('productos');
   const [catId, setCatId] = useState('all');
   const [estado, setEstado] = useState('Todos');
   const [search, setSearch] = useState('');
   const [deleting, setDeleting] = useState(null);
+  const [actionError, setActionError] = useState('');
 
-  const catName = (id) => categories.find((c) => c.id === id)?.name ?? '—';
-  // Who the product was last bought from, according to Compras
-  const lastSupplier = (p) => {
-    const last = lastPurchaseOf(purchases, p.id);
-    return last && (suppliers.find((s) => s.id === last.proveedorId)?.name ?? 'Proveedor eliminado');
-  };
+  const catName = (id) => categories.find((c) => c.id === id)?.nombre ?? '—';
+  const estadoOf = (p) => (p.activo ? 'Activo' : 'Inactivo');
 
   const filtered = products.filter(
     (p) =>
-      (catId === 'all' || p.catId === catId) &&
-      (estado === 'Todos' || p.estado === estado) &&
-      p.name.toLowerCase().includes(search.toLowerCase()),
+      (catId === 'all' || p.categoriaId === catId) &&
+      (estado === 'Todos' || estadoOf(p) === estado) &&
+      p.nombre.toLowerCase().includes(search.toLowerCase()),
   );
+
+  // Row actions (toggle, delete) report failures above the table
+  async function run(action) {
+    setActionError('');
+    try {
+      await action();
+    } catch (err) {
+      setActionError(err.message);
+    }
+  }
+
+  function confirmDelete() {
+    const p = deleting;
+    setDeleting(null);
+    run(() => remove(p.id));
+  }
   const pager = usePagination(filtered, `${catId}|${estado}|${search}`);
 
   return (
-    <div className="p-6">
+    <div className="p-4 sm:p-6">
       <div className="mb-6">
         <SegmentedTabs
           value={tab}
@@ -54,6 +64,9 @@ export default function Products({ onEdit, onNew }) {
           ]}
         />
       </div>
+
+      <ErrorAlert message={error} onRetry={reload} className="mb-4" />
+      <ErrorAlert message={actionError} className="mb-4" />
 
       {tab === 'stock' && <StockOverview products={products} catName={catName} />}
 
@@ -73,7 +86,7 @@ export default function Products({ onEdit, onNew }) {
             </Button>
           </Toolbar>
           <div className="flex flex-wrap gap-1.5 mb-5">
-            {[{ id: 'all', name: 'Todas' }, ...categories].map((c) => (
+            {[{ id: 'all', nombre: 'Todas' }, ...categories].map((c) => (
               <button
                 key={c.id}
                 onClick={() => setCatId(c.id)}
@@ -83,7 +96,7 @@ export default function Products({ onEdit, onNew }) {
                     : 'bg-white text-brand-600 border-brand-200 hover:border-brand-400'
                 }`}
               >
-                {c.name}
+                {c.nombre}
               </button>
             ))}
           </div>
@@ -98,17 +111,17 @@ export default function Products({ onEdit, onNew }) {
                   <ClickableRow key={p.id} onOpen={() => onEdit(p.id)}>
                     <td className="px-4 py-2.5">
                       <div className="flex items-center gap-3">
-                        <ProductImage src={p.img} alt={p.name} className="w-9 h-9 rounded-lg shrink-0" />
-                        <span className="font-medium text-brand-800">{p.name}</span>
+                        <ProductImage src={p.imagenUrl} alt={p.nombre} className="w-9 h-9 rounded-lg shrink-0" />
+                        <span className="font-medium text-brand-800">{p.nombre}</span>
                       </div>
                     </td>
                     <td className="px-4 py-2.5">
                       <span className="text-xs px-2 py-1 rounded-full font-medium bg-brand-200 text-brand-800">
-                        {catName(p.catId)}
+                        {catName(p.categoriaId)}
                       </span>
                     </td>
                     <td className="px-4 py-2.5 font-semibold text-brand-800 font-mono">
-                      ${p.precio.toLocaleString('es-CO')}
+                      ${p.precioVenta.toLocaleString('es-CO')}
                     </td>
                     <td className="px-4 py-2.5">
                       <div className="flex gap-1 flex-wrap">
@@ -137,19 +150,26 @@ export default function Products({ onEdit, onNew }) {
                       </span>
                     </td>
                     <td className="px-4 py-2.5 text-xs text-brand-600">
-                      {lastSupplier(p) ?? <span className="text-subtle">Sin compras</span>}
+                      {p.ultimaCompra?.proveedor ?? <span className="text-subtle">Sin compras</span>}
                     </td>
                     <td className="px-4 py-2.5">
-                      <StatusToggle value={p.estado} label={p.name} onChange={(estado) => update(p.id, { estado })} />
+                      <StatusToggle
+                        value={estadoOf(p)}
+                        label={p.nombre}
+                        onChange={(estado) =>
+                          run(() => update(p.id, { ...toProductRequest(p), activo: estado === 'Activo' }))
+                        }
+                      />
                     </td>
                     <td className="px-4 py-2.5">
-                      <RowActions label={p.name} onEdit={() => onEdit(p.id)} onDelete={() => setDeleting(p)} />
+                      <RowActions label={p.nombre} onEdit={() => onEdit(p.id)} onDelete={() => setDeleting(p)} />
                     </td>
                   </ClickableRow>
                 );
               })}
             </Table>
-            {filtered.length === 0 && <EmptyState icon={Shirt} message="No hay productos que coincidan." />}
+            {!loaded && loading && <LoadingState message="Cargando productos…" />}
+            {loaded && filtered.length === 0 && <EmptyState icon={Shirt} message="No hay productos que coincidan." />}
             <Pagination pager={pager} label="productos" />
           </TableCard>
         </>
@@ -158,12 +178,9 @@ export default function Products({ onEdit, onNew }) {
       {deleting && (
         <ConfirmDialog
           title="Eliminar producto"
-          message={`¿Eliminar ${deleting.name}? Esta acción no se puede deshacer.`}
+          message={`¿Eliminar ${deleting.nombre}? Esta acción no se puede deshacer.`}
           onCancel={() => setDeleting(null)}
-          onConfirm={() => {
-            remove(deleting.id);
-            setDeleting(null);
-          }}
+          onConfirm={confirmDelete}
         />
       )}
     </div>

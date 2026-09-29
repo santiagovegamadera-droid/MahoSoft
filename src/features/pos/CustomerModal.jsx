@@ -5,6 +5,7 @@ import { Button, Field, inputClass } from '@/shared/components/Form';
 import DocumentInput, { defaultDocType } from '@/shared/components/DocumentInput';
 import { isEmail } from '@/features/pos/SendInvoice';
 import useSettings from '@/features/settings/store';
+import CustomerSearch from '@/features/pos/CustomerSearch';
 
 export const EMPTY_CUSTOMER = { nombre: '', tipoDocumento: '', documento: '', telefono: '', correo: '' };
 export const EMPTY_DELIVERY = { direccion: '', barrio: '', ciudad: '', fecha: '', envio: 0, notas: '' };
@@ -62,8 +63,19 @@ export default function CustomerModal({ isOrder, customer, delivery, onSave, onC
         }}
         className="space-y-5"
       >
-        <div className="grid grid-cols-[3fr_2fr] gap-3">
-          <Field label="Nombre" error={touched && errors.nombre} className="col-span-2">
+        <CustomerSearch
+          onPick={(found) =>
+            setC({
+              nombre: found.nombre,
+              tipoDocumento: found.tipoDocumento || c.tipoDocumento,
+              documento: found.documento,
+              telefono: found.telefono,
+              correo: found.correo,
+            })
+          }
+        />
+        <div className="grid grid-cols-1 sm:grid-cols-[3fr_2fr] gap-3">
+          <Field label="Nombre" error={touched && errors.nombre} className="sm:col-span-2">
             <input value={c.nombre} onChange={setCustomer('nombre')} className={inputClass} autoFocus />
           </Field>
           <Field label="Documento" group>
@@ -84,7 +96,7 @@ export default function CustomerModal({ isOrder, customer, delivery, onSave, onC
               placeholder="300 000 0000"
             />
           </Field>
-          <Field label="Correo" error={touched && errors.correo} className="col-span-2">
+          <Field label="Correo" error={touched && errors.correo} className="sm:col-span-2">
             <input
               type="email"
               value={c.correo}
@@ -101,8 +113,8 @@ export default function CustomerModal({ isOrder, customer, delivery, onSave, onC
               <Truck size={16} />
               Entrega
             </p>
-            <div className="grid grid-cols-2 gap-3">
-              <Field label="Dirección" error={touched && errors.direccion} className="col-span-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <Field label="Dirección" error={touched && errors.direccion} className="sm:col-span-2">
                 <input
                   value={d.direccion}
                   onChange={setDelivery('direccion')}
@@ -129,7 +141,7 @@ export default function CustomerModal({ isOrder, customer, delivery, onSave, onC
                   className={inputClass}
                 />
               </Field>
-              <Field label="Notas de entrega" className="col-span-2">
+              <Field label="Notas de entrega" className="sm:col-span-2">
                 <textarea
                   value={d.notas}
                   onChange={setDelivery('notas')}

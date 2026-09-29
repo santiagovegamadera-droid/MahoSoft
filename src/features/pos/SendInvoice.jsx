@@ -1,19 +1,39 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { CheckCircle2, Loader2, Mail, Send } from 'lucide-react';
+import { api } from '@/shared/lib/api';
 
 export const isEmail = (s) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s.trim());
 
-// Visual only: sending is simulated until the backend can deliver emails
-export default function SendInvoice({ factura, email: initialEmail = '', sendNow = false }) {
+/**
+ * Emails a sale's receipt (POST /api/ventas/{id}/enviar). With `sendNow` it goes out on its own, to the email the
+ * customer left at checkout.
+ */
+export default function SendInvoice({ ventaId, factura, email: initialEmail = '', sendNow = false }) {
   const [email, setEmail] = useState(initialEmail);
-  const [status, setStatus] = useState(sendNow && isEmail(initialEmail) ? 'sending' : 'idle');
+  const [status, setStatus] = useState('idle');
+  const [error, setError] = useState('');
+  const autoSent = useRef(false);
   const valid = isEmail(email);
 
+  async function send(address) {
+    setError('');
+    setStatus('sending');
+    try {
+      await api(`/api/ventas/${ventaId}/enviar`, { method: 'POST', body: { correo: address.trim() } });
+      setStatus('sent');
+    } catch (err) {
+      setError(err.message);
+      setStatus('idle');
+    }
+  }
+
+  // Only once, even when React runs effects twice in development
   useEffect(() => {
-    if (status !== 'sending') return;
-    const t = setTimeout(() => setStatus('sent'), 1200);
-    return () => clearTimeout(t);
-  }, [status]);
+    if (sendNow && isEmail(initialEmail) && !autoSent.current) {
+      autoSent.current = true;
+      send(initialEmail);
+    }
+  }, []);
 
   if (status === 'sending') {
     return (
@@ -46,7 +66,7 @@ export default function SendInvoice({ factura, email: initialEmail = '', sendNow
     <form
       onSubmit={(e) => {
         e.preventDefault();
-        if (valid) setStatus('sending');
+        if (valid) send(email);
       }}
       className="p-3 rounded-xl border text-left border-brand-150 bg-brand-25"
     >
@@ -72,6 +92,7 @@ export default function SendInvoice({ factura, email: initialEmail = '', sendNow
           Enviar
         </button>
       </div>
+      {error && <p className="mt-1.5 text-xs text-danger">{error}</p>}
     </form>
   );
 }

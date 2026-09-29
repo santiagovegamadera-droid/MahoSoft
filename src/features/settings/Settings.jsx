@@ -1,19 +1,21 @@
 import { useState } from 'react';
-import { Boxes, Check, IdCard, RotateCcw, Ruler, ShoppingCart, Store } from 'lucide-react';
-import useSettings, { DEFAULT_SETTINGS, updateSettings } from '@/features/settings/store';
+import { Boxes, Check, IdCard, Loader2, RotateCcw, Ruler, ShoppingCart, Store } from 'lucide-react';
+import useSettings, { DEFAULT_SETTINGS, saveSettings, useSettingsStatus } from '@/features/settings/store';
 import BusinessSettings, { businessKeys, validateBusiness } from '@/features/settings/BusinessSettings';
 import PosSettings, { posKeys, validatePos } from '@/features/settings/PosSettings';
 import InventorySettings, { inventoryKeys, validateInventory } from '@/features/settings/InventorySettings';
 import SizeSettings, { sizeKeys, validateSizes } from '@/features/settings/SizeSettings';
 import DocumentSettings, { documentKeys, validateDocuments } from '@/features/settings/DocumentSettings';
 import ConfirmDialog from '@/shared/components/ConfirmDialog';
+import { ErrorAlert, LoadingState } from '@/shared/components/Feedback';
 import { Button } from '@/shared/components/Form';
 import { SegmentedTabs } from '@/shared/components/Toolbar';
 
-// Each view edits and saves only its own keys of the settings
+// Each view edits only its own keys of the settings and saves them to its endpoint (/api/configuracion/<section>)
 const VIEWS = [
   {
     id: 'negocio',
+    section: 'negocio',
     label: 'Datos del negocio',
     description: 'Aparecen en los recibos de venta.',
     icon: Store,
@@ -23,6 +25,7 @@ const VIEWS = [
   },
   {
     id: 'pos',
+    section: 'pos',
     label: 'Punto de venta',
     description: 'Opciones disponibles al registrar una venta.',
     icon: ShoppingCart,
@@ -32,6 +35,7 @@ const VIEWS = [
   },
   {
     id: 'inventario',
+    section: 'inventario',
     label: 'Inventario',
     description: 'Cuándo marcar un producto o una talla con stock bajo.',
     icon: Boxes,
@@ -41,6 +45,7 @@ const VIEWS = [
   },
   {
     id: 'tallas',
+    section: 'tallas',
     label: 'Tallas',
     description: 'Tallas disponibles para los productos, agrupadas y en orden.',
     icon: Ruler,
@@ -50,6 +55,7 @@ const VIEWS = [
   },
   {
     id: 'documentos',
+    section: 'tipos-documento',
     label: 'Tipos de documento',
     description: 'Tipos de identificación que se piden a los clientes.',
     icon: IdCard,
@@ -68,6 +74,8 @@ function SettingsView({ view }) {
   const [errors, setErrors] = useState({});
   const [saved, setSaved] = useState(false);
   const [resetting, setResetting] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState('');
   const { Form, icon: Icon } = view;
 
   const dirty = JSON.stringify(form) !== JSON.stringify(current);
@@ -77,21 +85,32 @@ function SettingsView({ view }) {
     setSaved(false);
   }
 
+  // Saves the values and shows the server's answer (it may refuse, e.g. removing a size already in use)
+  async function store(values) {
+    setSaveError('');
+    setSaving(true);
+    try {
+      const settings = await saveSettings(view.section, values);
+      setForm(pick(settings, view.keys));
+      setSaved(true);
+    } catch (err) {
+      setSaveError(err.message);
+    } finally {
+      setSaving(false);
+    }
+  }
+
   function save() {
     const { values, errors: errs } = view.validate(form);
     setErrors(errs);
     if (Object.keys(errs).length) return;
-    updateSettings(values);
-    setForm(values);
-    setSaved(true);
+    store(values);
   }
 
   function reset() {
-    const defaults = pick(DEFAULT_SETTINGS, view.keys);
-    updateSettings(defaults);
-    setForm(defaults);
     setErrors({});
     setResetting(false);
+    store(pick(DEFAULT_SETTINGS, view.keys));
   }
 
   return (
@@ -108,6 +127,7 @@ function SettingsView({ view }) {
 
       <div className="px-5 py-4">
         <Form form={form} update={update} errors={errors} />
+        <ErrorAlert message={saveError} className="mt-4" />
       </div>
 
       <div className="flex justify-end items-center gap-2 px-5 py-3 border-t border-brand-50">
@@ -116,11 +136,12 @@ function SettingsView({ view }) {
             <Check size={14} /> Cambios guardados
           </span>
         )}
-        <Button variant="secondary" onClick={() => setResetting(true)}>
+        <Button variant="secondary" onClick={() => setResetting(true)} disabled={saving}>
           <RotateCcw size={16} /> Restaurar predeterminados
         </Button>
-        <Button onClick={save} disabled={!dirty}>
-          Guardar cambios
+        <Button onClick={save} disabled={!dirty || saving}>
+          {saving && <Loader2 size={16} className="animate-spin" />}
+          {saving ? 'Guardando…' : 'Guardar cambios'}
         </Button>
       </div>
 
@@ -140,9 +161,10 @@ function SettingsView({ view }) {
 export default function Settings() {
   const [viewId, setViewId] = useState(VIEWS[0].id);
   const view = VIEWS.find((v) => v.id === viewId);
+  const { loaded, error, reload } = useSettingsStatus();
 
   return (
-    <div className="p-6">
+    <div className="p-4 sm:p-6">
       <div className="mb-6">
         <SegmentedTabs
           value={viewId}
@@ -153,8 +175,15 @@ export default function Settings() {
       </div>
 
       <div className="max-w-3xl">
-        {/* key: switching views starts a fresh form with that view's saved values */}
-        <SettingsView key={view.id} view={view} />
+        {/* The forms start from the saved values, so they wait for the first answer from the API */}
+        {loaded ? (
+          // key: switching views starts a fresh form with that view's saved values
+          <SettingsView key={view.id} view={view} />
+        ) : error ? (
+          <ErrorAlert message={error} onRetry={reload} />
+        ) : (
+          <LoadingState message="Cargando configuración…" />
+        )}
       </div>
     </div>
   );

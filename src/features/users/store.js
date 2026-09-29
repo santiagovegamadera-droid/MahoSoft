@@ -1,68 +1,31 @@
-import createCollection from '@/shared/lib/createCollection';
+import createApiStore from '@/shared/lib/createApiStore';
+import { api } from '@/shared/lib/api';
 import { useSession } from '@/features/auth/session';
 
 export const ROLES = ['Administradora', 'Vendedora', 'Bodega'];
 export const PERMISSIONS = ['Dashboard', 'POS', 'Compras', 'Proveedores', 'Usuarios', 'Reportes'];
-
-const useUsers = createCollection('users', [
-  {
-    id: 1,
-    name: 'Ana Martínez',
-    email: 'ana@ellaboutique.co',
-    rol: 'Administradora',
-    permisos: PERMISSIONS,
-    estado: 'Activo',
-    ultimo: '2026-09-23 08:15',
-  },
-  {
-    id: 2,
-    name: 'Carla Rodríguez',
-    email: 'carla@ellaboutique.co',
-    rol: 'Vendedora',
-    permisos: ['POS'],
-    estado: 'Activo',
-    ultimo: '2026-09-23 09:02',
-  },
-  {
-    id: 3,
-    name: 'Sofía Parra',
-    email: 'sofia@ellaboutique.co',
-    rol: 'Vendedora',
-    permisos: ['POS'],
-    estado: 'Activo',
-    ultimo: '2026-09-22 18:45',
-  },
-  {
-    id: 4,
-    name: 'Valentina Ruiz',
-    email: 'vale@ellaboutique.co',
-    rol: 'Vendedora',
-    permisos: ['POS'],
-    estado: 'Inactivo',
-    ultimo: '2026-09-10 12:30',
-  },
-  {
-    id: 5,
-    name: 'Jorge Mejía',
-    email: 'jorge@ellaboutique.co',
-    rol: 'Bodega',
-    permisos: ['Compras'],
-    estado: 'Activo',
-    ultimo: '2026-09-23 07:58',
-  },
-]);
+export const PASSWORD_MIN = 8;
 
 /**
- * The signed-in user. Identity, role and permissions come from the API session; the rest (phone,
- * document…) still comes from the local record until the Usuarios module moves to the API.
+ * Users from the API (Usuarios permission only): { id, nombre, email, rol, telefono, tipoDocumento, documento,
+ * activo, ultimoAcceso, creadoEn, permisos }. Users are deactivated, never deleted.
+ */
+const useUsers = createApiStore('/api/usuarios', {
+  sort: (a, b) => a.nombre.localeCompare(b.nombre, 'es'),
+});
+
+/** Sets a new password for a user (e.g. one who forgot it) */
+export const resetPassword = (id, nueva) => api(`/api/usuarios/${id}/password`, { method: 'POST', body: { nueva } });
+
+/**
+ * The signed-in user as the session has it: { id, name, email, rol, permisos }. Phone and document are in
+ * Mi perfil (GET /api/perfil); reading the user list here would need the Usuarios permission.
  */
 export function useCurrentUser() {
   const session = useSession();
-  const { items } = useUsers();
   if (!session) return null;
   const { id, nombre, email, rol, permisos } = session.usuario;
-  const local = items.find((u) => u.id === id);
-  return { ...local, id, name: nombre, email, rol, permisos };
+  return { id, name: nombre, email, rol, permisos };
 }
 
 export const initials = (name) =>

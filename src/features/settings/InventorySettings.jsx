@@ -15,7 +15,7 @@ export function validateInventory(form) {
 export default function InventorySettings({ form, update, errors }) {
   const set = (k) => (e) => update({ [k]: e.target.value });
   return (
-    <div className="grid grid-cols-2 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <Field label="Stock bajo por producto (unidades)" error={errors.stockBajoProducto}>
         <input
           type="number"

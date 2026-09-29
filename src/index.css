@@ -75,3 +75,24 @@ body {
   background: var(--color-brand-400);
   border-radius: 9999px;
 }
+
+/* Printing a receipt: only the .print-area copy (the 80 mm till receipt) is printed, without the app around it.
+   Pick the receipt printer and its roll size in the print dialog. */
+.print-area {
+  display: none;
+}
+@media print {
+  @page {
+    margin: 4mm;
+  }
+  body > *:not(.print-area) {
+    display: none !important;
+  }
+  .print-area {
+    display: block;
+  }
+  .print-area * {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+}

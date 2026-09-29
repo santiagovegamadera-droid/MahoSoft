@@ -1,51 +1,11 @@
-import createCollection from '@/shared/lib/createCollection';
+import createApiStore from '@/shared/lib/createApiStore';
 
-// Categories saved before estado existed count as Activo
-export const isActiveCategory = (c) => (c?.estado ?? 'Activo') === 'Activo';
+// A category not loaded yet counts as active, so screens don't hide products while the list arrives
+export const isActiveCategory = (c) => c?.activo !== false;
 
-const useCategories = createCollection('categories', [
-  {
-    id: 1,
-    name: 'Vestidos',
-    descripcion: 'Vestidos de día, noche y ocasión especial',
-    estado: 'Activo',
-  },
-  {
-    id: 2,
-    name: 'Blusas',
-    descripcion: 'Tops, blusas y camisetas',
-    estado: 'Activo',
-  },
-  {
-    id: 3,
-    name: 'Pantalones',
-    descripcion: 'Jeans, pantalones formales y casuales',
-    estado: 'Activo',
-  },
-  {
-    id: 4,
-    name: 'Faldas',
-    descripcion: 'Faldas mini, midi y maxi',
-    estado: 'Activo',
-  },
-  {
-    id: 5,
-    name: 'Conjuntos',
-    descripcion: 'Sets de dos y tres piezas',
-    estado: 'Activo',
-  },
-  {
-    id: 6,
-    name: 'Abrigos',
-    descripcion: 'Cardigans, blazers y abrigos',
-    estado: 'Activo',
-  },
-  {
-    id: 7,
-    name: 'Tops',
-    descripcion: 'Tops de fiesta y crop tops',
-    estado: 'Activo',
-  },
-]);
+/** Categories from the API: { id, nombre, descripcion, activo, productos, productosActivos } */
+const useCategories = createApiStore('/api/categorias', {
+  sort: (a, b) => a.nombre.localeCompare(b.nombre, 'es'),
+});
 
 export default useCategories;

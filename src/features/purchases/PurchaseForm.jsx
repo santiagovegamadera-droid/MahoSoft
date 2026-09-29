@@ -5,6 +5,7 @@ import {
   Building2,
   CheckCircle2,
   FileText,
+  Loader2,
   Plus,
   ShoppingBag,
   Store,
@@ -14,8 +15,8 @@ import ProductSearch from '@/features/purchases/ProductSearch';
 import InvoiceFile from '@/features/purchases/InvoiceFile';
 import { DOCUMENT_TYPES, IVA_RATES, PAYMENT_TERMS, ivaLabel, purchaseTotals } from '@/features/purchases/store';
 import useSettings from '@/features/settings/store';
-import { useCurrentUser } from '@/features/users/store';
 import { formatDocument } from '@/shared/components/DocumentInput';
+import { ErrorAlert } from '@/shared/components/Feedback';
 import { Button, Field, inputClass } from '@/shared/components/Form';
 import { SegmentedTabs } from '@/shared/components/Toolbar';
 
@@ -36,7 +37,7 @@ const newLine = (p) => ({
 function Section({ icon: Icon, title, subtitle, actions, children, className = '' }) {
   return (
     <section className={`bg-white rounded-2xl border border-brand-150 ${className}`}>
-      <div className="flex items-center justify-between gap-3 px-5 py-3 border-b border-brand-50">
+      <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-3 border-b border-brand-50">
         <div className="flex items-center gap-2.5">
           <Icon size={16} className="text-brand-600" />
           <div>
@@ -63,12 +64,14 @@ function Detail({ label, value }) {
   );
 }
 
-export default function PurchaseForm({ products, suppliers, onSave, onClose }) {
-  const user = useCurrentUser();
+/** `order` ({ productoId, talla }) starts the purchase with that line and the product's last supplier */
+export default function PurchaseForm({ products, suppliers, order, onSave, onClose }) {
   const business = useSettings();
-  const activeSuppliers = suppliers.filter((s) => s.estado === 'Activo');
+  const activeSuppliers = suppliers.filter((s) => s.activo);
+  const ordered = order && products.find((p) => p.id === order.productoId);
+  const firstSupplier = activeSuppliers.find((s) => s.id === ordered?.ultimaCompra?.proveedorId) ?? activeSuppliers[0];
   const [form, setForm] = useState({
-    proveedorId: activeSuppliers[0]?.id ?? '',
+    proveedorId: firstSupplier?.id ?? '',
     facturaProveedor: '',
     fecha: today(),
     hora: '',
@@ -76,18 +79,19 @@ export default function PurchaseForm({ products, suppliers, onSave, onClose }) {
     cufe: '',
     tipoComprobante: DOCUMENT_TYPES[0],
     valorComprobante: '',
-    condicionPago: 'contado',
+    condicionPago: 'Contado',
     vence: '',
-    estadoPago: 'pagada',
+    estadoPago: 'Pagada',
     // Starts on what the supplier usually charges; each invoice can still say otherwise
-    iva: activeSuppliers[0]?.iva ?? 0,
+    iva: firstSupplier?.ivaPorcentaje ?? 0,
     ivaIncluido: false,
     descuento: '',
     notas: '',
   });
-  const [lines, setLines] = useState([newLine(products[0])]);
+  const [lines, setLines] = useState([ordered ? { ...newLine(ordered), talla: order.talla } : newLine(products[0])]);
   const [file, setFile] = useState(null);
   const [error, setError] = useState('');
+  const [saving, setSaving] = useState(false);
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
   const productOf = (id) => products.find((p) => p.id === id);
   const supplier = suppliers.find((s) => s.id === Number(form.proveedorId));
@@ -106,7 +110,7 @@ export default function PurchaseForm({ products, suppliers, onSave, onClose }) {
     iva: Number(form.iva),
     ivaIncluido: form.ivaIncluido,
     descuento: Number(form.descuento) || 0,
-    items: lines.map((l) => ({ cant: Number(l.cant) || 0, costo: Number(l.costo) || 0 })),
+    items: lines.map((l) => ({ cant: Number(l.cant) || 0, precio: Number(l.costo) || 0 })),
   };
   const totals = purchaseTotals(draft);
   // Compare with the "Valor" printed on the invoice / e-invoice email
@@ -115,41 +119,54 @@ export default function PurchaseForm({ products, suppliers, onSave, onClose }) {
   // Line total as the invoice prints it: with IVA
   const lineTotal = (l) => (Number(l.cant) || 0) * (Number(l.costo) || 0) * (form.ivaIncluido ? 1 : 1 + rate);
 
-  function submit(e) {
+  // Quick checks here; the server validates everything again and computes the totals
+  async function submit(e) {
     e.preventDefault();
     if (!form.proveedorId) return setError('Elige un proveedor');
     if (!form.facturaProveedor.trim()) return setError('Escribe el número de la factura del proveedor');
     const items = lines.map((l) => ({
-      ref: l.ref.trim(),
-      productId: l.productId,
+      productoId: l.productId,
       talla: l.talla,
-      cant: Number(l.cant),
-      costo: Number(l.costo),
+      referenciaProveedor: l.ref.trim(),
+      cantidad: Number(l.cant),
+      precioUnitario: Number(l.costo),
     }));
-    if (items.some((i) => !i.productId || !i.talla)) return setError('Cada línea necesita producto y talla');
-    if (items.some((i) => !Number.isInteger(i.cant) || i.cant <= 0))
+    if (items.some((i) => !i.productoId || !i.talla)) return setError('Cada línea necesita producto y talla');
+    if (items.some((i) => !Number.isInteger(i.cantidad) || i.cantidad <= 0))
       return setError('Las cantidades deben ser números enteros mayores a 0');
-    if (lines.some((l) => l.costo === '') || items.some((i) => !(i.costo >= 0)))
+    if (lines.some((l) => l.costo === '') || items.some((i) => !(i.precioUnitario >= 0)))
       return setError('Ingresa el precio unitario de cada línea');
     if (!(draft.descuento >= 0)) return setError('El descuento no puede ser negativo');
-    if (form.condicionPago === 'credito' && !form.vence) return setError('Indica cuándo vence el crédito');
-    onSave(
-      {
-        ...form,
-        proveedorId: Number(form.proveedorId),
-        facturaProveedor: form.facturaProveedor.trim(),
-        vendedorProveedor: form.vendedorProveedor.trim(),
-        cufe: form.cufe.trim(),
-        vence: form.condicionPago === 'credito' ? form.vence : '',
-        iva: draft.iva,
-        descuento: draft.descuento,
-        valorComprobante: valor,
-        notas: form.notas.trim(),
-        usuario: user.name,
-        items,
-      },
-      file,
-    );
+    if (form.condicionPago === 'Credito' && !form.vence) return setError('Indica cuándo vence el crédito');
+
+    setError('');
+    setSaving(true);
+    try {
+      await onSave(
+        {
+          proveedorId: Number(form.proveedorId),
+          tipoComprobante: form.tipoComprobante,
+          numeroComprobante: form.facturaProveedor.trim(),
+          fecha: form.fecha,
+          hora: form.hora,
+          vendedorProveedor: form.vendedorProveedor.trim(),
+          cufe: form.cufe.trim(),
+          condicionPago: form.condicionPago,
+          fechaVencimiento: form.condicionPago === 'Credito' ? form.vence : null,
+          estadoPago: form.estadoPago,
+          ivaPorcentaje: draft.iva,
+          preciosIncluyenIva: form.ivaIncluido,
+          descuento: draft.descuento,
+          valorComprobante: valor || null,
+          notas: form.notas.trim(),
+          items,
+        },
+        file,
+      );
+    } catch (err) {
+      setError(err.message);
+      setSaving(false);
+    }
   }
 
   return (
@@ -180,21 +197,26 @@ export default function PurchaseForm({ products, suppliers, onSave, onClose }) {
                 value={form.proveedorId}
                 onChange={(e) => {
                   const next = suppliers.find((s) => s.id === Number(e.target.value));
-                  setForm((f) => ({ ...f, proveedorId: e.target.value, iva: next?.iva ?? 0, ivaIncluido: false }));
+                  setForm((f) => ({
+                    ...f,
+                    proveedorId: e.target.value,
+                    iva: next?.ivaPorcentaje ?? 0,
+                    ivaIncluido: false,
+                  }));
                 }}
                 className={inputClass}
                 aria-label="Proveedor"
               >
                 {activeSuppliers.map((s) => (
                   <option key={s.id} value={s.id}>
-                    {s.name}
+                    {s.nombre}
                   </option>
                 ))}
               </select>
               {supplier && (
                 <div className="grid grid-cols-2 gap-x-4 gap-y-3">
                   <Detail label="Documento" value={formatDocument(supplier.tipoDocumento, supplier.documento)} />
-                  <Detail label="Teléfono" value={supplier.tel} />
+                  <Detail label="Teléfono" value={supplier.telefono} />
                   <Detail label="Dirección" value={supplier.direccion} />
                   <Detail label="Ciudad" value={supplier.ciudad} />
                   <Detail label="Email" value={supplier.email} />
@@ -206,15 +228,15 @@ export default function PurchaseForm({ products, suppliers, onSave, onClose }) {
         </Section>
 
         <Section icon={FileText} title="Factura del proveedor" subtitle="Datos del recuadro de la factura">
-          <div className="grid grid-cols-6 gap-3">
-            <Field label="Tipo de comprobante" className="col-span-3">
+          <div className="grid grid-cols-1 sm:grid-cols-6 gap-3">
+            <Field label="Tipo de comprobante" className="sm:col-span-3">
               <select value={form.tipoComprobante} onChange={set('tipoComprobante')} className={inputClass}>
                 {DOCUMENT_TYPES.map((t) => (
                   <option key={t}>{t}</option>
                 ))}
               </select>
             </Field>
-            <Field label="Número" className="col-span-3">
+            <Field label="Número" className="sm:col-span-3">
               <input
                 value={form.facturaProveedor}
                 onChange={set('facturaProveedor')}
@@ -222,13 +244,13 @@ export default function PurchaseForm({ products, suppliers, onSave, onClose }) {
                 className={inputClass}
               />
             </Field>
-            <Field label="Fecha" className="col-span-3">
+            <Field label="Fecha" className="sm:col-span-3">
               <input type="date" value={form.fecha} onChange={set('fecha')} className={inputClass} />
             </Field>
-            <Field label="Hora" className="col-span-3">
+            <Field label="Hora" className="sm:col-span-3">
               <input type="time" value={form.hora} onChange={set('hora')} className={inputClass} />
             </Field>
-            <Field label="Vendedor / atendido por" className="col-span-3">
+            <Field label="Vendedor / atendido por" className="sm:col-span-3">
               <input
                 value={form.vendedorProveedor}
                 onChange={set('vendedorProveedor')}
@@ -236,7 +258,7 @@ export default function PurchaseForm({ products, suppliers, onSave, onClose }) {
                 className={inputClass}
               />
             </Field>
-            <Field label="CUFE / UUID" className="col-span-3">
+            <Field label="CUFE / UUID" className="sm:col-span-3">
               <input
                 value={form.cufe}
                 onChange={set('cufe')}
@@ -244,28 +266,28 @@ export default function PurchaseForm({ products, suppliers, onSave, onClose }) {
                 className={`${inputClass} font-mono`}
               />
             </Field>
-            <Field label="Condición de pago" className="col-span-3" group>
+            <Field label="Condición de pago" className="sm:col-span-3" group>
               <SegmentedTabs
                 value={form.condicionPago}
                 onChange={(condicionPago) =>
                   setForm((f) => ({
                     ...f,
                     condicionPago,
-                    estadoPago: condicionPago === 'credito' ? 'pendiente' : 'pagada',
+                    estadoPago: condicionPago === 'Credito' ? 'Pendiente' : 'Pagada',
                   }))
                 }
                 label="Condición de pago"
                 options={Object.entries(PAYMENT_TERMS)}
               />
             </Field>
-            {form.condicionPago === 'credito' ? (
-              <Field label="Vence" className="col-span-3">
+            {form.condicionPago === 'Credito' ? (
+              <Field label="Vence" className="sm:col-span-3">
                 <input type="date" value={form.vence} onChange={set('vence')} className={inputClass} />
               </Field>
             ) : (
-              <div className="col-span-3" />
+              <div className="sm:col-span-3" />
             )}
-            <Field label="Documento (opcional)" className="col-span-6" group>
+            <Field label="Documento (opcional)" className="sm:col-span-6" group>
               <InvoiceFile file={file} onChange={setFile} onError={setError} />
             </Field>
           </div>
@@ -299,7 +321,7 @@ export default function PurchaseForm({ products, suppliers, onSave, onClose }) {
         title="Productos comprados"
         subtitle="Una línea por referencia y talla"
         actions={
-          <div className="flex items-center gap-4 text-sm">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
             {hasIva && (
               <label className="flex items-center gap-2 text-brand-600">
                 <input
@@ -326,7 +348,8 @@ export default function PurchaseForm({ products, suppliers, onSave, onClose }) {
         }
       >
         <div className="-mx-5 -mt-5 overflow-x-auto">
-          <table className="w-full text-sm">
+          {/* Scrolls sideways on phones instead of squeezing the fields */}
+          <table className="w-full min-w-[760px] text-sm">
             <thead>
               <tr className="bg-brand-50 text-xs uppercase tracking-wide text-left text-brand-600">
                 <th className="pl-5 pr-2 py-2.5 font-semibold w-10">N.º</th>
@@ -439,7 +462,7 @@ export default function PurchaseForm({ products, suppliers, onSave, onClose }) {
               className={`${inputClass} resize-none`}
             />
           </Field>
-          {error && <p className="text-sm text-danger">{error}</p>}
+          <ErrorAlert message={error} />
         </div>
 
         <section className="bg-white rounded-2xl border border-brand-150 p-5 space-y-2 text-sm">
@@ -507,8 +530,8 @@ export default function PurchaseForm({ products, suppliers, onSave, onClose }) {
               onChange={(estadoPago) => setForm((f) => ({ ...f, estadoPago }))}
               label="Estado del pago"
               options={[
-                ['pagada', 'Pagada'],
-                ['pendiente', 'Pendiente'],
+                ['Pagada', 'Pagada'],
+                ['Pendiente', 'Pendiente'],
               ]}
             />
           </div>
@@ -516,8 +539,9 @@ export default function PurchaseForm({ products, suppliers, onSave, onClose }) {
             <Button variant="secondary" onClick={onClose} className="flex-1">
               Cancelar
             </Button>
-            <Button type="submit" className="flex-1">
-              Registrar compra
+            <Button type="submit" className="flex-1" disabled={saving}>
+              {saving && <Loader2 size={16} className="animate-spin" />}
+              {saving ? 'Registrando…' : 'Registrar compra'}
             </Button>
           </div>
         </section>

@@ -26,7 +26,11 @@ export function SearchInput({ value, onChange, placeholder, label = placeholder,
 /** Pill-style tab switcher; `options` are [value, label] pairs */
 export function SegmentedTabs({ value, onChange, options, label }) {
   return (
-    <div role="tablist" aria-label={label} className="flex gap-1 p-1 rounded-xl w-fit bg-brand-50">
+    <div
+      role="tablist"
+      aria-label={label}
+      className="flex gap-1 p-1 rounded-xl w-fit max-w-full overflow-x-auto bg-brand-50"
+    >
       {options.map(([v, text]) => (
         <button
           key={v}
@@ -34,7 +38,7 @@ export function SegmentedTabs({ value, onChange, options, label }) {
           role="tab"
           aria-selected={value === v}
           onClick={() => onChange(v)}
-          className={`px-3.5 py-1.5 rounded-lg text-sm font-semibold transition-all ${
+          className={`shrink-0 whitespace-nowrap px-3.5 py-1.5 rounded-lg text-sm font-semibold transition-all ${
             value === v
               ? 'bg-white text-brand-800 shadow-[0_1px_3px_rgba(80,52,89,0.1)]'
               : 'text-brand-600 hover:text-brand-800'

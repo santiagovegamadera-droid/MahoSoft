@@ -8,14 +8,17 @@ import { TableCard, TableTitle } from '@/shared/components/Table';
 export default function StockOverview({ products, catName }) {
   const { stockBajoTalla, tallas } = useSettings();
   // Only show size columns that some product uses, in the configured size order
-  const usedSizes = sortSizes(products.flatMap((p) => Object.keys(p.stock)), tallas);
+  const usedSizes = sortSizes(
+    products.flatMap((p) => Object.keys(p.stock)),
+    tallas,
+  );
   const allSizes = products.flatMap((p) => Object.values(p.stock));
   const inventoryValue = products.reduce((sum, p) => sum + totalStock(p) * (p.costo || 0), 0);
   const pager = usePagination(products);
 
   return (
     <>
-      <div className="grid grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {[
           { label: 'Total prendas', val: allSizes.reduce((a, b) => a + b, 0), color: 'text-brand-800' },
           {
@@ -62,10 +65,10 @@ export default function StockOverview({ products, catName }) {
             <tbody className="divide-y divide-brand-50">
               {pager.pageItems.map((p) => (
                 <tr key={p.id} className="hover:bg-brand-25">
-                  <td className="px-4 py-2.5 font-medium text-brand-800">{p.name}</td>
+                  <td className="px-4 py-2.5 font-medium text-brand-800">{p.nombre}</td>
                   <td className="px-4 py-2.5">
                     <span className="text-xs px-2 py-0.5 rounded-full bg-brand-200 text-brand-800">
-                      {catName(p.catId)}
+                      {catName(p.categoriaId)}
                     </span>
                   </td>
                   {usedSizes.map((t) => {

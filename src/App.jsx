@@ -29,6 +29,15 @@ function Workspace() {
   const user = useCurrentUser();
   const [view, setView] = useState(() => homeView(user));
   const [editingProduct, setEditingProduct] = useState(undefined);
+  // "Pedir" on a stock alert opens a new purchase with that product and size
+  const [order, setOrder] = useState(null);
+  // Menu drawer on screens below 1024 px
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  function navigate(next) {
+    setView(next);
+    setMenuOpen(false);
+  }
 
   // Permissions may have changed since the session started; an invalid session signs out on its own
   useEffect(() => {
@@ -50,19 +59,29 @@ function Workspace() {
     setEditingProduct(undefined);
     setView('product-detail');
   }
+  function orderProduct(line) {
+    setOrder(line);
+    setView('purchases');
+  }
 
   return (
-    <div className="flex h-screen bg-canvas">
-      <Sidebar current={current} onChange={setView} onLogout={logout} />
+    <div className="flex h-dvh bg-canvas">
+      <Sidebar
+        current={current}
+        onChange={navigate}
+        onLogout={logout}
+        open={menuOpen}
+        onClose={() => setMenuOpen(false)}
+      />
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <Header current={current} />
+        <Header current={current} onMenu={() => setMenuOpen(true)} />
         <main className="flex-1 min-h-0 overflow-y-auto">
-          {current === 'dashboard' && <Dashboard />}
+          {current === 'dashboard' && <Dashboard onOrder={canView(user, 'purchases') ? orderProduct : undefined} />}
           {current === 'products' && <Products onEdit={editProduct} onNew={newProduct} />}
           {current === 'product-detail' && (
             <ProductDetail key={editingProduct ?? 'new'} productId={editingProduct} onBack={goToProducts} />
           )}
-          {current === 'purchases' && <Purchases />}
+          {current === 'purchases' && <Purchases order={order} onOrderUsed={() => setOrder(null)} />}
           {current === 'pos' && <POS />}
           {current === 'sales-history' && <SalesHistory />}
           {current === 'suppliers' && <Suppliers />}

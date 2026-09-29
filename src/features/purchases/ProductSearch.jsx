@@ -10,7 +10,7 @@ export default function ProductSearch({ products, value, onChange, className }) 
   const [rect, setRect] = useState(null);
 
   const selected = products.find((p) => p.id === value);
-  const results = products.filter((p) => p.name.toLowerCase().includes(query.trim().toLowerCase()));
+  const results = products.filter((p) => p.nombre.toLowerCase().includes(query.trim().toLowerCase()));
 
   useEffect(() => {
     if (!open) return;
@@ -60,7 +60,7 @@ export default function ProductSearch({ products, value, onChange, className }) 
       <Search size={13} className="absolute left-2 top-1/2 -translate-y-1/2 text-subtle pointer-events-none" />
       <input
         ref={inputRef}
-        value={open ? query : (selected?.name ?? '')}
+        value={open ? query : (selected?.nombre ?? '')}
         onChange={(e) => {
           setQuery(e.target.value);
           setActive(0);
@@ -68,7 +68,7 @@ export default function ProductSearch({ products, value, onChange, className }) 
         onFocus={openList}
         onBlur={() => setOpen(false)}
         onKeyDown={onKeyDown}
-        placeholder={selected?.name ?? 'Buscar producto...'}
+        placeholder={selected?.nombre ?? 'Buscar producto...'}
         className={`${className} pl-7`}
         role="combobox"
         aria-expanded={open}
@@ -95,7 +95,7 @@ export default function ProductSearch({ products, value, onChange, className }) 
                 i === active ? 'bg-brand-50 text-brand-800' : 'text-brand-800'
               } ${p.id === value ? 'font-semibold' : ''}`}
             >
-              {p.name}
+              {p.nombre}
             </li>
           ))}
           {results.length === 0 && <li className="px-3 py-2 text-xs text-subtle">Sin resultados</li>}

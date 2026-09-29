@@ -1,17 +1,19 @@
 import { useState } from 'react';
-import { Ban, Banknote, CreditCard, FileText, Landmark, ReceiptText } from 'lucide-react';
-import saleTotals from '@/features/sales/saleTotals';
+import { Ban, Banknote, CreditCard, FileText, Landmark, Loader2, Paperclip, ReceiptText } from 'lucide-react';
 import { ReceiptModal } from '@/features/sales/SaleReceipt';
-import useSales, { voidSale } from '@/features/sales/store';
-import ConfirmDialog from '@/shared/components/ConfirmDialog';
+import useSales, { PAYMENT_LABELS, isVoided, voidSale } from '@/features/sales/store';
+import { apiBlob } from '@/shared/lib/api';
+import { openBlob } from '@/shared/lib/files';
+import { ErrorAlert, LoadingState } from '@/shared/components/Feedback';
+import Modal from '@/shared/components/Modal';
 import usePagination from '@/shared/lib/usePagination';
 import Pagination from '@/shared/components/Pagination';
 import StatCard from '@/shared/components/StatCard';
-import { Button } from '@/shared/components/Form';
+import { Button, Field, inputClass } from '@/shared/components/Form';
 import { ClickableRow, EmptyState, Table, TableCard } from '@/shared/components/Table';
 import { FilterSelect, SearchInput, Toolbar } from '@/shared/components/Toolbar';
 
-const paymentIcons = { efectivo: Banknote, tarjeta: CreditCard, transferencia: Landmark };
+const paymentIcons = { Efectivo: Banknote, Tarjeta: CreditCard, Transferencia: Landmark };
 
 const fmt = (n) => `$${n.toLocaleString('es-CO')}`;
 const fmtDate = (iso) =>
@@ -19,39 +21,112 @@ const fmtDate = (iso) =>
 const fmtDay = (iso) => new Date(iso).toLocaleDateString('es-CO', { day: '2-digit', month: 'short' });
 const fmtTime = (iso) => new Date(iso).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
 const isToday = (iso) => new Date(iso).toDateString() === new Date().toDateString();
+const customerName = (s) => s.cliente?.nombre || 'Cliente general';
+
+function VoidedBadge() {
+  return (
+    <span className="px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-danger-soft text-danger">Anulada</span>
+  );
+}
+
+/** Asks why the sale is voided; the server keeps the reason, who voided it and when */
+function VoidSale({ sale, onClose }) {
+  const [motivo, setMotivo] = useState('');
+  const [error, setError] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  async function confirm() {
+    if (!motivo.trim()) return setError('Escribe el motivo de la anulación');
+    setError('');
+    setSaving(true);
+    try {
+      await voidSale(sale.id, motivo.trim());
+      onClose();
+    } catch (err) {
+      setError(err.message);
+      setSaving(false);
+    }
+  }
+
+  return (
+    <Modal
+      title="Anular venta"
+      onClose={onClose}
+      footer={
+        <>
+          <Button variant="secondary" onClick={onClose}>
+            Cancelar
+          </Button>
+          <Button variant="danger" onClick={confirm} disabled={saving}>
+            {saving && <Loader2 size={16} className="animate-spin" />}
+            {saving ? 'Anulando…' : 'Anular venta'}
+          </Button>
+        </>
+      }
+    >
+      <div className="space-y-4">
+        <p className="text-sm text-brand-600">
+          La venta {sale.numeroFactura} por {fmt(sale.total)} quedará en el historial como anulada y sus{' '}
+          {sale.unidades === 1 ? 'prenda vuelve' : `${sale.unidades} prendas vuelven`} al stock.
+        </p>
+        <Field label="Motivo">
+          <textarea
+            rows={2}
+            value={motivo}
+            onChange={(e) => setMotivo(e.target.value)}
+            maxLength={300}
+            placeholder="Ej. la clienta devolvió la prenda, error al cobrar…"
+            className={`${inputClass} resize-none`}
+            autoFocus
+          />
+        </Field>
+        <ErrorAlert message={error} />
+      </div>
+    </Modal>
+  );
+}
 
 export default function SalesHistory() {
-  const { items: sales } = useSales();
+  const { items: sales, loaded, loading, error, reload } = useSales();
   const [search, setSearch] = useState('');
   const [payment, setPayment] = useState('todos');
   const [selectedId, setSelectedId] = useState(null);
   const [voiding, setVoiding] = useState(null);
   const [receipt, setReceipt] = useState(null);
+  const [fileError, setFileError] = useState('');
 
-  // Newest first
-  const rows = [...sales]
-    .sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
-    .map((s) => ({ ...s, ...saleTotals(s) }));
+  async function openTransferProof(sale) {
+    setFileError('');
+    try {
+      await openBlob(apiBlob(`/api/ventas/${sale.id}/comprobante`));
+    } catch (err) {
+      setFileError(err.message);
+    }
+  }
 
   const q = search.toLowerCase();
-  const filtered = rows.filter(
+  const filtered = sales.filter(
     (s) =>
-      (payment === 'todos' || s.pago === payment) &&
-      (s.factura.toLowerCase().includes(q) || s.cliente.toLowerCase().includes(q)),
+      (payment === 'todos' || s.metodoPago === payment) &&
+      (s.numeroFactura.toLowerCase().includes(q) || customerName(s).toLowerCase().includes(q)),
   );
-  const selected = rows.find((s) => s.id === selectedId);
+  const selected = sales.find((s) => s.id === selectedId);
   const pager = usePagination(filtered, `${search}|${payment}`);
 
-  const today = rows.filter((s) => isToday(s.fecha));
+  // Voided sales stay in the list but don't count
+  const valid = sales.filter((s) => !isVoided(s));
+  const today = valid.filter((s) => isToday(s.fecha));
   const todayTotal = today.reduce((sum, s) => sum + s.total, 0);
 
   return (
-    <div className="p-6">
+    <div className="p-4 sm:p-6">
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <StatCard label="Ventas de hoy" value={today.length} />
         <StatCard label="Vendido hoy" value={fmt(todayTotal)} />
-        <StatCard label="Ventas registradas" value={rows.length} />
+        <StatCard label="Ventas registradas" value={valid.length} />
       </div>
+
+      <ErrorAlert message={error} onRetry={reload} className="mb-4" />
 
       <Toolbar>
         <SearchInput value={search} onChange={setSearch} placeholder="Buscar por factura o cliente..." />
@@ -59,72 +134,109 @@ export default function SalesHistory() {
           value={payment}
           onChange={setPayment}
           label="Método de pago"
-          options={[
-            ['todos', 'Todos los pagos'],
-            ['efectivo', 'Efectivo'],
-            ['tarjeta', 'Tarjeta'],
-            ['transferencia', 'Transferencia'],
-          ]}
+          options={[['todos', 'Todos los pagos'], ...Object.entries(PAYMENT_LABELS)]}
         />
       </Toolbar>
 
-      <div className="flex gap-4 items-start">
+      <div className="flex flex-col lg:flex-row gap-4 items-stretch lg:items-start">
         <TableCard className="flex-1 min-w-0">
           <Table columns={['Factura', 'Fecha', 'Cliente', 'Prendas', 'Pago', 'Total']}>
             {pager.pageItems.map((s) => {
-              const PayIcon = paymentIcons[s.pago];
+              const PayIcon = paymentIcons[s.metodoPago];
+              const voided = isVoided(s);
               return (
-                <ClickableRow key={s.id} onOpen={() => setSelectedId(s.id)} selected={selectedId === s.id}>
-                  <td className="px-4 py-2.5 whitespace-nowrap font-mono font-semibold text-brand-800">{s.factura}</td>
+                <ClickableRow
+                  key={s.id}
+                  onOpen={() => {
+                    setSelectedId(s.id);
+                    setFileError('');
+                  }}
+                  selected={selectedId === s.id}
+                >
+                  <td className="px-4 py-2.5 whitespace-nowrap">
+                    <p className={`font-mono font-semibold ${voided ? 'text-subtle line-through' : 'text-brand-800'}`}>
+                      {s.numeroFactura}
+                    </p>
+                    {voided && <VoidedBadge />}
+                  </td>
                   <td className="px-4 py-2.5 whitespace-nowrap">
                     <p className="text-brand-800">{fmtDay(s.fecha)}</p>
                     <p className="text-xs text-subtle">{fmtTime(s.fecha)}</p>
                   </td>
-                  <td className="px-4 py-2.5 text-brand-800">{s.cliente}</td>
-                  <td className="px-4 py-2.5 text-brand-600">{s.items.reduce((n, i) => n + i.qty, 0)}</td>
+                  <td className="px-4 py-2.5 text-brand-800">{customerName(s)}</td>
+                  <td className="px-4 py-2.5 text-brand-600">{s.unidades}</td>
                   <td className="px-4 py-2.5">
-                    <span className="inline-flex items-center gap-1.5 capitalize text-brand-600">
+                    <span className="inline-flex items-center gap-1.5 text-brand-600">
                       <PayIcon size={14} />
-                      {s.pago}
+                      {PAYMENT_LABELS[s.metodoPago]}
                     </span>
                   </td>
-                  <td className="px-4 py-2.5 whitespace-nowrap font-mono font-semibold text-brand-800">{fmt(s.total)}</td>
+                  <td
+                    className={`px-4 py-2.5 whitespace-nowrap font-mono font-semibold ${
+                      voided ? 'text-subtle line-through' : 'text-brand-800'
+                    }`}
+                  >
+                    {fmt(s.total)}
+                  </td>
                 </ClickableRow>
               );
             })}
           </Table>
-          {filtered.length === 0 && (
+          {!loaded && loading && <LoadingState message="Cargando ventas…" />}
+          {loaded && filtered.length === 0 && (
             <EmptyState icon={ReceiptText} message="No hay ventas que coincidan con la búsqueda." />
           )}
           <Pagination pager={pager} label="ventas" />
         </TableCard>
 
         {/* Detail */}
-        <div className="w-64 shrink-0 bg-white rounded-2xl border border-brand-150">
+        <div className="w-full lg:w-64 shrink-0 bg-white rounded-2xl border border-brand-150">
           {selected ? (
             <>
               <div className="p-4 border-b border-brand-50">
-                <p className="font-mono text-sm font-semibold text-brand-800">{selected.factura}</p>
+                <div className="flex items-center gap-2">
+                  <p className="font-mono text-sm font-semibold text-brand-800">{selected.numeroFactura}</p>
+                  {isVoided(selected) && <VoidedBadge />}
+                </div>
                 <p className="text-xs mt-0.5 text-subtle">{fmtDate(selected.fecha)}</p>
                 <div className="mt-2 space-y-0.5 text-xs text-brand-600">
                   <p>
-                    Cliente: <span className="font-medium text-brand-800">{selected.cliente}</span>
+                    Cliente: <span className="font-medium text-brand-800">{customerName(selected)}</span>
                   </p>
                   <p>
                     Vendedor: <span className="font-medium text-brand-800">{selected.vendedor}</span>
                   </p>
                   <p>
-                    Pago: <span className="font-medium capitalize text-brand-800">{selected.pago}</span>
+                    Pago: <span className="font-medium text-brand-800">{PAYMENT_LABELS[selected.metodoPago]}</span>
+                    {selected.comprobante?.banco && ` · ${selected.comprobante.banco}`}
                   </p>
                 </div>
+                {selected.comprobante?.archivo && (
+                  <button
+                    type="button"
+                    onClick={() => openTransferProof(selected)}
+                    className="mt-2 flex items-center gap-1.5 text-xs font-semibold text-brand-600 hover:text-brand-800"
+                  >
+                    <Paperclip size={13} /> Ver comprobante de transferencia
+                  </button>
+                )}
+                <ErrorAlert message={fileError} className="mt-2" />
+                {isVoided(selected) && (
+                  <div className="mt-3 p-2 rounded-lg text-xs bg-danger-tint text-danger space-y-0.5">
+                    <p className="font-semibold">
+                      Anulada por {selected.anuladaPor} · {fmtDate(selected.anuladaEn)}
+                    </p>
+                    <p>{selected.motivoAnulacion}</p>
+                  </div>
+                )}
               </div>
               <div className="p-4 space-y-1.5 border-b border-brand-50">
                 {selected.items.map((i) => (
-                  <div key={i.name + i.talla} className="flex justify-between gap-2 text-xs">
+                  <div key={i.id} className="flex justify-between gap-2 text-xs">
                     <span className="text-brand-800">
-                      {i.qty} × {i.name} <span className="text-subtle">· {i.talla}</span>
+                      {i.cantidad} × {i.producto} <span className="text-subtle">· {i.talla}</span>
                     </span>
-                    <span className="font-mono text-brand-800">{fmt(i.price * i.qty)}</span>
+                    <span className="font-mono text-brand-800">{fmt(i.precioUnitario * i.cantidad)}</span>
                   </div>
                 ))}
               </div>
@@ -135,8 +247,8 @@ export default function SalesHistory() {
                 </div>
                 {selected.descuento > 0 && (
                   <div className="flex justify-between text-danger">
-                    <span>Descuento ({selected.descuento}%)</span>
-                    <span className="font-mono">−{fmt(selected.descuentoAmt)}</span>
+                    <span>Descuento ({selected.descuentoPorcentaje}%)</span>
+                    <span className="font-mono">−{fmt(selected.descuento)}</span>
                   </div>
                 )}
                 {selected.envio > 0 && (
@@ -153,9 +265,11 @@ export default function SalesHistory() {
                   <Button variant="soft" onClick={() => setReceipt(selected)} className="w-full">
                     <FileText size={16} /> Ver comprobante
                   </Button>
-                  <Button variant="dangerGhost" onClick={() => setVoiding(selected)} className="w-full">
-                    <Ban size={16} /> Anular venta
-                  </Button>
+                  {!isVoided(selected) && (
+                    <Button variant="dangerGhost" onClick={() => setVoiding(selected)} className="w-full">
+                      <Ban size={16} /> Anular venta
+                    </Button>
+                  )}
                 </div>
               </div>
             </>
@@ -166,20 +280,7 @@ export default function SalesHistory() {
       </div>
 
       {receipt && <ReceiptModal sale={receipt} onClose={() => setReceipt(null)} />}
-
-      {voiding && (
-        <ConfirmDialog
-          title="Anular venta"
-          message={`¿Anular la venta ${voiding.factura} por ${fmt(voiding.total)}? Se eliminará del historial y las prendas vendidas en el POS volverán al stock.`}
-          confirmLabel="Anular venta"
-          onCancel={() => setVoiding(null)}
-          onConfirm={() => {
-            voidSale(voiding.id);
-            setSelectedId(null);
-            setVoiding(null);
-          }}
-        />
-      )}
+      {voiding && <VoidSale sale={voiding} onClose={() => setVoiding(null)} />}
     </div>
   );
 }

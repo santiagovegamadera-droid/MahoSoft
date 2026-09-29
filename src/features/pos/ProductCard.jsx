@@ -22,9 +22,9 @@ export default function ProductCard({ product, category, price, stockLeft, inCar
         onClick={() => onAdd()}
         disabled={stockLeft === 0}
         className="relative text-left disabled:cursor-not-allowed"
-        aria-label={`Agregar ${product.name}`}
+        aria-label={`Agregar ${product.nombre}`}
       >
-        <ProductImage src={product.img} alt={product.name} className="w-full h-24" />
+        <ProductImage src={product.imagenUrl} alt={product.nombre} className="w-full h-24" />
 
         <span className="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded-full text-xs font-semibold bg-white/90 text-brand-700 backdrop-blur">
           {category}
@@ -50,7 +50,7 @@ export default function ProductCard({ product, category, price, stockLeft, inCar
       </button>
 
       <div className="flex flex-col gap-1.5 p-2 flex-1">
-        <p className="text-xs font-semibold leading-tight text-brand-800 line-clamp-2">{product.name}</p>
+        <p className="text-xs font-semibold leading-tight text-brand-800 line-clamp-2">{product.nombre}</p>
 
         <div className="flex items-end justify-between gap-2 mt-auto">
           <p className="text-xs font-bold text-brand-800 font-mono">{price}</p>

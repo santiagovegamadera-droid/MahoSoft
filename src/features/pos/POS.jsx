@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import {
+  ArrowLeft,
   Banknote,
   CalendarDays,
   CircleAlert,
@@ -7,6 +8,7 @@ import {
   CreditCard,
   FileText,
   Landmark,
+  Loader2,
   Mail,
   Paperclip,
   MapPin,
@@ -23,25 +25,25 @@ import {
 } from 'lucide-react';
 import saleTotals from '@/features/sales/saleTotals';
 import { ReceiptModal } from '@/features/sales/SaleReceipt';
-import { registerSale as saveSale } from '@/features/sales/store';
+import { PAYMENT_LABELS, registerSale as saveSale } from '@/features/sales/store';
 import useProducts, { sortSizes, totalStock } from '@/features/products/store';
 import useCategories, { isActiveCategory } from '@/features/categories/store';
 import useSettings from '@/features/settings/store';
-import { useCurrentUser } from '@/features/users/store';
 import ProductCard from '@/features/pos/ProductCard';
 import CartItem from '@/features/pos/CartItem';
 import SendInvoice, { isEmail } from '@/features/pos/SendInvoice';
 import TransferProof, { EMPTY_PROOF } from '@/features/pos/TransferProof';
 import CustomerModal, { EMPTY_CUSTOMER, EMPTY_DELIVERY, deliveryMissing } from '@/features/pos/CustomerModal';
+import { ErrorAlert } from '@/shared/components/Feedback';
 
 const PAYMENTS = [
-  { id: 'efectivo', label: 'Efectivo', Icon: Banknote },
-  { id: 'tarjeta', label: 'Tarjeta', Icon: CreditCard },
-  { id: 'transferencia', label: 'Transferencia', Icon: Landmark },
+  { id: 'Efectivo', label: 'Efectivo', Icon: Banknote },
+  { id: 'Tarjeta', label: 'Tarjeta', Icon: CreditCard },
+  { id: 'Transferencia', label: 'Transferencia', Icon: Landmark },
 ];
 const SALE_TYPES = [
-  { id: 'tienda', label: 'En tienda', Icon: Store },
-  { id: 'pedido', label: 'Pedido', Icon: Truck },
+  { id: 'Tienda', label: 'En tienda', Icon: Store },
+  { id: 'Pedido', label: 'Pedido', Icon: Truck },
 ];
 const fmtDate = (d) =>
   new Date(`${d}T00:00`).toLocaleDateString('es-CO', { weekday: 'short', day: 'numeric', month: 'short' });
@@ -54,26 +56,31 @@ const PRICES = [
 ];
 const SORTS = [
   { id: 'relevancia', label: 'Relevancia', compare: () => 0 },
-  { id: 'nombre', label: 'Nombre (A–Z)', compare: (a, b) => a.name.localeCompare(b.name, 'es') },
-  { id: 'precio-asc', label: 'Menor precio', compare: (a, b) => a.precio - b.precio },
-  { id: 'precio-desc', label: 'Mayor precio', compare: (a, b) => b.precio - a.precio },
+  { id: 'nombre', label: 'Nombre (A–Z)', compare: (a, b) => a.nombre.localeCompare(b.nombre, 'es') },
+  { id: 'precio-asc', label: 'Menor precio', compare: (a, b) => a.precioVenta - b.precioVenta },
+  { id: 'precio-desc', label: 'Mayor precio', compare: (a, b) => b.precioVenta - a.precioVenta },
   { id: 'stock', label: 'Más stock', compare: (a, b) => totalStock(b) - totalStock(a) },
 ];
 const selectClass =
   'px-2.5 py-1.5 rounded-lg border text-xs font-semibold outline-none bg-white border-brand-150 text-brand-600 focus:border-brand-600';
 const chipClass = (active) =>
-  active ? 'bg-brand-800 border-brand-800 text-white' : 'bg-white border-brand-150 text-brand-600 hover:border-brand-300';
+  active
+    ? 'bg-brand-800 border-brand-800 text-white'
+    : 'bg-white border-brand-150 text-brand-600 hover:border-brand-300';
 
 // Lowercase without accents, so "blusa" matches "Blúsa"
-const normalize = (s) => s.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
+const normalize = (s) =>
+  s
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .toLowerCase();
 
 export default function POS() {
   const { items: products } = useProducts();
   const { items: categories } = useCategories();
   const { descuentos, tallas } = useSettings();
-  const user = useCurrentUser();
   const [cart, setCart] = useState([]);
-  const [payment, setPayment] = useState('tarjeta');
+  const [payment, setPayment] = useState('Tarjeta');
   const [discount, setDiscount] = useState(0);
   const [catFilter, setCatFilter] = useState('Todos');
   const [query, setQuery] = useState('');
@@ -83,38 +90,45 @@ export default function POS() {
   const [onlyAvailable, setOnlyAvailable] = useState(false);
   const [sort, setSort] = useState('relevancia');
   const [completed, setCompleted] = useState(null);
-  const [saleType, setSaleType] = useState('tienda');
+  const [saleType, setSaleType] = useState('Tienda');
   const [customer, setCustomer] = useState(EMPTY_CUSTOMER);
   const [delivery, setDelivery] = useState(EMPTY_DELIVERY);
   const [editingCustomer, setEditingCustomer] = useState(false);
   const [proof, setProof] = useState(EMPTY_PROOF);
   const [showReceipt, setShowReceipt] = useState(false);
+  // Below 1024 px the cart is a full-screen panel opened from a bar at the bottom
+  const [cartOpen, setCartOpen] = useState(false);
+  const [charging, setCharging] = useState(false);
+  const [chargeError, setChargeError] = useState('');
 
   // Only active products from active categories can be sold
-  const catalog = products.filter(
-    (p) => p.estado === 'Activo' && isActiveCategory(categories.find((c) => c.id === p.catId)),
+  const catalog = products.filter((p) => p.activo && isActiveCategory(categories.find((c) => c.id === p.categoriaId)));
+  const catName = (id) => categories.find((c) => c.id === id)?.nombre ?? 'Otros';
+  const cats = ['Todos', ...Array.from(new Set(catalog.map((p) => catName(p.categoriaId))))];
+  const countIn = (c) => (c === 'Todos' ? catalog.length : catalog.filter((p) => catName(p.categoriaId) === c).length);
+  const allSizes = sortSizes(
+    catalog.flatMap((p) => Object.keys(p.stock)),
+    tallas,
   );
-  const catName = (id) => categories.find((c) => c.id === id)?.name ?? 'Otros';
-  const cats = ['Todos', ...Array.from(new Set(catalog.map((p) => catName(p.catId))))];
-  const countIn = (c) => (c === 'Todos' ? catalog.length : catalog.filter((p) => catName(p.catId) === c).length);
-  const allSizes = sortSizes(catalog.flatMap((p) => Object.keys(p.stock)), tallas);
   const priceRange = PRICES.find((r) => r.id === priceFilter);
-  const activeFilters = [sizeFilter, priceFilter !== 'todos', onlyAvailable, sort !== 'relevancia'].filter(Boolean).length;
+  const activeFilters = [sizeFilter, priceFilter !== 'todos', onlyAvailable, sort !== 'relevancia'].filter(
+    Boolean,
+  ).length;
 
   // Search matches name, category and colors, ignoring accents
   const terms = normalize(query.trim()).split(/\s+/).filter(Boolean);
   const matchesQuery = (p) => {
-    const text = normalize([p.name, catName(p.catId), ...(p.colores ?? [])].join(' '));
+    const text = normalize([p.nombre, catName(p.categoriaId), ...(p.colores ?? [])].join(' '));
     return terms.every((t) => text.includes(t));
   };
   const filtered = catalog
     .filter(
       (p) =>
-        (catFilter === 'Todos' || catName(p.catId) === catFilter) &&
+        (catFilter === 'Todos' || catName(p.categoriaId) === catFilter) &&
         matchesQuery(p) &&
         (!sizeFilter || (p.stock[sizeFilter] ?? 0) > 0) &&
-        p.precio >= priceRange.min &&
-        p.precio <= priceRange.max &&
+        p.precioVenta >= priceRange.min &&
+        p.precioVenta <= priceRange.max &&
         (!onlyAvailable || totalStock(p) > 0),
     )
     .sort(SORTS.find((s) => s.id === sort).compare);
@@ -144,7 +158,7 @@ export default function POS() {
     setCart((prev) => {
       const ex = prev.find((c) => c.id === p.id && c.talla === size);
       if (ex) return prev.map((c) => (c === ex ? { ...c, qty: c.qty + 1 } : c));
-      return [...prev, { id: p.id, name: p.name, price: p.precio, img: p.img, qty: 1, talla: size }];
+      return [...prev, { id: p.id, name: p.nombre, price: p.precioVenta, img: p.imagenUrl, qty: 1, talla: size }];
     });
   }
   function removeLine(line) {
@@ -168,7 +182,7 @@ export default function POS() {
     });
   }
 
-  const isOrder = saleType === 'pedido';
+  const isOrder = saleType === 'Pedido';
   const {
     subtotal,
     descuentoAmt: discountAmt,
@@ -186,39 +200,56 @@ export default function POS() {
     !delivery.direccion && 'dirección',
   ].filter(Boolean);
   const hasCustomer = Boolean(customer.nombre || customer.telefono || customer.documento || customer.correo);
-  const canCharge =
-    cart.length > 0 && cart.every((c) => c.qty >= 1) && !missingDelivery;
+  const canCharge = cart.length > 0 && cart.every((c) => c.qty >= 1) && !missingDelivery;
 
-  function registerSale() {
-    const sale = saveSale({
-      tipo: saleType,
-      cliente: customer.nombre.trim() || 'Cliente general',
-      tipoDocumento: customer.documento.trim() ? customer.tipoDocumento : '',
-      documento: customer.documento.trim(),
-      telefono: customer.telefono.trim(),
-      vendedor: user.name,
-      pago: payment,
-      descuento: discount,
-      correo: customer.correo.trim(),
-      entrega: isOrder ? delivery : null,
-      // Only the file's details are kept until the backend can store the file itself
-      comprobante:
-        payment === 'transferencia'
-          ? {
-              archivo: proof.file && { nombre: proof.file.name, tipo: proof.file.type, tamano: proof.file.size },
-              banco: proof.banco,
-              referencia: proof.referencia.trim(),
-            }
-          : null,
-      envio,
-      items: cart.map((c) => ({ productId: c.id, name: c.name, talla: c.talla, qty: c.qty, price: c.price })),
-    });
-    setCompleted({ ...sale, total, units, sendNow: sendsInvoice });
+  // The server takes prices, stock and the invoice number from the database; the cart only says what and how many
+  async function registerSale() {
+    const isTransfer = payment === 'Transferencia';
+    setChargeError('');
+    setCharging(true);
+    try {
+      const sale = await saveSale(
+        {
+          tipo: saleType,
+          metodoPago: payment,
+          descuentoPorcentaje: discount,
+          cliente: hasCustomer
+            ? {
+                nombre: customer.nombre.trim(),
+                tipoDocumento: customer.documento.trim() ? customer.tipoDocumento : null,
+                documento: customer.documento.trim(),
+                telefono: customer.telefono.trim(),
+                correo: customer.correo.trim(),
+              }
+            : null,
+          entrega: isOrder
+            ? {
+                direccion: delivery.direccion.trim(),
+                barrio: delivery.barrio.trim(),
+                ciudad: delivery.ciudad.trim(),
+                fechaEntrega: delivery.fecha || null,
+                envio: Number(delivery.envio) || 0,
+                notas: delivery.notas.trim(),
+              }
+            : null,
+          comprobante: isTransfer ? { banco: proof.banco, referencia: proof.referencia.trim() } : null,
+          items: cart.map((c) => ({ productoId: c.id, talla: c.talla, cantidad: c.qty })),
+        },
+        isTransfer ? proof.file : null,
+      );
+      setCompleted({ ...sale, sendNow: sendsInvoice });
+    } catch (err) {
+      setChargeError(err.message);
+    } finally {
+      setCharging(false);
+    }
   }
 
   function newSale() {
     setCart([]);
-    setSaleType('tienda');
+    setCartOpen(false);
+    setSaleType('Tienda');
+    setChargeError('');
     setCustomer(EMPTY_CUSTOMER);
     setDelivery(EMPTY_DELIVERY);
     setProof(EMPTY_PROOF);
@@ -235,15 +266,16 @@ export default function POS() {
             <Check size={32} strokeWidth={2.5} />
           </div>
           <h2 className="text-2xl font-display text-brand-800">
-            {completed.tipo === 'pedido' ? 'Pedido registrado' : 'Venta registrada'}
+            {completed.tipo === 'Pedido' ? 'Pedido registrado' : 'Venta registrada'}
           </h2>
-          <p className="text-xs mt-1 text-subtle">Factura #{completed.factura}</p>
+          <p className="text-xs mt-1 text-subtle">Factura #{completed.numeroFactura}</p>
 
           <div className="my-6 py-4 border-y border-dashed border-brand-200">
             <p className="text-xs uppercase tracking-wider text-subtle">Total cobrado</p>
             <p className="text-3xl font-bold mt-1 text-brand-800 font-mono">{fmt(completed.total)}</p>
-            <p className="text-xs mt-2 text-brand-600 capitalize">
-              {completed.units} {completed.units === 1 ? 'prenda' : 'prendas'} · {completed.pago}
+            <p className="text-xs mt-2 text-brand-600">
+              {completed.unidades} {completed.unidades === 1 ? 'prenda' : 'prendas'} ·{' '}
+              {PAYMENT_LABELS[completed.metodoPago]}
             </p>
             {completed.comprobante &&
               (completed.comprobante.archivo ? (
@@ -264,7 +296,7 @@ export default function POS() {
             <div className="mb-3 p-3 rounded-xl border text-left border-brand-150 bg-brand-25">
               <p className="flex items-center gap-1.5 text-xs font-semibold mb-1.5 text-brand-800">
                 <Truck size={14} />
-                Entregar a {completed.cliente}
+                Entregar a {completed.cliente?.nombre}
               </p>
               <div className="space-y-1 text-xs text-brand-600">
                 <p className="flex items-start gap-1.5">
@@ -273,12 +305,12 @@ export default function POS() {
                 </p>
                 <p className="flex items-center gap-1.5">
                   <Phone size={12} className="shrink-0" />
-                  {completed.telefono}
+                  {completed.cliente?.telefono}
                 </p>
-                {completed.entrega.fecha && (
+                {completed.entrega.fechaEntrega && (
                   <p className="flex items-center gap-1.5 capitalize">
                     <CalendarDays size={12} className="shrink-0" />
-                    {fmtDate(completed.entrega.fecha)}
+                    {fmtDate(completed.entrega.fechaEntrega)}
                   </p>
                 )}
               </div>
@@ -286,7 +318,12 @@ export default function POS() {
           )}
 
           <div className="mb-4">
-            <SendInvoice factura={completed.factura} email={completed.correo} sendNow={completed.sendNow} />
+            <SendInvoice
+              ventaId={completed.id}
+              factura={completed.numeroFactura}
+              email={completed.cliente?.correo ?? ''}
+              sendNow={completed.sendNow}
+            />
           </div>
 
           <div className="flex gap-3">
@@ -438,7 +475,7 @@ export default function POS() {
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4">
+        <div className="flex-1 overflow-y-auto p-4 pb-24 lg:pb-4">
           {filtered.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 text-center">
               <Search size={36} strokeWidth={1.5} className="mb-3 text-brand-200" />
@@ -465,8 +502,8 @@ export default function POS() {
                     <ProductCard
                       key={p.id}
                       product={p}
-                      category={catName(p.catId)}
-                      price={fmt(p.precio)}
+                      category={catName(p.categoriaId)}
+                      price={fmt(p.precioVenta)}
                       sizes={sizes}
                       stockLeft={sizes.reduce((s, x) => s + x.left, 0)}
                       inCartQty={cart.filter((c) => c.id === p.id).reduce((s, c) => s + c.qty, 0)}
@@ -480,17 +517,25 @@ export default function POS() {
         </div>
       </div>
 
-      {/* Cart panel */}
-      <aside className="w-72 shrink-0 flex flex-col border-l bg-white border-brand-150">
+      {/* Cart panel: a column from 1024 px, a full-screen panel below */}
+      <aside
+        className={`fixed inset-0 z-30 flex-col bg-white lg:static lg:z-auto lg:flex lg:w-72 lg:shrink-0 lg:border-l border-brand-150 ${
+          cartOpen ? 'flex' : 'hidden'
+        }`}
+      >
         <div className="px-4 pt-3 pb-3 border-b border-brand-100">
+          <button
+            onClick={() => setCartOpen(false)}
+            className="flex items-center gap-1.5 mb-2 text-xs font-semibold text-brand-600 hover:text-brand-800 lg:hidden"
+          >
+            <ArrowLeft size={14} /> Seguir agregando productos
+          </button>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <ShoppingBag size={15} className="text-brand-800" />
               <h3 className="text-sm font-semibold text-brand-800">Venta actual</h3>
               {units > 0 && (
-                <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-brand-100 text-brand-700">
-                  {units}
-                </span>
+                <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-brand-100 text-brand-700">{units}</span>
               )}
             </div>
             {cart.length > 0 && (
@@ -535,7 +580,10 @@ export default function POS() {
                     </p>
                   )}
                   {sendsInvoice && (
-                    <p className="flex items-center gap-1.5 text-xs text-brand-600" title="La factura se enviará a este correo">
+                    <p
+                      className="flex items-center gap-1.5 text-xs text-brand-600"
+                      title="La factura se enviará a este correo"
+                    >
                       <Mail size={11} className="shrink-0" />
                       <span className="truncate">{customer.correo}</span>
                     </p>
@@ -666,21 +714,39 @@ export default function POS() {
             ))}
           </div>
 
-          {payment === 'transferencia' && <TransferProof value={proof} onChange={setProof} />}
+          {payment === 'Transferencia' && <TransferProof value={proof} onChange={setProof} />}
 
+          <ErrorAlert message={chargeError} />
           <button
             onClick={registerSale}
-            disabled={!canCharge}
-            className="w-full py-2.5 rounded-xl text-sm font-bold text-white transition-colors shadow-md disabled:opacity-40 disabled:shadow-none bg-brand-800 enabled:hover:bg-brand-600"
+            disabled={!canCharge || charging}
+            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold text-white transition-colors shadow-md disabled:opacity-40 disabled:shadow-none bg-brand-800 enabled:hover:bg-brand-600"
           >
-            {cart.length === 0
-              ? 'Agrega productos para cobrar'
-              : missingDelivery
-                ? 'Faltan datos de entrega'
-                : `Cobrar ${fmt(total)}`}
+            {charging && <Loader2 size={16} className="animate-spin" />}
+            {charging
+              ? 'Registrando…'
+              : cart.length === 0
+                ? 'Agrega productos para cobrar'
+                : missingDelivery
+                  ? 'Faltan datos de entrega'
+                  : `Cobrar ${fmt(total)}`}
           </button>
         </div>
       </aside>
+
+      {/* Below 1024 px: shows the sale while browsing, and opens it */}
+      {!cartOpen && (
+        <button
+          onClick={() => setCartOpen(true)}
+          className="fixed bottom-4 inset-x-4 z-20 flex items-center justify-between gap-3 px-4 py-3 rounded-2xl text-sm font-semibold text-white shadow-lg bg-brand-800 lg:hidden"
+        >
+          <span className="flex items-center gap-2">
+            <ShoppingBag size={18} />
+            {cart.length === 0 ? 'Venta actual' : `Ver venta · ${units} ${units === 1 ? 'prenda' : 'prendas'}`}
+          </span>
+          <span className="font-mono">{fmt(total)}</span>
+        </button>
+      )}
 
       {editingCustomer && (
         <CustomerModal

@@ -24,8 +24,8 @@ export default function SizeSettings({ form, update, errors }) {
   return (
     <div className="space-y-4">
       <p className="text-xs text-brand-600">
-        Las tallas se muestran en este orden al crear productos, en el punto de venta y en el stock. Quitar una talla
-        no borra el stock que ya tengan los productos.
+        Las tallas se muestran en este orden al crear productos, en el punto de venta y en el stock. Quitar una talla no
+        borra el stock que ya tengan los productos.
       </p>
       {form.tallas.map((g, i) => (
         <div key={i} className="rounded-xl border border-brand-150 p-4 space-y-3">

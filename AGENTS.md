@@ -17,7 +17,7 @@ This is the canonical project structure. Start with task-relevant files below. O
 - `src/App.jsx` - Primary application component and the usual starting point for UI work
 - `src/index.css` - Global CSS entrypoint and Tailwind CSS v4 import
 - `index.html` - Vite HTML shell containing the `#root` element and loading `src/main.jsx`
-- `package.json` - Project dependencies and the Vite build, development, preview, and formatting scripts
+- `package.json` - Project dependencies and the Vite build, development, preview, and formatting (Prettier) scripts
 - `vite.config.js` - Vite configuration with React, Tailwind CSS v4, and Figma Make plugins plus the `@` alias for `src`
 - `.mise.toml` - Toolchain versions for Node.js and pnpm
 
@@ -34,7 +34,7 @@ Import across folders with the `@` alias (`@/features/pos/POS`, `@/shared/compon
 
 ### Data (CRUD)
 
-Until the backend exists, each feature keeps its records in `src/features/<feature>/store.js`, built with `createCollection` from `src/shared/lib/createCollection.js`. It returns a hook (`useProducts()`, `useSuppliers()`, …) with `items`, `create`, `update` and `remove`; data is shared across screens and persisted to localStorage under `mahosoft:<name>`. Records reference each other by id (`catId`, `proveedorId`, `productId`). Stock-changing operations (sales, voids, purchase movements) go through the helpers in `sales/store.js` and `purchases/store.js`, which adjust product stock. Forms use `Modal`, `ConfirmDialog` and the helpers in `src/shared/components/Form.jsx` (`Field`, `Button`, `RowActions`, `inputClass`).
+Settings (`settings/store.js`) come from `GET /api/configuracion` in the same shape as before (`useSettings()`), and each section saves with `saveSettings(section, values)`. Modules already connected to the API (`categories`, `suppliers`, `products`, `purchases`, `sales`, `users`; `profile` calls `/api/perfil`, `dashboard` `/api/tablero` and `reports` `/api/reportes` directly). `useCurrentUser()` reads only the session (id, name, email, rol, permisos) build their `store.js` with `createApiStore('/api/<recurso>')` from `src/shared/lib/createApiStore.js`: same hook shape plus `loaded`, `loading`, `error` and `reload`, and `create`/`update`/`remove` are async and throw `ApiError` with the server's message; show it with `ErrorAlert` / `LoadingState` from `src/shared/components/Feedback.jsx`. API records use the backend's Spanish field names (`nombre`, `activo`). The rest still keep their records in `src/features/<feature>/store.js`, built with `createCollection` from `src/shared/lib/createCollection.js`. It returns a hook (`useProducts()`, `useSuppliers()`, …) with `items`, `create`, `update` and `remove`; data is shared across screens and persisted to localStorage under `mahosoft:<name>`. Records reference each other by id (`catId`, `proveedorId`, `productId`). Stock-changing operations (sales, voids, purchase movements) go through the helpers in `sales/store.js` and `purchases/store.js`, which adjust product stock. Forms use `Modal`, `ConfirmDialog` and the helpers in `src/shared/components/Form.jsx` (`Field`, `Button`, `RowActions`, `inputClass`).
 
 ## Dependencies
 
@@ -42,7 +42,11 @@ Until the backend exists, each feature keeps its records in `src/features/<featu
 - Icons: `lucide-react` — use it for every icon; do not use emojis or Unicode symbols as icons
 - Styling: Tailwind CSS v4 with the `@tailwindcss/vite` plugin
 - Build tooling: Vite 8 and `@vitejs/plugin-react`
-- Formatting: oxfmt
+- Formatting: Prettier (`.prettierrc.json`: 120 columns, single quotes). Run `npm run format` before committing; `npm run format:check` only reports
+
+## Responsive
+
+The app works on phones, tablets and desktops. Below `lg` (1024 px) the sidebar is a drawer opened from the header (☰) and the POS cart opens from a bottom bar. Page roots use `p-4 sm:p-6`; form grids start at one column (`grid-cols-1 sm:grid-cols-2`, spans as `sm:col-span-2`); stat cards use two columns on phones; wide tables sit in `overflow-x-auto` with a `min-w-[…]` when their fields would get squeezed.
 
 ## Styling
 
