@@ -44,7 +44,6 @@ Para cada módulo: endpoints en el backend (con su permiso) y reemplazar su `sto
   - [x] Pedidos con datos de entrega.
   - [x] Comprobante de transferencia (archivo, banco y referencia).
   - [x] **Anular** en lugar de borrar: pedir motivo, guardar quién y cuándo, y devolver el stock.
-  - [ ] Decidir si **anular** debe quedar solo para la administradora (hoy puede cualquiera con permiso POS).
 - [x] **Historial de ventas** desde la API, mostrando las anuladas.
 - [x] **Usuarios** (permiso Usuarios)
   - [x] Crear, editar, desactivar y asignar permisos (no se borran; nadie puede desactivarse ni quitarse el permiso Usuarios a sí mismo, y siempre queda al menos uno).
@@ -74,7 +73,7 @@ Para cada módulo: endpoints en el backend (con su permiso) y reemplazar su `sto
 - [ ] Definir **dónde se publica**: la API, la base de datos SQL Server y el frontend. La app ya está lista para cualquier proveedor; falta elegirlo para escribir el paso a paso (ver "Publicar" en el README del backend).
 - [x] En producción: toda la configuración por variables de entorno (la API no arranca si falta una obligatoria), HSTS/HTTPS, y el dominio real del frontend en `Cors__Origenes__0` y `App__UrlFrontend`.
 - [ ] **Copias de seguridad** automáticas de la base de datos y de la carpeta de PDF.
-- [x] Revisar qué puede hacer cada rol en cada endpoint (Vendedora, Bodega, Administradora): cubierto por las pruebas de permisos.
+- [x] **Un solo usuario** (decidido): el administrador, con acceso a todo. Se quitó la pantalla Usuarios y sus endpoints; los datos propios y la contraseña se cambian en Mi perfil.
 - [x] **Pruebas automáticas del backend** (`backend/tests/MahoSoft.Pruebas`, `dotnet test`): 29 pruebas de totales, stock, concurrencia, anulaciones, ajustes y permisos, contra una base aparte.
 
 ---

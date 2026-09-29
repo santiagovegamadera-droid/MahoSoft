@@ -11,7 +11,6 @@ import {
   ShoppingCart,
   Tags,
   Truck,
-  UserCog,
   X,
 } from 'lucide-react';
 import useSettings from '@/features/settings/store';
@@ -39,7 +38,6 @@ const nav = [
     group: 'Operaciones',
     children: [{ id: 'sales-history', label: 'Historial de ventas', icon: ReceiptText }],
   },
-  { id: 'users', label: 'Usuarios', icon: UserCog, group: 'Relaciones' },
   { id: 'reports', label: 'Reportes', icon: ChartColumn, group: 'Análisis' },
   { id: 'settings', label: 'Configuración', icon: Settings, group: 'Sistema' },
 ];

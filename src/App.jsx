@@ -11,7 +11,6 @@ import ProductDetail from '@/features/products/ProductDetail';
 import Purchases from '@/features/purchases/Purchases';
 import POS from '@/features/pos/POS';
 import Suppliers from '@/features/suppliers/Suppliers';
-import Users from '@/features/users/Users';
 import Reports from '@/features/reports/Reports';
 import Categories from '@/features/categories/Categories';
 import SalesHistory from '@/features/sales/SalesHistory';
@@ -85,7 +84,6 @@ function Workspace() {
           {current === 'pos' && <POS />}
           {current === 'sales-history' && <SalesHistory />}
           {current === 'suppliers' && <Suppliers />}
-          {current === 'users' && <Users />}
           {current === 'reports' && <Reports />}
           {current === 'categories' && <Categories />}
           {current === 'settings' && <Settings />}
