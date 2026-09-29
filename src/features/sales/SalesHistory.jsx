@@ -119,7 +119,7 @@ export default function SalesHistory() {
   const todayTotal = today.reduce((sum, s) => sum + s.total, 0);
 
   return (
-    <div className="p-6">
+    <div className="p-4 sm:p-6">
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <StatCard label="Ventas de hoy" value={today.length} />
         <StatCard label="Vendido hoy" value={fmt(todayTotal)} />
@@ -138,7 +138,7 @@ export default function SalesHistory() {
         />
       </Toolbar>
 
-      <div className="flex gap-4 items-start">
+      <div className="flex flex-col lg:flex-row gap-4 items-stretch lg:items-start">
         <TableCard className="flex-1 min-w-0">
           <Table columns={['Factura', 'Fecha', 'Cliente', 'Prendas', 'Pago', 'Total']}>
             {pager.pageItems.map((s) => {
@@ -190,7 +190,7 @@ export default function SalesHistory() {
         </TableCard>
 
         {/* Detail */}
-        <div className="w-64 shrink-0 bg-white rounded-2xl border border-brand-150">
+        <div className="w-full lg:w-64 shrink-0 bg-white rounded-2xl border border-brand-150">
           {selected ? (
             <>
               <div className="p-4 border-b border-brand-50">

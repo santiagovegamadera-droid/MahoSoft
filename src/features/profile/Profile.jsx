@@ -93,8 +93,8 @@ function PersonalInfo({ perfil, onSaved }) {
   return (
     <Card icon={UserRound} title="Información personal" className="lg:col-span-2">
       <form onSubmit={save} className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
-          <Field label="Nombre" error={errors.nombre} className="col-span-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Field label="Nombre" error={errors.nombre} className="sm:col-span-2">
             <input
               value={form.nombre}
               onChange={(e) => set({ nombre: e.target.value })}
@@ -122,7 +122,7 @@ function PersonalInfo({ perfil, onSaved }) {
               placeholder="300 000 0000"
             />
           </Field>
-          <Field label="Documento" group className="col-span-2">
+          <Field label="Documento" group className="sm:col-span-2">
             <DocumentInput
               types={tiposDocumento}
               tipo={form.tipoDocumento}
@@ -268,7 +268,7 @@ export default function Profile() {
   useEffect(load, []);
 
   return (
-    <div className="p-6 space-y-6 max-w-5xl">
+    <div className="p-4 sm:p-6 space-y-6 max-w-5xl">
       {/* Summary */}
       <div className="bg-white rounded-2xl border border-brand-150 p-5 flex items-center gap-4">
         <div className="w-16 h-16 rounded-full flex items-center justify-center text-xl font-bold shrink-0 bg-brand-600 text-white">

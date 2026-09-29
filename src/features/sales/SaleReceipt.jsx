@@ -74,7 +74,7 @@ export default function SaleReceipt({ sale }) {
       </div>
 
       {/* Customer + payment */}
-      <div className="grid grid-cols-2 gap-4 py-4 border-b border-brand-100">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 py-4 border-b border-brand-100">
         <div className="space-y-2">
           <p className="text-[11px] font-semibold text-brand-800">Cliente</p>
           <div className="grid grid-cols-2 gap-2">

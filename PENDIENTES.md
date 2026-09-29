@@ -82,7 +82,7 @@ Para cada módulo: endpoints en el backend (con su permiso) y reemplazar su `sto
 ## 4. Decisiones pendientes
 
 - [ ] **"Ahorro/Descuento" de las facturas de proveedor**: confirmar que es solo informativo (los precios ya vienen con el descuento). Si se escribe en el campo Descuento, se descontaría dos veces.
-- [ ] **¿Se usará en tablet o en pantallas de menos de 1280 px?** Si sí, adaptar el menú lateral y el punto de venta.
+- [x] **Celular, tablet y computador** (decidido: cualquier dispositivo). Bajo 1024 px el menú es un panel que se abre con ☰ y el carrito del POS se abre desde una barra abajo; formularios a una columna en celular; tablas anchas se deslizan de lado.
 - [ ] ¿Letra de 13 px en tablas y formularios, si el sistema todavía se ve grande?
 
 ---

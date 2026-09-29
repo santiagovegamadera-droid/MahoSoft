@@ -82,7 +82,7 @@ export default function Dashboard({ onOrder }) {
 
   if (!data) {
     return (
-      <div className="p-6">
+      <div className="p-4 sm:p-6">
         {error ? <ErrorAlert message={error} onRetry={load} /> : <LoadingState message="Cargando indicadores…" />}
       </div>
     );
@@ -113,7 +113,7 @@ export default function Dashboard({ onOrder }) {
   const slices = categorySlices(data.ventasPorCategoria);
 
   return (
-    <div className="p-6 space-y-5">
+    <div className="p-4 sm:p-6 space-y-5">
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {cards.map((card) => (

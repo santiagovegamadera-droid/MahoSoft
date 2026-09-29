@@ -107,7 +107,7 @@ function SupplierForm({ supplier, onSave, onClose }) {
               Se usa por defecto al registrar sus compras; cada factura se puede cambiar.
             </span>
           </Field>
-          <div className="grid grid-cols-[3fr_2fr] gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-[3fr_2fr] gap-3">
             <Field label="Dirección">
               <input
                 value={form.direccion}
@@ -125,7 +125,7 @@ function SupplierForm({ supplier, onSave, onClose }) {
 
         <fieldset className="space-y-3">
           <legend className="mb-2 text-sm font-semibold text-brand-800">Contacto</legend>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Field label="Teléfono">
               <input
                 value={form.telefono}
@@ -193,7 +193,7 @@ export default function Suppliers() {
   }
 
   return (
-    <div className="p-6">
+    <div className="p-4 sm:p-6">
       <Toolbar>
         <Button onClick={() => setEditing('new')} className="ml-auto">
           <Plus size={16} /> Nuevo proveedor

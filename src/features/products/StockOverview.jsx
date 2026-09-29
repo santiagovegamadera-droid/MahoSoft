@@ -18,7 +18,7 @@ export default function StockOverview({ products, catName }) {
 
   return (
     <>
-      <div className="grid grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {[
           { label: 'Total prendas', val: allSizes.reduce((a, b) => a + b, 0), color: 'text-brand-800' },
           {

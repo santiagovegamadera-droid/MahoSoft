@@ -69,7 +69,7 @@ function PurchaseDetail({ purchase, supplier, onClose }) {
       }
     >
       <ErrorAlert message={error} className="mb-4" />
-      <div className="grid grid-cols-2 gap-4 mb-4 text-sm">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4 text-sm">
         <div>
           <p className="text-xs uppercase tracking-wide text-subtle mb-1">Proveedor</p>
           <p className="font-semibold text-brand-800">{purchase.proveedor}</p>
@@ -219,7 +219,7 @@ export default function PurchaseOrders({ purchases, loaded, loading, suppliers, 
 
   return (
     <>
-      <div className="grid grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <StatCard label="Compras del mes" value={thisMonth.length} />
         <StatCard label="Invertido (mes)" value={fmt(thisMonth.reduce((s, p) => s + p.total, 0))} />
         <StatCard

@@ -109,7 +109,7 @@ export default function Categories() {
   }
 
   return (
-    <div className="p-6">
+    <div className="p-4 sm:p-6">
       <Toolbar>
         <Button onClick={() => setEditing('new')} className="ml-auto">
           <Plus size={16} /> Nueva categoría

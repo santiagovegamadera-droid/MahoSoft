@@ -107,7 +107,7 @@ function UserForm({ user, onSave, onClose }) {
         <Field label="Nombre" error={errors.nombre}>
           <input value={form.nombre} onChange={set('nombre')} maxLength={150} className={inputClass} autoFocus />
         </Field>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Field label="Email" error={errors.email}>
             <input type="email" value={form.email} onChange={set('email')} maxLength={256} className={inputClass} />
           </Field>
@@ -144,7 +144,7 @@ function UserForm({ user, onSave, onClose }) {
             </span>
           </Field>
         )}
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Field label="Rol">
             <select value={form.rol} onChange={set('rol')} className={inputClass}>
               {ROLES.map((r) => (
@@ -266,7 +266,7 @@ export default function Users() {
   }
 
   return (
-    <div className="p-6">
+    <div className="p-4 sm:p-6">
       <Toolbar>
         <FilterSelect value={role} onChange={setRole} label="Rol" options={[['Todos', 'Todos los roles'], ...ROLES]} />
         <Button onClick={() => setEditing('new')} className="ml-auto">

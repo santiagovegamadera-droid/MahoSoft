@@ -31,7 +31,7 @@ export default function ProductDetail({ productId, onBack }) {
   const { getById, loaded, error, reload } = useProducts();
   if (productId != null && !loaded) {
     return (
-      <div className="p-6 max-w-4xl">
+      <div className="p-4 sm:p-6 max-w-4xl">
         {error ? <ErrorAlert message={error} onRetry={reload} /> : <LoadingState message="Cargando producto…" />}
       </div>
     );
@@ -39,7 +39,7 @@ export default function ProductDetail({ productId, onBack }) {
   const existing = productId != null ? getById(productId) : null;
   if (productId != null && !existing) {
     return (
-      <div className="p-6 max-w-4xl space-y-4">
+      <div className="p-4 sm:p-6 max-w-4xl space-y-4">
         <ErrorAlert message="Este producto ya no existe." />
         <Button variant="secondary" onClick={onBack}>
           <ArrowLeft size={16} /> Volver a productos
@@ -136,7 +136,7 @@ function ProductForm({ existing, onBack }) {
   ];
 
   return (
-    <div className="p-6 max-w-4xl">
+    <div className="p-4 sm:p-6 max-w-4xl">
       <button
         onClick={onBack}
         className="flex items-center gap-2 text-sm mb-6 font-medium transition-colors text-brand-600 hover:text-brand-800"
@@ -193,7 +193,7 @@ function ProductForm({ existing, onBack }) {
                     </Field>
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <Field label="Precio de venta" error={errors.precioVenta}>
                     <input
                       type="number"

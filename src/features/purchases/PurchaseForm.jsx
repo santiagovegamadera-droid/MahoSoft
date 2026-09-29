@@ -37,7 +37,7 @@ const newLine = (p) => ({
 function Section({ icon: Icon, title, subtitle, actions, children, className = '' }) {
   return (
     <section className={`bg-white rounded-2xl border border-brand-150 ${className}`}>
-      <div className="flex items-center justify-between gap-3 px-5 py-3 border-b border-brand-50">
+      <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-3 border-b border-brand-50">
         <div className="flex items-center gap-2.5">
           <Icon size={16} className="text-brand-600" />
           <div>
@@ -228,15 +228,15 @@ export default function PurchaseForm({ products, suppliers, order, onSave, onClo
         </Section>
 
         <Section icon={FileText} title="Factura del proveedor" subtitle="Datos del recuadro de la factura">
-          <div className="grid grid-cols-6 gap-3">
-            <Field label="Tipo de comprobante" className="col-span-3">
+          <div className="grid grid-cols-1 sm:grid-cols-6 gap-3">
+            <Field label="Tipo de comprobante" className="sm:col-span-3">
               <select value={form.tipoComprobante} onChange={set('tipoComprobante')} className={inputClass}>
                 {DOCUMENT_TYPES.map((t) => (
                   <option key={t}>{t}</option>
                 ))}
               </select>
             </Field>
-            <Field label="Número" className="col-span-3">
+            <Field label="Número" className="sm:col-span-3">
               <input
                 value={form.facturaProveedor}
                 onChange={set('facturaProveedor')}
@@ -244,13 +244,13 @@ export default function PurchaseForm({ products, suppliers, order, onSave, onClo
                 className={inputClass}
               />
             </Field>
-            <Field label="Fecha" className="col-span-3">
+            <Field label="Fecha" className="sm:col-span-3">
               <input type="date" value={form.fecha} onChange={set('fecha')} className={inputClass} />
             </Field>
-            <Field label="Hora" className="col-span-3">
+            <Field label="Hora" className="sm:col-span-3">
               <input type="time" value={form.hora} onChange={set('hora')} className={inputClass} />
             </Field>
-            <Field label="Vendedor / atendido por" className="col-span-3">
+            <Field label="Vendedor / atendido por" className="sm:col-span-3">
               <input
                 value={form.vendedorProveedor}
                 onChange={set('vendedorProveedor')}
@@ -258,7 +258,7 @@ export default function PurchaseForm({ products, suppliers, order, onSave, onClo
                 className={inputClass}
               />
             </Field>
-            <Field label="CUFE / UUID" className="col-span-3">
+            <Field label="CUFE / UUID" className="sm:col-span-3">
               <input
                 value={form.cufe}
                 onChange={set('cufe')}
@@ -266,7 +266,7 @@ export default function PurchaseForm({ products, suppliers, order, onSave, onClo
                 className={`${inputClass} font-mono`}
               />
             </Field>
-            <Field label="Condición de pago" className="col-span-3" group>
+            <Field label="Condición de pago" className="sm:col-span-3" group>
               <SegmentedTabs
                 value={form.condicionPago}
                 onChange={(condicionPago) =>
@@ -281,13 +281,13 @@ export default function PurchaseForm({ products, suppliers, order, onSave, onClo
               />
             </Field>
             {form.condicionPago === 'Credito' ? (
-              <Field label="Vence" className="col-span-3">
+              <Field label="Vence" className="sm:col-span-3">
                 <input type="date" value={form.vence} onChange={set('vence')} className={inputClass} />
               </Field>
             ) : (
-              <div className="col-span-3" />
+              <div className="sm:col-span-3" />
             )}
-            <Field label="Documento (opcional)" className="col-span-6" group>
+            <Field label="Documento (opcional)" className="sm:col-span-6" group>
               <InvoiceFile file={file} onChange={setFile} onError={setError} />
             </Field>
           </div>
@@ -321,7 +321,7 @@ export default function PurchaseForm({ products, suppliers, order, onSave, onClo
         title="Productos comprados"
         subtitle="Una línea por referencia y talla"
         actions={
-          <div className="flex items-center gap-4 text-sm">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
             {hasIva && (
               <label className="flex items-center gap-2 text-brand-600">
                 <input
@@ -348,7 +348,8 @@ export default function PurchaseForm({ products, suppliers, order, onSave, onClo
         }
       >
         <div className="-mx-5 -mt-5 overflow-x-auto">
-          <table className="w-full text-sm">
+          {/* Scrolls sideways on phones instead of squeezing the fields */}
+          <table className="w-full min-w-[760px] text-sm">
             <thead>
               <tr className="bg-brand-50 text-xs uppercase tracking-wide text-left text-brand-600">
                 <th className="pl-5 pr-2 py-2.5 font-semibold w-10">N.º</th>

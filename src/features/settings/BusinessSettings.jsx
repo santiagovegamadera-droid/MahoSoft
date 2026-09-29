@@ -21,7 +21,7 @@ export function validateBusiness(form) {
 export default function BusinessSettings({ form, update, errors }) {
   const set = (k) => (e) => update({ [k]: e.target.value });
   return (
-    <div className="grid grid-cols-2 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <Field label="Nombre del negocio" error={errors.nombre}>
         <input value={form.nombre} onChange={set('nombre')} className={inputClass} />
       </Field>

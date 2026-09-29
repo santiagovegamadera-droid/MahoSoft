@@ -89,7 +89,7 @@ export default function Reports() {
   const totalTop = (data?.topProductos ?? []).reduce((s, p) => s + p.ingresos, 0);
 
   return (
-    <div className="p-6 space-y-5">
+    <div className="p-4 sm:p-6 space-y-5">
       {/* Header controls */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
@@ -126,7 +126,7 @@ export default function Reports() {
       {data && (
         <div className={`space-y-5 transition-opacity ${loading ? 'opacity-50' : ''}`}>
           {/* KPIs */}
-          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {[
               {
                 label: 'Total ventas',

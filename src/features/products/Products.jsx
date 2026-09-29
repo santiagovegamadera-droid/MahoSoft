@@ -53,7 +53,7 @@ export default function Products({ onEdit, onNew }) {
   const pager = usePagination(filtered, `${catId}|${estado}|${search}`);
 
   return (
-    <div className="p-6">
+    <div className="p-4 sm:p-6">
       <div className="mb-6">
         <SegmentedTabs
           value={tab}

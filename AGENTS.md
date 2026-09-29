@@ -44,6 +44,10 @@ Settings (`settings/store.js`) come from `GET /api/configuracion` in the same sh
 - Build tooling: Vite 8 and `@vitejs/plugin-react`
 - Formatting: Prettier (`.prettierrc.json`: 120 columns, single quotes). Run `npm run format` before committing; `npm run format:check` only reports
 
+## Responsive
+
+The app works on phones, tablets and desktops. Below `lg` (1024 px) the sidebar is a drawer opened from the header (☰) and the POS cart opens from a bottom bar. Page roots use `p-4 sm:p-6`; form grids start at one column (`grid-cols-1 sm:grid-cols-2`, spans as `sm:col-span-2`); stat cards use two columns on phones; wide tables sit in `overflow-x-auto` with a `min-w-[…]` when their fields would get squeezed.
+
 ## Styling
 
 This project uses **Tailwind CSS v4** through the `@tailwindcss/vite` plugin configured in `vite.config.js`. `src/index.css` imports Tailwind with `@import 'tailwindcss';`. Use Tailwind utility classes directly in JSX and put global CSS or Tailwind v4 theme customization in `src/index.css`. Use the `@theme` color tokens (`brand-*`, `canvas`, `success`, `warning`, `danger`, …) instead of hex values; add a new token when a color is missing. Do not use inline `style={{}}` or JS hover/focus handlers for styling — use `hover:`/`focus:` variants and conditional classes; inline style is only for values computed at runtime (e.g. a percentage width). This scaffold does not need a Tailwind config file or PostCSS config.

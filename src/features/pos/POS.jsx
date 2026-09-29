@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import {
+  ArrowLeft,
   Banknote,
   CalendarDays,
   CircleAlert,
@@ -95,6 +96,8 @@ export default function POS() {
   const [editingCustomer, setEditingCustomer] = useState(false);
   const [proof, setProof] = useState(EMPTY_PROOF);
   const [showReceipt, setShowReceipt] = useState(false);
+  // Below 1024 px the cart is a full-screen panel opened from a bar at the bottom
+  const [cartOpen, setCartOpen] = useState(false);
   const [charging, setCharging] = useState(false);
   const [chargeError, setChargeError] = useState('');
 
@@ -244,6 +247,7 @@ export default function POS() {
 
   function newSale() {
     setCart([]);
+    setCartOpen(false);
     setSaleType('Tienda');
     setChargeError('');
     setCustomer(EMPTY_CUSTOMER);
@@ -471,7 +475,7 @@ export default function POS() {
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4">
+        <div className="flex-1 overflow-y-auto p-4 pb-24 lg:pb-4">
           {filtered.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 text-center">
               <Search size={36} strokeWidth={1.5} className="mb-3 text-brand-200" />
@@ -513,9 +517,19 @@ export default function POS() {
         </div>
       </div>
 
-      {/* Cart panel */}
-      <aside className="w-72 shrink-0 flex flex-col border-l bg-white border-brand-150">
+      {/* Cart panel: a column from 1024 px, a full-screen panel below */}
+      <aside
+        className={`fixed inset-0 z-30 flex-col bg-white lg:static lg:z-auto lg:flex lg:w-72 lg:shrink-0 lg:border-l border-brand-150 ${
+          cartOpen ? 'flex' : 'hidden'
+        }`}
+      >
         <div className="px-4 pt-3 pb-3 border-b border-brand-100">
+          <button
+            onClick={() => setCartOpen(false)}
+            className="flex items-center gap-1.5 mb-2 text-xs font-semibold text-brand-600 hover:text-brand-800 lg:hidden"
+          >
+            <ArrowLeft size={14} /> Seguir agregando productos
+          </button>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <ShoppingBag size={15} className="text-brand-800" />
@@ -719,6 +733,20 @@ export default function POS() {
           </button>
         </div>
       </aside>
+
+      {/* Below 1024 px: shows the sale while browsing, and opens it */}
+      {!cartOpen && (
+        <button
+          onClick={() => setCartOpen(true)}
+          className="fixed bottom-4 inset-x-4 z-20 flex items-center justify-between gap-3 px-4 py-3 rounded-2xl text-sm font-semibold text-white shadow-lg bg-brand-800 lg:hidden"
+        >
+          <span className="flex items-center gap-2">
+            <ShoppingBag size={18} />
+            {cart.length === 0 ? 'Venta actual' : `Ver venta · ${units} ${units === 1 ? 'prenda' : 'prendas'}`}
+          </span>
+          <span className="font-mono">{fmt(total)}</span>
+        </button>
+      )}
 
       {editingCustomer && (
         <CustomerModal

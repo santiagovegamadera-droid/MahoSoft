@@ -19,7 +19,7 @@ export default function Purchases({ order, onOrderUsed }) {
   }
 
   return (
-    <div className="p-6">
+    <div className="p-4 sm:p-6">
       {buying ? (
         // The form starts from the product and supplier lists, so it waits for them
         productsLoaded && suppliersLoaded ? (
