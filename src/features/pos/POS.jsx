@@ -7,6 +7,7 @@ import {
   CreditCard,
   FileText,
   Landmark,
+  Loader2,
   Mail,
   Paperclip,
   MapPin,
@@ -23,25 +24,25 @@ import {
 } from 'lucide-react';
 import saleTotals from '@/features/sales/saleTotals';
 import { ReceiptModal } from '@/features/sales/SaleReceipt';
-import { registerSale as saveSale } from '@/features/sales/store';
+import { PAYMENT_LABELS, registerSale as saveSale } from '@/features/sales/store';
 import useProducts, { sortSizes, totalStock } from '@/features/products/store';
 import useCategories, { isActiveCategory } from '@/features/categories/store';
 import useSettings from '@/features/settings/store';
-import { useCurrentUser } from '@/features/users/store';
 import ProductCard from '@/features/pos/ProductCard';
 import CartItem from '@/features/pos/CartItem';
 import SendInvoice, { isEmail } from '@/features/pos/SendInvoice';
 import TransferProof, { EMPTY_PROOF } from '@/features/pos/TransferProof';
 import CustomerModal, { EMPTY_CUSTOMER, EMPTY_DELIVERY, deliveryMissing } from '@/features/pos/CustomerModal';
+import { ErrorAlert } from '@/shared/components/Feedback';
 
 const PAYMENTS = [
-  { id: 'efectivo', label: 'Efectivo', Icon: Banknote },
-  { id: 'tarjeta', label: 'Tarjeta', Icon: CreditCard },
-  { id: 'transferencia', label: 'Transferencia', Icon: Landmark },
+  { id: 'Efectivo', label: 'Efectivo', Icon: Banknote },
+  { id: 'Tarjeta', label: 'Tarjeta', Icon: CreditCard },
+  { id: 'Transferencia', label: 'Transferencia', Icon: Landmark },
 ];
 const SALE_TYPES = [
-  { id: 'tienda', label: 'En tienda', Icon: Store },
-  { id: 'pedido', label: 'Pedido', Icon: Truck },
+  { id: 'Tienda', label: 'En tienda', Icon: Store },
+  { id: 'Pedido', label: 'Pedido', Icon: Truck },
 ];
 const fmtDate = (d) =>
   new Date(`${d}T00:00`).toLocaleDateString('es-CO', { weekday: 'short', day: 'numeric', month: 'short' });
@@ -71,9 +72,8 @@ export default function POS() {
   const { items: products } = useProducts();
   const { items: categories } = useCategories();
   const { descuentos, tallas } = useSettings();
-  const user = useCurrentUser();
   const [cart, setCart] = useState([]);
-  const [payment, setPayment] = useState('tarjeta');
+  const [payment, setPayment] = useState('Tarjeta');
   const [discount, setDiscount] = useState(0);
   const [catFilter, setCatFilter] = useState('Todos');
   const [query, setQuery] = useState('');
@@ -83,12 +83,14 @@ export default function POS() {
   const [onlyAvailable, setOnlyAvailable] = useState(false);
   const [sort, setSort] = useState('relevancia');
   const [completed, setCompleted] = useState(null);
-  const [saleType, setSaleType] = useState('tienda');
+  const [saleType, setSaleType] = useState('Tienda');
   const [customer, setCustomer] = useState(EMPTY_CUSTOMER);
   const [delivery, setDelivery] = useState(EMPTY_DELIVERY);
   const [editingCustomer, setEditingCustomer] = useState(false);
   const [proof, setProof] = useState(EMPTY_PROOF);
   const [showReceipt, setShowReceipt] = useState(false);
+  const [charging, setCharging] = useState(false);
+  const [chargeError, setChargeError] = useState('');
 
   // Only active products from active categories can be sold
   const catalog = products.filter(
@@ -168,7 +170,7 @@ export default function POS() {
     });
   }
 
-  const isOrder = saleType === 'pedido';
+  const isOrder = saleType === 'Pedido';
   const {
     subtotal,
     descuentoAmt: discountAmt,
@@ -189,36 +191,53 @@ export default function POS() {
   const canCharge =
     cart.length > 0 && cart.every((c) => c.qty >= 1) && !missingDelivery;
 
-  function registerSale() {
-    const sale = saveSale({
-      tipo: saleType,
-      cliente: customer.nombre.trim() || 'Cliente general',
-      tipoDocumento: customer.documento.trim() ? customer.tipoDocumento : '',
-      documento: customer.documento.trim(),
-      telefono: customer.telefono.trim(),
-      vendedor: user.name,
-      pago: payment,
-      descuento: discount,
-      correo: customer.correo.trim(),
-      entrega: isOrder ? delivery : null,
-      // Only the file's details are kept until the backend can store the file itself
-      comprobante:
-        payment === 'transferencia'
-          ? {
-              archivo: proof.file && { nombre: proof.file.name, tipo: proof.file.type, tamano: proof.file.size },
-              banco: proof.banco,
-              referencia: proof.referencia.trim(),
-            }
-          : null,
-      envio,
-      items: cart.map((c) => ({ productId: c.id, name: c.name, talla: c.talla, qty: c.qty, price: c.price })),
-    });
-    setCompleted({ ...sale, total, units, sendNow: sendsInvoice });
+  // The server takes prices, stock and the invoice number from the database; the cart only says what and how many
+  async function registerSale() {
+    const isTransfer = payment === 'Transferencia';
+    setChargeError('');
+    setCharging(true);
+    try {
+      const sale = await saveSale(
+        {
+          tipo: saleType,
+          metodoPago: payment,
+          descuentoPorcentaje: discount,
+          cliente: hasCustomer
+            ? {
+                nombre: customer.nombre.trim(),
+                tipoDocumento: customer.documento.trim() ? customer.tipoDocumento : null,
+                documento: customer.documento.trim(),
+                telefono: customer.telefono.trim(),
+                correo: customer.correo.trim(),
+              }
+            : null,
+          entrega: isOrder
+            ? {
+                direccion: delivery.direccion.trim(),
+                barrio: delivery.barrio.trim(),
+                ciudad: delivery.ciudad.trim(),
+                fechaEntrega: delivery.fecha || null,
+                envio: Number(delivery.envio) || 0,
+                notas: delivery.notas.trim(),
+              }
+            : null,
+          comprobante: isTransfer ? { banco: proof.banco, referencia: proof.referencia.trim() } : null,
+          items: cart.map((c) => ({ productoId: c.id, talla: c.talla, cantidad: c.qty })),
+        },
+        isTransfer ? proof.file : null,
+      );
+      setCompleted({ ...sale, sendNow: sendsInvoice });
+    } catch (err) {
+      setChargeError(err.message);
+    } finally {
+      setCharging(false);
+    }
   }
 
   function newSale() {
     setCart([]);
-    setSaleType('tienda');
+    setSaleType('Tienda');
+    setChargeError('');
     setCustomer(EMPTY_CUSTOMER);
     setDelivery(EMPTY_DELIVERY);
     setProof(EMPTY_PROOF);
@@ -235,15 +254,16 @@ export default function POS() {
             <Check size={32} strokeWidth={2.5} />
           </div>
           <h2 className="text-2xl font-display text-brand-800">
-            {completed.tipo === 'pedido' ? 'Pedido registrado' : 'Venta registrada'}
+            {completed.tipo === 'Pedido' ? 'Pedido registrado' : 'Venta registrada'}
           </h2>
-          <p className="text-xs mt-1 text-subtle">Factura #{completed.factura}</p>
+          <p className="text-xs mt-1 text-subtle">Factura #{completed.numeroFactura}</p>
 
           <div className="my-6 py-4 border-y border-dashed border-brand-200">
             <p className="text-xs uppercase tracking-wider text-subtle">Total cobrado</p>
             <p className="text-3xl font-bold mt-1 text-brand-800 font-mono">{fmt(completed.total)}</p>
-            <p className="text-xs mt-2 text-brand-600 capitalize">
-              {completed.units} {completed.units === 1 ? 'prenda' : 'prendas'} · {completed.pago}
+            <p className="text-xs mt-2 text-brand-600">
+              {completed.unidades} {completed.unidades === 1 ? 'prenda' : 'prendas'} ·{' '}
+              {PAYMENT_LABELS[completed.metodoPago]}
             </p>
             {completed.comprobante &&
               (completed.comprobante.archivo ? (
@@ -264,7 +284,7 @@ export default function POS() {
             <div className="mb-3 p-3 rounded-xl border text-left border-brand-150 bg-brand-25">
               <p className="flex items-center gap-1.5 text-xs font-semibold mb-1.5 text-brand-800">
                 <Truck size={14} />
-                Entregar a {completed.cliente}
+                Entregar a {completed.cliente?.nombre}
               </p>
               <div className="space-y-1 text-xs text-brand-600">
                 <p className="flex items-start gap-1.5">
@@ -273,12 +293,12 @@ export default function POS() {
                 </p>
                 <p className="flex items-center gap-1.5">
                   <Phone size={12} className="shrink-0" />
-                  {completed.telefono}
+                  {completed.cliente?.telefono}
                 </p>
-                {completed.entrega.fecha && (
+                {completed.entrega.fechaEntrega && (
                   <p className="flex items-center gap-1.5 capitalize">
                     <CalendarDays size={12} className="shrink-0" />
-                    {fmtDate(completed.entrega.fecha)}
+                    {fmtDate(completed.entrega.fechaEntrega)}
                   </p>
                 )}
               </div>
@@ -286,7 +306,11 @@ export default function POS() {
           )}
 
           <div className="mb-4">
-            <SendInvoice factura={completed.factura} email={completed.correo} sendNow={completed.sendNow} />
+            <SendInvoice
+              factura={completed.numeroFactura}
+              email={completed.cliente?.correo ?? ''}
+              sendNow={completed.sendNow}
+            />
           </div>
 
           <div className="flex gap-3">
@@ -666,18 +690,22 @@ export default function POS() {
             ))}
           </div>
 
-          {payment === 'transferencia' && <TransferProof value={proof} onChange={setProof} />}
+          {payment === 'Transferencia' && <TransferProof value={proof} onChange={setProof} />}
 
+          <ErrorAlert message={chargeError} />
           <button
             onClick={registerSale}
-            disabled={!canCharge}
-            className="w-full py-2.5 rounded-xl text-sm font-bold text-white transition-colors shadow-md disabled:opacity-40 disabled:shadow-none bg-brand-800 enabled:hover:bg-brand-600"
+            disabled={!canCharge || charging}
+            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold text-white transition-colors shadow-md disabled:opacity-40 disabled:shadow-none bg-brand-800 enabled:hover:bg-brand-600"
           >
-            {cart.length === 0
-              ? 'Agrega productos para cobrar'
-              : missingDelivery
-                ? 'Faltan datos de entrega'
-                : `Cobrar ${fmt(total)}`}
+            {charging && <Loader2 size={16} className="animate-spin" />}
+            {charging
+              ? 'Registrando…'
+              : cart.length === 0
+                ? 'Agrega productos para cobrar'
+                : missingDelivery
+                  ? 'Faltan datos de entrega'
+                  : `Cobrar ${fmt(total)}`}
           </button>
         </div>
       </aside>

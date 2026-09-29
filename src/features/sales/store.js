@@ -1,87 +1,42 @@
-import createCollection from '@/shared/lib/createCollection';
-import { adjustStock } from '@/features/products/store';
+import createApiStore from '@/shared/lib/createApiStore';
+import { api } from '@/shared/lib/api';
+import useProducts from '@/features/products/store';
 
-// Sample sales have no productId, so they never touch stock
-const useSales = createCollection('sales', [
-  {
-    id: 1,
-    factura: 'VTA-2026-0842',
-    fecha: '2026-09-21T10:24:00',
-    cliente: 'Laura Gómez',
-    vendedor: 'Carla Rodríguez',
-    pago: 'tarjeta',
-    descuento: 0,
-    items: [
-      { name: 'Vestido Floral Verano', talla: 'M', qty: 1, price: 89900 },
-      { name: 'Blusa Seda Negra', talla: 'S', qty: 1, price: 65000 },
-    ],
-  },
-  {
-    id: 2,
-    factura: 'VTA-2026-0843',
-    fecha: '2026-09-21T16:05:00',
-    cliente: 'Cliente general',
-    vendedor: 'Sofía Parra',
-    pago: 'efectivo',
-    descuento: 10,
-    items: [{ name: 'Falda Plisada Beige', talla: 'M', qty: 2, price: 75000 }],
-  },
-  {
-    id: 3,
-    factura: 'VTA-2026-0844',
-    fecha: '2026-09-22T11:40:00',
-    cliente: 'Daniela Torres',
-    vendedor: 'Carla Rodríguez',
-    pago: 'transferencia',
-    descuento: 5,
-    items: [
-      { name: 'Conjunto Lino Blanco', talla: 'L', qty: 1, price: 185000 },
-      { name: 'Top Crop Lentejuelas', talla: 'M', qty: 1, price: 98000 },
-    ],
-  },
-  {
-    id: 4,
-    factura: 'VTA-2026-0845',
-    fecha: '2026-09-23T09:15:00',
-    cliente: 'Marcela Ríos',
-    vendedor: 'Ana Martínez',
-    pago: 'tarjeta',
-    descuento: 0,
-    items: [{ name: 'Cardigan Tejido Crema', talla: 'S', qty: 1, price: 145000 }],
-  },
-  {
-    id: 5,
-    factura: 'VTA-2026-0846',
-    fecha: '2026-09-23T10:02:00',
-    cliente: 'Cliente general',
-    vendedor: 'Sofía Parra',
-    pago: 'efectivo',
-    descuento: 0,
-    items: [
-      { name: 'Jean Skinny Azul', talla: '28', qty: 1, price: 119000 },
-      { name: 'Blusa Seda Negra', talla: 'M', qty: 1, price: 65000 },
-    ],
-  },
-]);
+/**
+ * Sales from the API, newest first, voided ones included: { id, numeroFactura, fecha, tipo, cliente: { id, nombre,
+ * tipoDocumento, documento, telefono, correo }, vendedorId, vendedor, metodoPago, descuentoPorcentaje, subtotal,
+ * descuento, envio, total, estado, anuladaEn, anuladaPor, motivoAnulacion, entrega: { direccion, barrio, ciudad,
+ * fechaEntrega, notas }, comprobante: { banco, referencia, archivo }, unidades, items: [{ productoId, producto, talla,
+ * cantidad, precioUnitario }] }. Prices, totals and stock are set by the server.
+ */
+const useSales = createApiStore('/api/ventas', {
+  sort: (a, b) => new Date(b.fecha) - new Date(a.fecha) || b.id - a.id,
+});
 
-/** Saves a POS sale with the next invoice number and takes its units out of stock */
-export function registerSale(data) {
-  const sales = useSales.api.getAll();
-  const lastNumber = Math.max(0, ...sales.map((s) => Number(s.factura.split('-').pop())));
-  const sale = useSales.api.create({
-    ...data,
-    factura: `VTA-${new Date().getFullYear()}-${String(lastNumber + 1).padStart(4, '0')}`,
-    fecha: new Date().toISOString(),
-  });
-  sale.items.forEach((i) => i.productId && adjustStock(i.productId, i.talla, -i.qty));
+export const PAYMENT_LABELS = { Efectivo: 'Efectivo', Tarjeta: 'Tarjeta', Transferencia: 'Transferencia' };
+export const isVoided = (s) => s.estado === 'Anulada';
+
+/**
+ * Registers a POS sale: the server numbers it, takes its units out of stock and keeps prices and costs.
+ * `file` is the transfer receipt, saved together with it. Throws ApiError (e.g. when a size ran out).
+ */
+export async function registerSale(data, file) {
+  const body = new FormData();
+  body.append('datos', JSON.stringify(data));
+  if (file) body.append('comprobante', file);
+  const sale = useSales.put(await api('/api/ventas', { method: 'POST', body }));
+  useProducts.reload(); // stock changed
   return sale;
 }
 
-/** Deletes (voids) a sale and returns its units to stock */
-export function voidSale(id) {
-  const sale = useSales.api.getById(id);
-  sale.items.forEach((i) => i.productId && adjustStock(i.productId, i.talla, i.qty));
-  useSales.api.remove(id);
+/** Voids a sale: it stays in the history as Anulada, and its units go back to stock */
+export async function voidSale(id, motivo) {
+  const sale = useSales.put(await api(`/api/ventas/${id}/anular`, { method: 'POST', body: { motivo } }));
+  useProducts.reload();
+  return sale;
 }
+
+/** Saved customers whose document, phone or name contains `text` (at least 3 characters) */
+export const searchCustomers = (text, signal) => api(`/api/clientes?q=${encodeURIComponent(text)}`, { signal });
 
 export default useSales;

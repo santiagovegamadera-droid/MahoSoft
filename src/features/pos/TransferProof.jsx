@@ -1,16 +1,20 @@
 import { useEffect, useRef, useState } from 'react';
 import { FileText, Paperclip, X } from 'lucide-react';
 import useSettings from '@/features/settings/store';
+import { formatSize } from '@/shared/lib/files';
 
 export const EMPTY_PROOF = { file: null, banco: '', referencia: '' };
 
-const kb = (n) => (n < 1024 * 1024 ? `${Math.round(n / 1024)} KB` : `${(n / 1024 / 1024).toFixed(1)} MB`);
+// Same types and size the server accepts (it checks the content too)
+const ACCEPTED = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp'];
+const MAX_SIZE = 10 * 1024 * 1024;
 
-// Visual only: the file stays in the browser until the backend can store it
+// The receipt is saved on the server together with the sale
 export default function TransferProof({ value, onChange }) {
   const inputRef = useRef(null);
   const [dragging, setDragging] = useState(false);
   const [preview, setPreview] = useState(null);
+  const [error, setError] = useState('');
   const { file } = value;
   const { bancos } = useSettings();
 
@@ -21,7 +25,13 @@ export default function TransferProof({ value, onChange }) {
     return () => URL.revokeObjectURL(url);
   }, [file]);
 
-  const pick = (f) => f && onChange({ ...value, file: f });
+  function pick(f) {
+    if (!f) return;
+    if (!ACCEPTED.includes(f.type)) return setError('Debe ser un PDF o una imagen JPG, PNG o WebP');
+    if (f.size > MAX_SIZE) return setError('No puede pesar más de 10 MB');
+    setError('');
+    onChange({ ...value, file: f });
+  }
   const set = (k) => (e) => onChange({ ...value, [k]: e.target.value });
   const fieldClass =
     'min-w-0 px-2 py-1.5 rounded-md border text-xs outline-none bg-white border-brand-150 text-brand-800 placeholder:text-subtle focus:border-brand-600';
@@ -41,7 +51,7 @@ export default function TransferProof({ value, onChange }) {
           )}
           <div className="min-w-0 flex-1">
             <p className="text-xs font-semibold truncate text-brand-800">{file.name}</p>
-            <p className="text-xs text-subtle">{kb(file.size)}</p>
+            <p className="text-xs text-subtle">{formatSize(file.size)}</p>
           </div>
           <button
             onClick={() => onChange({ ...value, file: null })}
@@ -78,7 +88,7 @@ export default function TransferProof({ value, onChange }) {
       <input
         ref={inputRef}
         type="file"
-        accept="image/*,application/pdf"
+        accept={ACCEPTED.join(',')}
         onChange={(e) => {
           pick(e.target.files[0]);
           e.target.value = '';
@@ -102,6 +112,7 @@ export default function TransferProof({ value, onChange }) {
         />
       </div>
 
+      {error && <p className="text-xs text-danger">{error}</p>}
       {!file && <p className="text-xs text-warning">Sin comprobante, la venta quedará pendiente de verificar</p>}
     </div>
   );

@@ -1,7 +1,7 @@
 import logoSrc from '@/assets/public/logo.png';
 import Modal from '@/shared/components/Modal';
 import { Button } from '@/shared/components/Form';
-import saleTotals from '@/features/sales/saleTotals';
+import { PAYMENT_LABELS, isVoided } from '@/features/sales/store';
 import useSettings from '@/features/settings/store';
 import { formatDocument } from '@/shared/components/DocumentInput';
 
@@ -27,10 +27,11 @@ function Info({ label, value, className = '' }) {
   );
 }
 
-// Sale receipt shown after a sale, from the history, and sent by email
+// Sale receipt shown after a sale, from the history, and sent by email. Totals are the ones the server saved.
 export default function SaleReceipt({ sale }) {
   const business = useSettings();
-  const { subtotal, descuentoAmt, envio, total } = saleTotals(sale);
+  const { subtotal, descuento, envio, total } = sale;
+  const cliente = sale.cliente;
   const proof = sale.comprobante;
   const storeLines = [
     business.nit && `NIT ${business.nit}`,
@@ -54,9 +55,14 @@ export default function SaleReceipt({ sale }) {
         </div>
         <div className="text-right shrink-0">
           <p className="text-[10px] font-semibold uppercase tracking-wider text-subtle">Comprobante de venta</p>
-          <p className="text-lg font-bold font-mono">{sale.factura}</p>
+          <p className="text-lg font-bold font-mono">{sale.numeroFactura}</p>
           <p className="text-[11px] text-brand-600">{fmtDateTime(sale.fecha)}</p>
-          {sale.tipo === 'pedido' && (
+          {isVoided(sale) && (
+            <span className="inline-block mt-2 mr-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-danger-soft text-danger">
+              Anulada
+            </span>
+          )}
+          {sale.tipo === 'Pedido' && (
             <span className="inline-block mt-2 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-brand-100 text-brand-700">
               Pedido
             </span>
@@ -69,16 +75,16 @@ export default function SaleReceipt({ sale }) {
         <div className="space-y-2">
           <p className="text-[11px] font-semibold text-brand-800">Cliente</p>
           <div className="grid grid-cols-2 gap-2">
-            <Info label="Nombre" value={sale.cliente || 'Cliente general'} className="col-span-2" />
-            <Info label="Documento" value={formatDocument(sale.tipoDocumento, sale.documento)} />
-            <Info label="Teléfono" value={sale.telefono} />
-            <Info label="Correo" value={sale.correo} className="col-span-2" />
+            <Info label="Nombre" value={cliente?.nombre || 'Cliente general'} className="col-span-2" />
+            <Info label="Documento" value={cliente && formatDocument(cliente.tipoDocumento, cliente.documento)} />
+            <Info label="Teléfono" value={cliente?.telefono} />
+            <Info label="Correo" value={cliente?.correo} className="col-span-2" />
           </div>
         </div>
         <div className="space-y-2">
           <p className="text-[11px] font-semibold text-brand-800">Pago</p>
           <div className="grid grid-cols-2 gap-2">
-            <Info label="Medio" value={<span className="capitalize">{sale.pago}</span>} />
+            <Info label="Medio" value={PAYMENT_LABELS[sale.metodoPago]} />
             <Info label="Vendedor" value={sale.vendedor} />
             {proof && (
               <>
@@ -100,7 +106,7 @@ export default function SaleReceipt({ sale }) {
               value={[sale.entrega.direccion, sale.entrega.barrio, sale.entrega.ciudad].filter(Boolean).join(', ')}
               className="col-span-2"
             />
-            <Info label="Fecha" value={sale.entrega.fecha && fmtDate(sale.entrega.fecha)} />
+            <Info label="Fecha" value={sale.entrega.fechaEntrega && fmtDate(sale.entrega.fechaEntrega)} />
             <Info label="Notas" value={sale.entrega.notas} className="col-span-3" />
           </div>
         </div>
@@ -119,12 +125,12 @@ export default function SaleReceipt({ sale }) {
         </thead>
         <tbody>
           {sale.items.map((i) => (
-            <tr key={`${i.name}-${i.talla}`} className="border-b border-brand-50">
-              <td className="py-2 text-brand-800">{i.name}</td>
+            <tr key={i.id} className="border-b border-brand-50">
+              <td className="py-2 text-brand-800">{i.producto}</td>
               <td className="py-2 text-center text-brand-600">{i.talla}</td>
-              <td className="py-2 text-center text-brand-600">{i.qty}</td>
-              <td className="py-2 text-right font-mono text-brand-600">{fmt(i.price)}</td>
-              <td className="py-2 text-right font-mono text-brand-800">{fmt(i.price * i.qty)}</td>
+              <td className="py-2 text-center text-brand-600">{i.cantidad}</td>
+              <td className="py-2 text-right font-mono text-brand-600">{fmt(i.precioUnitario)}</td>
+              <td className="py-2 text-right font-mono text-brand-800">{fmt(i.precioUnitario * i.cantidad)}</td>
             </tr>
           ))}
         </tbody>
@@ -137,10 +143,10 @@ export default function SaleReceipt({ sale }) {
             <span>Subtotal</span>
             <span className="font-mono">{fmt(subtotal)}</span>
           </div>
-          {descuentoAmt > 0 && (
+          {descuento > 0 && (
             <div className="flex justify-between text-danger">
-              <span>Descuento ({sale.descuento}%)</span>
-              <span className="font-mono">−{fmt(descuentoAmt)}</span>
+              <span>Descuento ({sale.descuentoPorcentaje}%)</span>
+              <span className="font-mono">−{fmt(descuento)}</span>
             </div>
           )}
           {envio > 0 && (

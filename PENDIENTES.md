@@ -17,7 +17,7 @@ Frontend: este repositorio. Backend: repositorio `backend` (.NET 9 + SQL Server)
 
 ## 1. Conectar cada módulo a la API
 
-Hoy el **login**, las **categorías**, la **configuración**, los **proveedores**, los **productos** y las **compras** usan la base de datos. Todo lo demás sigue guardándose en el navegador (`store.js` de cada módulo).
+Hoy el **login**, las **categorías**, la **configuración**, los **proveedores**, los **productos**, las **compras** y las **ventas** usan la base de datos. Lo demás (usuarios, perfil, inicio y reportes) sigue en el navegador o con datos fijos.
 Para cada módulo: endpoints en el backend (con su permiso) y reemplazar su `store.js` por llamadas a la API, con mensajes de carga y de error.
 
 - [x] **Categorías**: listar, crear, editar, activar/desactivar; no eliminar si tiene productos.
@@ -31,21 +31,20 @@ Para cada módulo: endpoints en el backend (con su permiso) y reemplazar su `sto
 - [x] **Proveedores**
   - [x] CRUD con IVA que cobra; bloquear la eliminación si tiene compras (ofrecer desactivar).
   - [x] **"Categorías que surte" calculadas desde las compras** (decidido). Ya no se marcan a mano.
-> **Mientras Ventas siga en el navegador:** registrar o anular una venta **no cambia el stock** de los productos (que ya están en la base). `adjustStock` en `products/store.js` quedó vacío a propósito; se borra al conectar Ventas.
-
 - [x] **Compras**
   - [x] Registrar la compra: calcular los totales en el servidor, sumar el stock con movimientos de entrada y actualizar el costo del producto (sin IVA).
   - [x] Guardar el **PDF de la factura en el disco del servidor** (carpeta en `Archivos:Carpeta`; tipo y tamaño validados en el servidor).
   - [x] No permitir registrar dos veces la misma factura del proveedor.
   - [x] Marcar como pagada; indicador "Por pagar".
   - [ ] En producción, poner `Archivos:Carpeta` en un disco con **copia de seguridad** (las facturas no están en la base de datos).
-- [ ] **Ventas / Punto de venta**
-  - [ ] Registrar la venta: número de factura consecutivo sin repetirse aunque dos cajas vendan a la vez, descontar el stock y guardar el costo del momento.
-  - [ ] **Clientes**: buscar por documento o teléfono para no volver a escribir sus datos.
-  - [ ] Pedidos con datos de entrega.
-  - [ ] Comprobante de transferencia (archivo, banco y referencia).
-  - [ ] **Anular** en lugar de borrar: pedir motivo, guardar quién y cuándo, y devolver el stock.
-- [ ] **Historial de ventas** desde la API, mostrando las anuladas.
+- [x] **Ventas / Punto de venta**
+  - [x] Registrar la venta: número de factura consecutivo sin repetirse aunque dos cajas vendan a la vez, descontar el stock y guardar el costo del momento.
+  - [x] **Clientes**: buscar por documento o teléfono para no volver a escribir sus datos.
+  - [x] Pedidos con datos de entrega.
+  - [x] Comprobante de transferencia (archivo, banco y referencia).
+  - [x] **Anular** en lugar de borrar: pedir motivo, guardar quién y cuándo, y devolver el stock.
+  - [ ] Decidir si **anular** debe quedar solo para la administradora (hoy puede cualquiera con permiso POS).
+- [x] **Historial de ventas** desde la API, mostrando las anuladas.
 - [ ] **Usuarios** (solo administradora)
   - [ ] Crear, editar, desactivar y asignar permisos.
   - [ ] Asignar o restablecer la contraseña de un usuario.

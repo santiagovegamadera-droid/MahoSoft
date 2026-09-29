@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { Check, Clock, Mail, ReceiptText, UserRound } from 'lucide-react';
 import useUsers, { initials, useCurrentUser } from '@/features/users/store';
-import useSales from '@/features/sales/store';
-import saleTotals from '@/features/sales/saleTotals';
+import useSales, { isVoided } from '@/features/sales/store';
 import useSettings from '@/features/settings/store';
 import DocumentInput, { defaultDocType } from '@/shared/components/DocumentInput';
 import { Button, Field, inputClass } from '@/shared/components/Form';
@@ -116,10 +115,15 @@ export default function Profile() {
   const user = useCurrentUser();
   const { items: sales } = useSales();
 
-  const month = new Date().toISOString().slice(0, 7);
-  const mySales = sales.filter((s) => s.vendedor === user.name);
-  const monthSales = mySales.filter((s) => s.fecha.startsWith(month));
-  const sold = (list) => list.reduce((sum, s) => sum + saleTotals(s).total, 0);
+  // Voided sales don't count
+  const now = new Date();
+  const inThisMonth = (iso) => {
+    const d = new Date(iso);
+    return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+  };
+  const mySales = sales.filter((s) => s.vendedorId === user.id && !isVoided(s));
+  const monthSales = mySales.filter((s) => inThisMonth(s.fecha));
+  const sold = (list) => list.reduce((sum, s) => sum + s.total, 0);
 
   return (
     <div className="p-6 space-y-6 max-w-5xl">
