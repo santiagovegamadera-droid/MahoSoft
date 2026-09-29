@@ -6,6 +6,7 @@ import { Button } from '@/shared/components/Form';
 import { PAYMENT_LABELS, isVoided } from '@/features/sales/store';
 import useSettings from '@/features/settings/store';
 import { formatDocument } from '@/shared/components/DocumentInput';
+import ThermalReceipt from '@/features/sales/ThermalReceipt';
 
 const fmt = (n) => `$${n.toLocaleString('es-CO')}`;
 const fmtDateTime = (iso) =>
@@ -189,10 +190,10 @@ export function ReceiptModal({ sale, onClose }) {
       }
     >
       <SaleReceipt sale={sale} />
-      {/* A copy outside the app: when printing, only this is shown (see .print-area in index.css) */}
+      {/* The till-receipt version, outside the app: when printing, only this is shown (see .print-area in index.css) */}
       {createPortal(
         <div className="print-area">
-          <SaleReceipt sale={sale} />
+          <ThermalReceipt sale={sale} />
         </div>,
         document.body,
       )}

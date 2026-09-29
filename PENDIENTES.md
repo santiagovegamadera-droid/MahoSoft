@@ -62,7 +62,7 @@ Para cada módulo: endpoints en el backend (con su permiso) y reemplazar su `sto
 - [ ] **Enviar la factura por correo** al cliente (hoy es simulado en el POS). Requiere un servicio de correo.
 - [ ] **Recuperar la contraseña por correo** (hoy dice "pídele a la administradora"). Usa el mismo servicio de correo.
 - [x] **Imprimir el comprobante de venta**: botón "Imprimir" en el comprobante; se imprime solo el recibo en una hoja.
-  - [ ] Si la tienda usa **impresora térmica de 80 mm**, adaptar el formato (hoy está pensado para hoja carta o A4).
+  - [x] Formato de **impresora térmica de 80 mm** (decidido): la tirilla se imprime en una columna de 72 mm. En el diálogo de impresión elegir la impresora de recibos y su rollo.
 
 ---
 
