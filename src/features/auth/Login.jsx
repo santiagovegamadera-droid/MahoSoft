@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { AlertCircle, ArrowRight, Eye, EyeOff, Heart, Info, Loader2, Lock, Mail } from 'lucide-react';
 import { login } from '@/features/auth/session';
+import { ForgotPassword, ResetPassword, resetCodeFromUrl } from '@/features/auth/PasswordRecovery';
 import Logo from '@/shared/components/Logo';
 import fondo from '@/assets/public/fondo.png';
 import logoSrc from '@/assets/public/logo.png';
@@ -13,6 +14,17 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [info, setInfo] = useState('');
+  // 'login', 'forgot' (ask for the email link) or 'reset' (opened from that link)
+  const [resetCode] = useState(resetCodeFromUrl);
+  const [mode, setMode] = useState(resetCode ? 'reset' : 'login');
+
+  function backToLogin(message = '') {
+    // Drop ?restablecer=… so a reload doesn't reopen the reset form
+    if (resetCode) window.history.replaceState(null, '', window.location.pathname);
+    setError('');
+    setInfo(message);
+    setMode('login');
+  }
 
   // On success the session changes and the app replaces this screen
   async function handleSubmit(e) {
@@ -73,122 +85,138 @@ export default function Login() {
             <Logo variant="dark" size="md" />
           </div>
 
-          <h2 className="flex items-center gap-3text-2xl sm:text-3xl text-brand-800 font-display">
-            Bienvenida de nuevo
+          <h2 className="flex items-center gap-3 text-2xl sm:text-3xl text-brand-800 font-display">
+            {mode === 'login' ? 'Bienvenida de nuevo' : mode === 'forgot' ? 'Recupera tu acceso' : 'Contraseña nueva'}
             <Heart size={26} strokeWidth={1.75} className="text-brand-400" />
           </h2>
           <p className="mt-1 mb-[clamp(12px,2.8vh,28px)] text-sm text-brand-600">
-            Ingresa tus credenciales para continuar
+            {mode === 'login'
+              ? 'Ingresa tus credenciales para continuar'
+              : mode === 'forgot'
+                ? 'Te enviaremos un enlace a tu correo para crear una contraseña nueva'
+                : 'Escribe la contraseña con la que vas a ingresar'}
           </p>
 
-          <form onSubmit={handleSubmit} className="flex flex-col gap-[clamp(10px,2vh,20px)]">
-            <div>
-              <label
-                htmlFor="login-email"
-                className="block text-xs font-semibold mb-1.5 uppercase tracking-wide text-brand-800"
-              >
-                Correo electrónico
-              </label>
-              <div className="flex items-center gap-3 px-4 rounded-xl border border-brand-200 bg-white text-brand-800 transition-all focus-within:border-brand-600 focus-within:ring-3 focus-within:ring-brand-600/15">
-                <Mail size={18} strokeWidth={1.75} className="shrink-0 text-brand-600" />
-                <input
-                  id="login-email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  autoComplete="username"
-                  placeholder="tu@correo.com"
-                  required
-                  autoFocus
-                  className="w-full py-[clamp(8px,1.4vh,12px)] text-sm outline-none bg-transparent"
-                />
-              </div>
-            </div>
+          {mode === 'forgot' && <ForgotPassword initialEmail={email} onBack={() => backToLogin()} />}
+          {mode === 'reset' && (
+            <ResetPassword
+              code={resetCode}
+              onDone={() => backToLogin('Listo. Ya puedes ingresar con tu contraseña nueva.')}
+              onBack={() => backToLogin()}
+            />
+          )}
 
-            <div>
-              <label
-                htmlFor="login-password"
-                className="block text-xs font-semibold mb-1.5 uppercase tracking-wide text-brand-800"
-              >
-                Contraseña
-              </label>
-              <div className="flex items-center gap-3 px-4 rounded-xl border border-brand-200 bg-white text-brand-800 transition-all focus-within:border-brand-600 focus-within:ring-3 focus-within:ring-brand-600/15">
-                <Lock size={18} strokeWidth={1.75} className="shrink-0 text-brand-600" />
-                <input
-                  id="login-password"
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  autoComplete="current-password"
-                  required
-                  className="w-full py-[clamp(8px,1.4vh,12px)] text-sm outline-none bg-transparent"
-                />
+          {mode === 'login' && (
+            <form onSubmit={handleSubmit} className="flex flex-col gap-[clamp(10px,2vh,20px)]">
+              <div>
+                <label
+                  htmlFor="login-email"
+                  className="block text-xs font-semibold mb-1.5 uppercase tracking-wide text-brand-800"
+                >
+                  Correo electrónico
+                </label>
+                <div className="flex items-center gap-3 px-4 rounded-xl border border-brand-200 bg-white text-brand-800 transition-all focus-within:border-brand-600 focus-within:ring-3 focus-within:ring-brand-600/15">
+                  <Mail size={18} strokeWidth={1.75} className="shrink-0 text-brand-600" />
+                  <input
+                    id="login-email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    autoComplete="username"
+                    placeholder="tu@correo.com"
+                    required
+                    autoFocus
+                    className="w-full py-[clamp(8px,1.4vh,12px)] text-sm outline-none bg-transparent"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="login-password"
+                  className="block text-xs font-semibold mb-1.5 uppercase tracking-wide text-brand-800"
+                >
+                  Contraseña
+                </label>
+                <div className="flex items-center gap-3 px-4 rounded-xl border border-brand-200 bg-white text-brand-800 transition-all focus-within:border-brand-600 focus-within:ring-3 focus-within:ring-brand-600/15">
+                  <Lock size={18} strokeWidth={1.75} className="shrink-0 text-brand-600" />
+                  <input
+                    id="login-password"
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    autoComplete="current-password"
+                    required
+                    className="w-full py-[clamp(8px,1.4vh,12px)] text-sm outline-none bg-transparent"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((v) => !v)}
+                    className="shrink-0 text-brand-600 hover:text-brand-800"
+                    aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                  >
+                    {showPassword ? <EyeOff size={18} strokeWidth={1.75} /> : <Eye size={18} strokeWidth={1.75} />}
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
+                <label className="flex items-center gap-2 cursor-pointer text-brand-600">
+                  <input
+                    type="checkbox"
+                    checked={remember}
+                    onChange={(e) => setRemember(e.target.checked)}
+                    className="w-4 h-4 accent-brand-800"
+                  />
+                  Recordarme
+                </label>
                 <button
                   type="button"
-                  onClick={() => setShowPassword((v) => !v)}
-                  className="shrink-0 text-brand-600 hover:text-brand-800"
-                  aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                  onClick={() => {
+                    setError('');
+                    setInfo('');
+                    setMode('forgot');
+                  }}
+                  className="font-semibold underline underline-offset-2 text-brand-600 hover:text-brand-800"
                 >
-                  {showPassword ? <EyeOff size={18} strokeWidth={1.75} /> : <Eye size={18} strokeWidth={1.75} />}
+                  ¿Olvidaste tu contraseña?
                 </button>
               </div>
-            </div>
 
-            <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
-              <label className="flex items-center gap-2 cursor-pointer text-brand-600">
-                <input
-                  type="checkbox"
-                  checked={remember}
-                  onChange={(e) => setRemember(e.target.checked)}
-                  className="w-4 h-4 accent-brand-800"
-                />
-                Recordarme
-              </label>
-              <button
-                type="button"
-                onClick={() => {
-                  setError('');
-                  setInfo('Pídele a la administradora que te asigne una contraseña nueva desde Usuarios.');
-                }}
-                className="font-semibold underline underline-offset-2 text-brand-600 hover:text-brand-800"
-              >
-                ¿Olvidaste tu contraseña?
-              </button>
-            </div>
-
-            {error && (
-              <p
-                role="alert"
-                className="flex items-start gap-2 px-3 py-2.5 rounded-xl text-sm bg-danger-soft text-danger"
-              >
-                <AlertCircle size={17} className="shrink-0 mt-px" />
-                {error}
-              </p>
-            )}
-            {info && (
-              <p className="flex items-start gap-2 px-3 py-2.5 rounded-xl text-sm bg-brand-50 text-brand-800">
-                <Info size={17} className="shrink-0 mt-px text-brand-600" />
-                {info}
-              </p>
-            )}
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="mt-1 w-full disabled:opacity-70 disabled:cursor-wait py-[clamp(10px,1.6vh,14px)] rounded-xl flex items-center justify-center gap-2 text-base font-semibold text-white transition-all hover:brightness-110 bg-linear-90 from-brand-500 to-brand-700 shadow-[0_6px_20px_rgba(94,47,112,0.35)]"
-            >
-              {loading ? (
-                <>
-                  <Loader2 size={18} strokeWidth={1.75} className="animate-spin" /> Ingresando…
-                </>
-              ) : (
-                <>
-                  Ingresar al sistema
-                  <ArrowRight size={18} strokeWidth={1.75} />
-                </>
+              {error && (
+                <p
+                  role="alert"
+                  className="flex items-start gap-2 px-3 py-2.5 rounded-xl text-sm bg-danger-soft text-danger"
+                >
+                  <AlertCircle size={17} className="shrink-0 mt-px" />
+                  {error}
+                </p>
               )}
-            </button>
-          </form>
+              {info && (
+                <p className="flex items-start gap-2 px-3 py-2.5 rounded-xl text-sm bg-brand-50 text-brand-800">
+                  <Info size={17} className="shrink-0 mt-px text-brand-600" />
+                  {info}
+                </p>
+              )}
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="mt-1 w-full disabled:opacity-70 disabled:cursor-wait py-[clamp(10px,1.6vh,14px)] rounded-xl flex items-center justify-center gap-2 text-base font-semibold text-white transition-all hover:brightness-110 bg-linear-90 from-brand-500 to-brand-700 shadow-[0_6px_20px_rgba(94,47,112,0.35)]"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 size={18} strokeWidth={1.75} className="animate-spin" /> Ingresando…
+                  </>
+                ) : (
+                  <>
+                    Ingresar al sistema
+                    <ArrowRight size={18} strokeWidth={1.75} />
+                  </>
+                )}
+              </button>
+            </form>
+          )}
         </div>
 
         <p className="absolute bottom-[clamp(12px,2.5vh,24px)] left-0 right-0 px-4 text-center text-[10px] sm:text-[11px] font-medium tracking-[0.15em] sm:tracking-[0.25em] text-brand-800">

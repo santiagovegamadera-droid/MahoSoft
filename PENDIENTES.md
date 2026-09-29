@@ -59,8 +59,9 @@ Para cada módulo: endpoints en el backend (con su permiso) y reemplazar su `sto
 ## 2. Funciones que faltan
 
 - [x] **Ajustes de inventario** (Productos → Movimientos): historial de todos los movimientos con filtros, y registrar conteo físico, prenda dañada o perdida, devolución a proveedor o ingreso sin compra.
-- [ ] **Enviar la factura por correo** al cliente (hoy es simulado en el POS). Requiere un servicio de correo.
-- [ ] **Recuperar la contraseña por correo** (hoy dice "pídele a la administradora"). Usa el mismo servicio de correo.
+- [x] **Enviar la factura por correo** al cliente desde el POS (sale sola si el cliente dejó su correo).
+- [x] **Recuperar la contraseña por correo**: "¿Olvidaste tu contraseña?" envía un enlace que vence en 1 hora y sirve una sola vez.
+  - [ ] **Configurar el Gmail de la tienda** (decidido): pasar la dirección y una contraseña de aplicación y guardarlas con `user-secrets` (ver el README del backend). Mientras tanto, ambas funciones responden "todavía no está configurado".
 - [x] **Imprimir el comprobante de venta**: botón "Imprimir" en el comprobante; se imprime solo el recibo en una hoja.
   - [x] Formato de **impresora térmica de 80 mm** (decidido): la tirilla se imprime en una columna de 72 mm. En el diálogo de impresión elegir la impresora de recibos y su rollo.
 

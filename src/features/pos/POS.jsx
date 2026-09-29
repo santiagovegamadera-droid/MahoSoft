@@ -307,6 +307,7 @@ export default function POS() {
 
           <div className="mb-4">
             <SendInvoice
+              ventaId={completed.id}
               factura={completed.numeroFactura}
               email={completed.cliente?.correo ?? ''}
               sendNow={completed.sendNow}
