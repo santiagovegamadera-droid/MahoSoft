@@ -88,8 +88,8 @@ Para cada módulo: endpoints en el backend (con su permiso) y reemplazar su `sto
 
 ## 5. Diseño (menor)
 
-- [ ] Ordenar la paleta de colores (`brand-500`, `-700`, `-750` y `-75`, que se usan casi solo en el login).
-- [ ] Las pestañas de Detalle de producto todavía no usan el componente `SegmentedTabs`.
+- [x] Paleta ordenada de claro a oscuro y comentada en `index.css`. Se quitaron `brand-750` y `brand-75` (casi iguales a `-800` y `-100`); `brand-500` y `-700` quedan como acentos del login y de los precios.
+- [x] Las pestañas de Detalle de producto usan `SegmentedTabs`.
 
 ---
 
