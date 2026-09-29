@@ -64,11 +64,14 @@ function Detail({ label, value }) {
   );
 }
 
-export default function PurchaseForm({ products, suppliers, onSave, onClose }) {
+/** `order` ({ productoId, talla }) starts the purchase with that line and the product's last supplier */
+export default function PurchaseForm({ products, suppliers, order, onSave, onClose }) {
   const business = useSettings();
   const activeSuppliers = suppliers.filter((s) => s.activo);
+  const ordered = order && products.find((p) => p.id === order.productoId);
+  const firstSupplier = activeSuppliers.find((s) => s.id === ordered?.ultimaCompra?.proveedorId) ?? activeSuppliers[0];
   const [form, setForm] = useState({
-    proveedorId: activeSuppliers[0]?.id ?? '',
+    proveedorId: firstSupplier?.id ?? '',
     facturaProveedor: '',
     fecha: today(),
     hora: '',
@@ -80,12 +83,12 @@ export default function PurchaseForm({ products, suppliers, onSave, onClose }) {
     vence: '',
     estadoPago: 'Pagada',
     // Starts on what the supplier usually charges; each invoice can still say otherwise
-    iva: activeSuppliers[0]?.ivaPorcentaje ?? 0,
+    iva: firstSupplier?.ivaPorcentaje ?? 0,
     ivaIncluido: false,
     descuento: '',
     notas: '',
   });
-  const [lines, setLines] = useState([newLine(products[0])]);
+  const [lines, setLines] = useState([ordered ? { ...newLine(ordered), talla: order.talla } : newLine(products[0])]);
   const [file, setFile] = useState(null);
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);

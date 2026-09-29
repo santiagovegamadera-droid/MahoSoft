@@ -29,6 +29,8 @@ function Workspace() {
   const user = useCurrentUser();
   const [view, setView] = useState(() => homeView(user));
   const [editingProduct, setEditingProduct] = useState(undefined);
+  // "Pedir" on a stock alert opens a new purchase with that product and size
+  const [order, setOrder] = useState(null);
 
   // Permissions may have changed since the session started; an invalid session signs out on its own
   useEffect(() => {
@@ -50,6 +52,10 @@ function Workspace() {
     setEditingProduct(undefined);
     setView('product-detail');
   }
+  function orderProduct(line) {
+    setOrder(line);
+    setView('purchases');
+  }
 
   return (
     <div className="flex h-screen bg-canvas">
@@ -57,12 +63,12 @@ function Workspace() {
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <Header current={current} />
         <main className="flex-1 min-h-0 overflow-y-auto">
-          {current === 'dashboard' && <Dashboard />}
+          {current === 'dashboard' && <Dashboard onOrder={canView(user, 'purchases') ? orderProduct : undefined} />}
           {current === 'products' && <Products onEdit={editProduct} onNew={newProduct} />}
           {current === 'product-detail' && (
             <ProductDetail key={editingProduct ?? 'new'} productId={editingProduct} onBack={goToProducts} />
           )}
-          {current === 'purchases' && <Purchases />}
+          {current === 'purchases' && <Purchases order={order} onOrderUsed={() => setOrder(null)} />}
           {current === 'pos' && <POS />}
           {current === 'sales-history' && <SalesHistory />}
           {current === 'suppliers' && <Suppliers />}

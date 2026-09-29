@@ -21,3 +21,11 @@ export async function openBlob(download) {
     throw err;
   }
 }
+
+/** Saves a downloaded file (e.g. a report) with its name, through a temporary link */
+export function saveBlob(blob, name) {
+  const url = URL.createObjectURL(blob);
+  const link = Object.assign(document.createElement('a'), { href: url, download: name });
+  link.click();
+  setTimeout(() => URL.revokeObjectURL(url), 60_000);
+}

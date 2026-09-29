@@ -17,7 +17,7 @@ Frontend: este repositorio. Backend: repositorio `backend` (.NET 9 + SQL Server)
 
 ## 1. Conectar cada módulo a la API
 
-Hoy el **login**, las **categorías**, la **configuración**, los **proveedores**, los **productos**, las **compras**, las **ventas**, los **usuarios** y **Mi perfil** usan la base de datos. Solo **Inicio** y **Reportes** siguen con datos fijos.
+Hoy el **login**, las **categorías**, la **configuración**, los **proveedores**, los **productos**, las **compras**, las **ventas**, los **usuarios**, **Mi perfil**, **Inicio** y **Reportes** usan la base de datos: ya no queda ningún módulo con datos del navegador o fijos.
 Para cada módulo: endpoints en el backend (con su permiso) y reemplazar su `store.js` por llamadas a la API, con mensajes de carga y de error.
 
 - [x] **Categorías**: listar, crear, editar, activar/desactivar; no eliminar si tiene productos.
@@ -49,9 +49,10 @@ Para cada módulo: endpoints en el backend (con su permiso) y reemplazar su `sto
   - [x] Crear, editar, desactivar y asignar permisos (no se borran; nadie puede desactivarse ni quitarse el permiso Usuarios a sí mismo, y siempre queda al menos uno).
   - [x] Asignar o restablecer la contraseña de un usuario.
 - [x] **Mi perfil**: editar los datos propios y **pantalla para cambiar la contraseña**.
-- [ ] **Inicio (Dashboard)** con datos reales. Hoy los números son fijos: ventas de hoy y del mes, gráfico de ingresos, ventas por categoría, productos más vendidos y alertas de stock bajo.
-  - [ ] Definir qué hace el botón **"Pedir"** de las alertas (por ejemplo, abrir una compra nueva con ese producto).
-- [ ] **Reportes** con datos reales (hoy son fijos) y que funcionen los botones **Exportar PDF** y **Exportar Excel** (hoy no hacen nada).
+- [x] **Inicio (Dashboard)** con datos reales: ventas de hoy y del mes (contra ayer y el mes anterior a la fecha), ingresos de los últimos 6 meses, ventas por categoría, productos más vendidos y alertas de stock bajo.
+  - [x] El botón **"Pedir"** abre una compra nueva con ese producto y talla (y su último proveedor). Solo aparece a quien tiene permiso de Compras.
+  - [ ] Se quitó la línea de "Meta" del gráfico porque no existe ninguna meta guardada. Si se quiere, agregar **metas de venta mensuales** en Configuración.
+- [x] **Reportes** con datos reales (semana, mes y año, comparados con el periodo anterior) y botones **Exportar PDF** y **Exportar Excel** (se generan en el servidor).
 
 ---
 
