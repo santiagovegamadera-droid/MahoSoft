@@ -8,7 +8,10 @@ import { TableCard, TableTitle } from '@/shared/components/Table';
 export default function StockOverview({ products, catName }) {
   const { stockBajoTalla, tallas } = useSettings();
   // Only show size columns that some product uses, in the configured size order
-  const usedSizes = sortSizes(products.flatMap((p) => Object.keys(p.stock)), tallas);
+  const usedSizes = sortSizes(
+    products.flatMap((p) => Object.keys(p.stock)),
+    tallas,
+  );
   const allSizes = products.flatMap((p) => Object.values(p.stock));
   const inventoryValue = products.reduce((sum, p) => sum + totalStock(p) * (p.costo || 0), 0);
   const pager = usePagination(products);

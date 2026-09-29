@@ -59,8 +59,7 @@ function PurchaseDetail({ purchase, supplier, onClose }) {
         <>
           {isPending(purchase) && (
             <Button variant="soft" onClick={markPaid} disabled={paying}>
-              {paying ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle2 size={16} />} Marcar como
-              pagada
+              {paying ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle2 size={16} />} Marcar como pagada
             </Button>
           )}
           <Button variant="secondary" onClick={onClose}>

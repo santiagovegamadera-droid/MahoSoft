@@ -17,7 +17,7 @@ This is the canonical project structure. Start with task-relevant files below. O
 - `src/App.jsx` - Primary application component and the usual starting point for UI work
 - `src/index.css` - Global CSS entrypoint and Tailwind CSS v4 import
 - `index.html` - Vite HTML shell containing the `#root` element and loading `src/main.jsx`
-- `package.json` - Project dependencies and the Vite build, development, preview, and formatting scripts
+- `package.json` - Project dependencies and the Vite build, development, preview, and formatting (Prettier) scripts
 - `vite.config.js` - Vite configuration with React, Tailwind CSS v4, and Figma Make plugins plus the `@` alias for `src`
 - `.mise.toml` - Toolchain versions for Node.js and pnpm
 
@@ -42,7 +42,7 @@ Settings (`settings/store.js`) come from `GET /api/configuracion` in the same sh
 - Icons: `lucide-react` — use it for every icon; do not use emojis or Unicode symbols as icons
 - Styling: Tailwind CSS v4 with the `@tailwindcss/vite` plugin
 - Build tooling: Vite 8 and `@vitejs/plugin-react`
-- Formatting: oxfmt
+- Formatting: Prettier (`.prettierrc.json`: 120 columns, single quotes). Run `npm run format` before committing; `npm run format:check` only reports
 
 ## Styling
 

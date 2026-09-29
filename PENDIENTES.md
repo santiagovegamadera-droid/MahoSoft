@@ -11,7 +11,8 @@ Frontend: este repositorio. Backend: repositorio `backend` (.NET 9 + SQL Server)
 
 - [x] **Hacer commit** de todo lo trabajado en la rama `santiago`, en los dos repositorios (frontend `189f56b`, backend `2a4d106`).
 - [x] **Push** de `santiago` a GitHub en los dos repositorios. Falta decidir cuándo pasarlo a `develop` / `main`.
-- [ ] **No usar `npm run format`** hasta configurar el formateador: `oxfmt` no toma el estilo del proyecto (comillas simples, punto y coma, 120 columnas) y reescribe todos los archivos. Hay que agregarle su archivo de configuración o cambiarlo por Prettier.
+- [x] **Formateador**: se cambió `oxfmt` por Prettier (`.prettierrc.json`: 120 columnas, comillas simples). `npm run format` formatea y `npm run format:check` revisa.
+  - [ ] `pnpm-lock.yaml` quedó desactualizado (se usó npm, sin pnpm instalado): correr `pnpm install` si se sigue usando pnpm, o borrarlo y quedarse con `package-lock.json`.
 
 ---
 

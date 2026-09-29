@@ -63,10 +63,16 @@ const SORTS = [
 const selectClass =
   'px-2.5 py-1.5 rounded-lg border text-xs font-semibold outline-none bg-white border-brand-150 text-brand-600 focus:border-brand-600';
 const chipClass = (active) =>
-  active ? 'bg-brand-800 border-brand-800 text-white' : 'bg-white border-brand-150 text-brand-600 hover:border-brand-300';
+  active
+    ? 'bg-brand-800 border-brand-800 text-white'
+    : 'bg-white border-brand-150 text-brand-600 hover:border-brand-300';
 
 // Lowercase without accents, so "blusa" matches "Blúsa"
-const normalize = (s) => s.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
+const normalize = (s) =>
+  s
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .toLowerCase();
 
 export default function POS() {
   const { items: products } = useProducts();
@@ -93,15 +99,18 @@ export default function POS() {
   const [chargeError, setChargeError] = useState('');
 
   // Only active products from active categories can be sold
-  const catalog = products.filter(
-    (p) => p.activo && isActiveCategory(categories.find((c) => c.id === p.categoriaId)),
-  );
+  const catalog = products.filter((p) => p.activo && isActiveCategory(categories.find((c) => c.id === p.categoriaId)));
   const catName = (id) => categories.find((c) => c.id === id)?.nombre ?? 'Otros';
   const cats = ['Todos', ...Array.from(new Set(catalog.map((p) => catName(p.categoriaId))))];
   const countIn = (c) => (c === 'Todos' ? catalog.length : catalog.filter((p) => catName(p.categoriaId) === c).length);
-  const allSizes = sortSizes(catalog.flatMap((p) => Object.keys(p.stock)), tallas);
+  const allSizes = sortSizes(
+    catalog.flatMap((p) => Object.keys(p.stock)),
+    tallas,
+  );
   const priceRange = PRICES.find((r) => r.id === priceFilter);
-  const activeFilters = [sizeFilter, priceFilter !== 'todos', onlyAvailable, sort !== 'relevancia'].filter(Boolean).length;
+  const activeFilters = [sizeFilter, priceFilter !== 'todos', onlyAvailable, sort !== 'relevancia'].filter(
+    Boolean,
+  ).length;
 
   // Search matches name, category and colors, ignoring accents
   const terms = normalize(query.trim()).split(/\s+/).filter(Boolean);
@@ -188,8 +197,7 @@ export default function POS() {
     !delivery.direccion && 'dirección',
   ].filter(Boolean);
   const hasCustomer = Boolean(customer.nombre || customer.telefono || customer.documento || customer.correo);
-  const canCharge =
-    cart.length > 0 && cart.every((c) => c.qty >= 1) && !missingDelivery;
+  const canCharge = cart.length > 0 && cart.every((c) => c.qty >= 1) && !missingDelivery;
 
   // The server takes prices, stock and the invoice number from the database; the cart only says what and how many
   async function registerSale() {
@@ -513,9 +521,7 @@ export default function POS() {
               <ShoppingBag size={15} className="text-brand-800" />
               <h3 className="text-sm font-semibold text-brand-800">Venta actual</h3>
               {units > 0 && (
-                <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-brand-100 text-brand-700">
-                  {units}
-                </span>
+                <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-brand-100 text-brand-700">{units}</span>
               )}
             </div>
             {cart.length > 0 && (
@@ -560,7 +566,10 @@ export default function POS() {
                     </p>
                   )}
                   {sendsInvoice && (
-                    <p className="flex items-center gap-1.5 text-xs text-brand-600" title="La factura se enviará a este correo">
+                    <p
+                      className="flex items-center gap-1.5 text-xs text-brand-600"
+                      title="La factura se enviará a este correo"
+                    >
                       <Mail size={11} className="shrink-0" />
                       <span className="truncate">{customer.correo}</span>
                     </p>
