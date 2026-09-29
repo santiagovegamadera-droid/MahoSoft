@@ -17,7 +17,7 @@ Frontend: este repositorio. Backend: repositorio `backend` (.NET 9 + SQL Server)
 
 ## 1. Conectar cada módulo a la API
 
-Hoy el **login**, las **categorías**, la **configuración**, los **proveedores**, los **productos**, las **compras** y las **ventas** usan la base de datos. Lo demás (usuarios, perfil, inicio y reportes) sigue en el navegador o con datos fijos.
+Hoy el **login**, las **categorías**, la **configuración**, los **proveedores**, los **productos**, las **compras**, las **ventas**, los **usuarios** y **Mi perfil** usan la base de datos. Solo **Inicio** y **Reportes** siguen con datos fijos.
 Para cada módulo: endpoints en el backend (con su permiso) y reemplazar su `store.js` por llamadas a la API, con mensajes de carga y de error.
 
 - [x] **Categorías**: listar, crear, editar, activar/desactivar; no eliminar si tiene productos.
@@ -45,10 +45,10 @@ Para cada módulo: endpoints en el backend (con su permiso) y reemplazar su `sto
   - [x] **Anular** en lugar de borrar: pedir motivo, guardar quién y cuándo, y devolver el stock.
   - [ ] Decidir si **anular** debe quedar solo para la administradora (hoy puede cualquiera con permiso POS).
 - [x] **Historial de ventas** desde la API, mostrando las anuladas.
-- [ ] **Usuarios** (solo administradora)
-  - [ ] Crear, editar, desactivar y asignar permisos.
-  - [ ] Asignar o restablecer la contraseña de un usuario.
-- [ ] **Mi perfil**: editar los datos propios y **pantalla para cambiar la contraseña** (el endpoint ya existe: `POST /api/auth/cambiar-password`).
+- [x] **Usuarios** (permiso Usuarios)
+  - [x] Crear, editar, desactivar y asignar permisos (no se borran; nadie puede desactivarse ni quitarse el permiso Usuarios a sí mismo, y siempre queda al menos uno).
+  - [x] Asignar o restablecer la contraseña de un usuario.
+- [x] **Mi perfil**: editar los datos propios y **pantalla para cambiar la contraseña**.
 - [ ] **Inicio (Dashboard)** con datos reales. Hoy los números son fijos: ventas de hoy y del mes, gráfico de ingresos, ventas por categoría, productos más vendidos y alertas de stock bajo.
   - [ ] Definir qué hace el botón **"Pedir"** de las alertas (por ejemplo, abrir una compra nueva con ese producto).
 - [ ] **Reportes** con datos reales (hoy son fijos) y que funcionen los botones **Exportar PDF** y **Exportar Excel** (hoy no hacen nada).

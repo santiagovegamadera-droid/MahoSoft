@@ -1,9 +1,19 @@
 import { useState } from 'react';
-import { Plus, UserCog } from 'lucide-react';
-import useUsers, { PERMISSIONS, ROLES, initials } from '@/features/users/store';
+import { KeyRound, Loader2, Pencil, Plus, UserCog } from 'lucide-react';
+import useUsers, {
+  PASSWORD_MIN,
+  PERMISSIONS,
+  ROLES,
+  initials,
+  resetPassword,
+  useCurrentUser,
+} from '@/features/users/store';
+import { refreshUser } from '@/features/auth/session';
+import useSettings from '@/features/settings/store';
+import DocumentInput, { defaultDocType } from '@/shared/components/DocumentInput';
+import { ErrorAlert, LoadingState } from '@/shared/components/Feedback';
 import Modal from '@/shared/components/Modal';
-import ConfirmDialog from '@/shared/components/ConfirmDialog';
-import { Button, CheckboxList, Field, RowActions, StatusToggle, inputClass } from '@/shared/components/Form';
+import { Button, CheckboxList, Field, StatusToggle, inputClass } from '@/shared/components/Form';
 import usePagination from '@/shared/lib/usePagination';
 import Pagination from '@/shared/components/Pagination';
 import { EmptyState, Table, TableCard } from '@/shared/components/Table';
@@ -16,28 +26,68 @@ const rolColors = {
 };
 
 const emptyUser = {
-  name: '',
+  nombre: '',
   email: '',
   rol: 'Vendedora',
+  telefono: '',
+  tipoDocumento: '',
+  documento: '',
   permisos: ['POS'],
-  estado: 'Activo',
-  ultimo: '—',
+  activo: true,
 };
 
-function UserForm({ user, onSave, onClose }) {
-  const [form, setForm] = useState(() =>
-    user ? { ...user, permisos: user.permisos.filter((p) => PERMISSIONS.includes(p)) } : emptyUser,
+// Fields the API takes when saving (the password only when creating)
+const toRequest = (u) => Object.fromEntries(Object.keys(emptyUser).map((k) => [k, u[k]]));
+const estadoOf = (activo) => (activo ? 'Activo' : 'Inactivo');
+const fmtAccess = (iso) =>
+  iso
+    ? new Date(iso).toLocaleString('es-CO', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
+    : 'Nunca';
+
+function SaveButton({ saving, label = 'Guardar', form }) {
+  return (
+    <Button type="submit" form={form} disabled={saving}>
+      {saving && <Loader2 size={16} className="animate-spin" />}
+      {saving ? 'Guardando…' : label}
+    </Button>
   );
+}
+
+function UserForm({ user, onSave, onClose }) {
+  const { tiposDocumento } = useSettings();
+  const [form, setForm] = useState(() => {
+    const base = user ? toRequest(user) : emptyUser;
+    return { ...base, tipoDocumento: base.tipoDocumento || defaultDocType(tiposDocumento, 'CC'), password: '' };
+  });
   const [errors, setErrors] = useState({});
+  const [saveError, setSaveError] = useState('');
+  const [saving, setSaving] = useState(false);
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
 
-  function submit(e) {
+  async function submit(e) {
     e.preventDefault();
     const next = {};
-    if (!form.name.trim()) next.name = 'El nombre es obligatorio';
+    if (!form.nombre.trim()) next.nombre = 'El nombre es obligatorio';
     if (!form.email.trim()) next.email = 'El email es obligatorio';
+    if (!user && form.password.length < PASSWORD_MIN) next.password = `Mínimo ${PASSWORD_MIN} caracteres`;
     setErrors(next);
-    if (Object.keys(next).length === 0) onSave({ ...form, name: form.name.trim(), email: form.email.trim() });
+    if (Object.keys(next).length) return;
+
+    setSaveError('');
+    setSaving(true);
+    try {
+      await onSave({
+        ...toRequest(form),
+        nombre: form.nombre.trim(),
+        email: form.email.trim(),
+        telefono: form.telefono.trim(),
+        documento: form.documento.trim(),
+        ...(!user && { password: form.password }),
+      });
+    } catch (err) {
+      setSaveError(err.message);
+      setSaving(false);
+    }
   }
 
   return (
@@ -49,19 +99,51 @@ function UserForm({ user, onSave, onClose }) {
           <Button variant="secondary" onClick={onClose}>
             Cancelar
           </Button>
-          <Button type="submit" form="user-form">
-            Guardar
-          </Button>
+          <SaveButton saving={saving} form="user-form" />
         </>
       }
     >
       <form id="user-form" onSubmit={submit} className="space-y-4">
-        <Field label="Nombre" error={errors.name}>
-          <input value={form.name} onChange={set('name')} className={inputClass} autoFocus />
+        <Field label="Nombre" error={errors.nombre}>
+          <input value={form.nombre} onChange={set('nombre')} maxLength={150} className={inputClass} autoFocus />
         </Field>
-        <Field label="Email" error={errors.email}>
-          <input type="email" value={form.email} onChange={set('email')} className={inputClass} />
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Email" error={errors.email}>
+            <input type="email" value={form.email} onChange={set('email')} maxLength={256} className={inputClass} />
+          </Field>
+          <Field label="Teléfono">
+            <input
+              value={form.telefono}
+              onChange={set('telefono')}
+              maxLength={30}
+              inputMode="tel"
+              className={inputClass}
+            />
+          </Field>
+        </div>
+        <Field label="Documento" group>
+          <DocumentInput
+            types={tiposDocumento}
+            tipo={form.tipoDocumento}
+            numero={form.documento}
+            onTipoChange={(tipoDocumento) => setForm((f) => ({ ...f, tipoDocumento }))}
+            onNumeroChange={(documento) => setForm((f) => ({ ...f, documento }))}
+          />
         </Field>
+        {!user && (
+          <Field label="Contraseña inicial" error={errors.password}>
+            <input
+              type="password"
+              value={form.password}
+              onChange={set('password')}
+              autoComplete="new-password"
+              className={inputClass}
+            />
+            <span className="block mt-1 text-xs text-subtle">
+              Dísela al usuario; luego podrá cambiarla en Mi perfil.
+            </span>
+          </Field>
+        )}
         <div className="grid grid-cols-2 gap-3">
           <Field label="Rol">
             <select value={form.rol} onChange={set('rol')} className={inputClass}>
@@ -72,7 +154,10 @@ function UserForm({ user, onSave, onClose }) {
           </Field>
           <Field label="Estado" group>
             <div className="py-2.5">
-              <StatusToggle value={form.estado} onChange={(estado) => setForm((f) => ({ ...f, estado }))} />
+              <StatusToggle
+                value={estadoOf(form.activo)}
+                onChange={(estado) => setForm((f) => ({ ...f, activo: estado === 'Activo' }))}
+              />
             </div>
           </Field>
         </div>
@@ -83,24 +168,101 @@ function UserForm({ user, onSave, onClose }) {
             onChange={(permisos) => setForm((f) => ({ ...f, permisos }))}
           />
         </Field>
+        <ErrorAlert message={saveError} />
       </form>
     </Modal>
   );
 }
 
+/** The administrator sets a new password for someone who forgot theirs */
+function ResetPassword({ user, onClose }) {
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [done, setDone] = useState(false);
+
+  async function submit(e) {
+    e.preventDefault();
+    if (password.length < PASSWORD_MIN) return setError(`La contraseña debe tener al menos ${PASSWORD_MIN} caracteres`);
+    setError('');
+    setSaving(true);
+    try {
+      await resetPassword(user.id, password);
+      setDone(true);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <Modal
+      title="Restablecer contraseña"
+      onClose={onClose}
+      footer={
+        done ? (
+          <Button onClick={onClose}>Listo</Button>
+        ) : (
+          <>
+            <Button variant="secondary" onClick={onClose}>
+              Cancelar
+            </Button>
+            <SaveButton saving={saving} form="reset-form" label="Guardar contraseña" />
+          </>
+        )
+      }
+    >
+      {done ? (
+        <p className="text-sm text-brand-600">
+          Listo. Dile a {user.nombre} su nueva contraseña; podrá cambiarla en Mi perfil.
+        </p>
+      ) : (
+        <form id="reset-form" onSubmit={submit} className="space-y-4">
+          <p className="text-sm text-brand-600">Nueva contraseña para {user.nombre}.</p>
+          <Field label="Nueva contraseña">
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoComplete="new-password"
+              className={inputClass}
+              autoFocus
+            />
+          </Field>
+          <ErrorAlert message={error} />
+        </form>
+      )}
+    </Modal>
+  );
+}
+
 export default function Users() {
-  const { items: users, create, update, remove } = useUsers();
+  const me = useCurrentUser();
+  const { items: users, loaded, loading, error, reload, create, update } = useUsers();
   const [role, setRole] = useState('Todos');
   const [editing, setEditing] = useState(null); // null | 'new' | user
-  const [deleting, setDeleting] = useState(null);
+  const [resetting, setResetting] = useState(null);
+  const [actionError, setActionError] = useState('');
 
   const filtered = users.filter((u) => role === 'Todos' || u.rol === role);
   const pager = usePagination(filtered, role);
 
-  function save(data) {
-    if (editing === 'new') create(data);
-    else update(editing.id, data);
+  async function save(data) {
+    if (editing === 'new') await create(data);
+    else await update(editing.id, data);
+    // The sidebar shows the session's name and permissions
+    if (editing !== 'new' && editing.id === me.id) await refreshUser();
     setEditing(null);
+  }
+
+  async function setActivo(user, activo) {
+    setActionError('');
+    try {
+      await update(user.id, { ...toRequest(user), activo });
+    } catch (err) {
+      setActionError(err.message);
+    }
   }
 
   return (
@@ -112,6 +274,9 @@ export default function Users() {
         </Button>
       </Toolbar>
 
+      <ErrorAlert message={error} onRetry={reload} className="mb-4" />
+      <ErrorAlert message={actionError} className="mb-4" />
+
       <TableCard>
         <Table columns={['Usuario', 'Rol', 'Permisos', 'Último acceso', 'Estado', '']}>
           {pager.pageItems.map((user) => (
@@ -119,10 +284,13 @@ export default function Users() {
               <td className="px-4 py-2.5">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 bg-brand-200 text-brand-800">
-                    {initials(user.name)}
+                    {initials(user.nombre)}
                   </div>
                   <div>
-                    <p className="font-medium text-brand-800">{user.name}</p>
+                    <p className="font-medium text-brand-800">
+                      {user.nombre}
+                      {user.id === me.id && <span className="ml-1.5 text-xs font-normal text-subtle">(tú)</span>}
+                    </p>
                     <p className="text-xs text-subtle">{user.email}</p>
                   </div>
                 </div>
@@ -145,36 +313,46 @@ export default function Users() {
                   )}
                 </div>
               </td>
-              <td className="px-4 py-2.5 text-xs font-mono text-brand-600">{user.ultimo}</td>
+              <td className="px-4 py-2.5 text-xs text-brand-600">{fmtAccess(user.ultimoAcceso)}</td>
               <td className="px-4 py-2.5">
                 <StatusToggle
-                  value={user.estado}
-                  label={user.name}
-                  onChange={(estado) => update(user.id, { estado })}
+                  value={estadoOf(user.activo)}
+                  label={user.nombre}
+                  onChange={(estado) => setActivo(user, estado === 'Activo')}
                 />
               </td>
               <td className="px-4 py-2.5">
-                <RowActions label={user.name} onEdit={() => setEditing(user)} onDelete={() => setDeleting(user)} />
+                <div className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() => setEditing(user)}
+                    className="p-1.5 rounded-lg text-brand-600 hover:bg-brand-50 hover:text-brand-800"
+                    aria-label={`Editar ${user.nombre}`}
+                    title="Editar"
+                  >
+                    <Pencil size={15} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setResetting(user)}
+                    className="p-1.5 rounded-lg text-brand-600 hover:bg-brand-50 hover:text-brand-800"
+                    aria-label={`Restablecer contraseña de ${user.nombre}`}
+                    title="Restablecer contraseña"
+                  >
+                    <KeyRound size={15} />
+                  </button>
+                </div>
               </td>
             </tr>
           ))}
         </Table>
-        {filtered.length === 0 && <EmptyState icon={UserCog} message="No hay usuarios." />}
+        {!loaded && loading && <LoadingState message="Cargando usuarios…" />}
+        {loaded && filtered.length === 0 && <EmptyState icon={UserCog} message="No hay usuarios." />}
         <Pagination pager={pager} label="usuarios" />
       </TableCard>
 
       {editing && <UserForm user={editing === 'new' ? null : editing} onSave={save} onClose={() => setEditing(null)} />}
-      {deleting && (
-        <ConfirmDialog
-          title="Eliminar usuario"
-          message={`¿Eliminar a ${deleting.name}? Perderá el acceso al sistema.`}
-          onCancel={() => setDeleting(null)}
-          onConfirm={() => {
-            remove(deleting.id);
-            setDeleting(null);
-          }}
-        />
-      )}
+      {resetting && <ResetPassword user={resetting} onClose={() => setResetting(null)} />}
     </div>
   );
 }
