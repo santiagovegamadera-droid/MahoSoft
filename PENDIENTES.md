@@ -26,7 +26,7 @@ Para cada módulo: endpoints en el backend (con su permiso) y reemplazar su `sto
   - [x] CRUD con tallas, colores y stock por talla (cambiar el stock registra un movimiento de ajuste).
   - [x] Subir fotos a **Cloudinary** (claves guardadas con `user-secrets`).
   - [x] "Proveedores" y "Último proveedor" calculados desde las compras.
-  - [ ] **Regenerar el secreto de Cloudinary** antes de producción (se compartió por chat).
+  - [x] Secreto de Cloudinary: se deja el actual (decidido). Se puede regenerar más adelante en Settings → API Keys.
 - [x] **Configuración**: datos del negocio, tipos de documento, tallas, bancos, descuentos del POS y umbrales de stock bajo.
   - [ ] Completar los **datos del negocio** (NIT o cédula, dirección, teléfono, correo): salen en los recibos y como comprador en las compras.
 - [x] **Proveedores**
