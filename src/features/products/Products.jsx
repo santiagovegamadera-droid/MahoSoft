@@ -3,7 +3,6 @@ import { Plus, Shirt } from 'lucide-react';
 import useProducts, { toProductRequest, totalStock } from '@/features/products/store';
 import useCategories from '@/features/categories/store';
 import StockOverview from '@/features/products/StockOverview';
-import InventoryMovements from '@/features/products/InventoryMovements';
 import useSettings from '@/features/settings/store';
 import ConfirmDialog from '@/shared/components/ConfirmDialog';
 import { ErrorAlert, LoadingState } from '@/shared/components/Feedback';
@@ -62,7 +61,6 @@ export default function Products({ onEdit, onNew }) {
           options={[
             ['productos', 'Productos'],
             ['stock', 'Stock actual'],
-            ['movimientos', 'Movimientos'],
           ]}
         />
       </div>
@@ -71,7 +69,6 @@ export default function Products({ onEdit, onNew }) {
       <ErrorAlert message={actionError} className="mb-4" />
 
       {tab === 'stock' && <StockOverview products={products} catName={catName} />}
-      {tab === 'movimientos' && <InventoryMovements />}
 
       {tab === 'productos' && (
         <>

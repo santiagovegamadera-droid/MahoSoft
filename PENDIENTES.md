@@ -59,7 +59,7 @@ Para cada módulo: endpoints en el backend (con su permiso) y reemplazar su `sto
 
 ## 2. Funciones que faltan
 
-- [x] **Ajustes de inventario** (Productos → Movimientos): historial de todos los movimientos con filtros, y registrar conteo físico, prenda dañada o perdida, devolución a proveedor o ingreso sin compra.
+- [ ] **Ajustes de inventario**: la pestaña Productos → Movimientos se quitó a pedido. El backend sigue listo (`GET /api/inventario/movimientos`, `POST /api/inventario/ajustes`); falta decidir si se registran ajustes desde otra pantalla.
 - [x] **Enviar la factura por correo** al cliente desde el POS (sale sola si el cliente dejó su correo).
 - [x] **Recuperar la contraseña por correo**: "¿Olvidaste tu contraseña?" envía un enlace que vence en 1 hora y sirve una sola vez.
   - [ ] **Configurar el Gmail de la tienda** (decidido): pasar la dirección y una contraseña de aplicación y guardarlas con `user-secrets` (ver el README del backend). Mientras tanto, ambas funciones responden "todavía no está configurado".
