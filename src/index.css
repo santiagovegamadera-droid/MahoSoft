@@ -75,3 +75,23 @@ body {
   background: var(--color-brand-400);
   border-radius: 9999px;
 }
+
+/* Printing a receipt: only the .print-area copy is printed, without the app around it */
+.print-area {
+  display: none;
+}
+@media print {
+  @page {
+    margin: 12mm;
+  }
+  body > *:not(.print-area) {
+    display: none !important;
+  }
+  .print-area {
+    display: block;
+  }
+  .print-area * {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+}

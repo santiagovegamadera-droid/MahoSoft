@@ -58,10 +58,11 @@ Para cada módulo: endpoints en el backend (con su permiso) y reemplazar su `sto
 
 ## 2. Funciones que faltan
 
-- [ ] **Pantalla de ajustes de inventario**: hoy el stock solo cambia con compras y ventas. Falta poder registrar conteos, prendas dañadas, devoluciones a proveedor, etc. La tabla `MovimientosInventario` ya existe.
+- [x] **Ajustes de inventario** (Productos → Movimientos): historial de todos los movimientos con filtros, y registrar conteo físico, prenda dañada o perdida, devolución a proveedor o ingreso sin compra.
 - [ ] **Enviar la factura por correo** al cliente (hoy es simulado en el POS). Requiere un servicio de correo.
 - [ ] **Recuperar la contraseña por correo** (hoy dice "pídele a la administradora"). Usa el mismo servicio de correo.
-- [ ] **Imprimir el comprobante de venta**: revisar cómo se ve impreso.
+- [x] **Imprimir el comprobante de venta**: botón "Imprimir" en el comprobante; se imprime solo el recibo en una hoja.
+  - [ ] Si la tienda usa **impresora térmica de 80 mm**, adaptar el formato (hoy está pensado para hoja carta o A4).
 
 ---
 

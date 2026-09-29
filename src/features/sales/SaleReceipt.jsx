@@ -1,3 +1,5 @@
+import { createPortal } from 'react-dom';
+import { Printer } from 'lucide-react';
 import logoSrc from '@/assets/public/logo.png';
 import Modal from '@/shared/components/Modal';
 import { Button } from '@/shared/components/Form';
@@ -176,12 +178,24 @@ export function ReceiptModal({ sale, onClose }) {
       size="lg"
       onClose={onClose}
       footer={
-        <Button variant="secondary" onClick={onClose}>
-          Cerrar
-        </Button>
+        <>
+          <Button variant="secondary" onClick={() => window.print()}>
+            <Printer size={16} /> Imprimir
+          </Button>
+          <Button variant="secondary" onClick={onClose}>
+            Cerrar
+          </Button>
+        </>
       }
     >
       <SaleReceipt sale={sale} />
+      {/* A copy outside the app: when printing, only this is shown (see .print-area in index.css) */}
+      {createPortal(
+        <div className="print-area">
+          <SaleReceipt sale={sale} />
+        </div>,
+        document.body,
+      )}
     </Modal>
   );
 }
