@@ -10,7 +10,7 @@ import usePagination from '@/shared/lib/usePagination';
 import Pagination from '@/shared/components/Pagination';
 import StatCard from '@/shared/components/StatCard';
 import { Button, Field, inputClass } from '@/shared/components/Form';
-import { ClickableRow, EmptyState, Table, TableCard } from '@/shared/components/Table';
+import { ClickableRow, EmptyState, Table, TableCard, TableTitle } from '@/shared/components/Table';
 import { FilterSelect, SearchInput, Toolbar } from '@/shared/components/Toolbar';
 
 const paymentIcons = { Efectivo: Banknote, Tarjeta: CreditCard, Transferencia: Landmark };
@@ -22,6 +22,26 @@ const fmtDay = (iso) => new Date(iso).toLocaleDateString('es-CO', { day: '2-digi
 const fmtTime = (iso) => new Date(iso).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
 const isToday = (iso) => new Date(iso).toDateString() === new Date().toDateString();
 const customerName = (s) => s.cliente?.nombre || 'Cliente general';
+// Ignores accents and case, so "gomez" finds "Gómez"
+const normalize = (t) =>
+  (t ?? '')
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .toLowerCase();
+const digits = (t) => (t ?? '').replace(/\D/g, '');
+
+/** Whether a sale matches the search: invoice number, customer name, ID document or phone */
+function matches(sale, query) {
+  const text = normalize(query);
+  const number = digits(query);
+  return (
+    [sale.numeroFactura, customerName(sale), sale.cliente?.documento, sale.cliente?.telefono].some((v) =>
+      normalize(v).includes(text),
+    ) ||
+    // "1.000.001" finds 1000001
+    (number.length >= 3 && [sale.cliente?.documento, sale.cliente?.telefono].some((v) => digits(v).includes(number)))
+  );
+}
 
 function VoidedBadge() {
   return (
@@ -104,11 +124,10 @@ export default function SalesHistory() {
     }
   }
 
-  const q = search.toLowerCase();
+  // Without a search the list shows today's sales; a search looks through every day
+  const q = search.trim();
   const filtered = sales.filter(
-    (s) =>
-      (payment === 'todos' || s.metodoPago === payment) &&
-      (s.numeroFactura.toLowerCase().includes(q) || customerName(s).toLowerCase().includes(q)),
+    (s) => (payment === 'todos' || s.metodoPago === payment) && (q ? matches(s, q) : isToday(s.fecha)),
   );
   const selected = sales.find((s) => s.id === selectedId);
   const pager = usePagination(filtered, `${search}|${payment}`);
@@ -129,7 +148,12 @@ export default function SalesHistory() {
       <ErrorAlert message={error} onRetry={reload} className="mb-4" />
 
       <Toolbar>
-        <SearchInput value={search} onChange={setSearch} placeholder="Buscar por factura o cliente..." />
+        <SearchInput
+          value={search}
+          onChange={setSearch}
+          placeholder="Buscar en todas las fechas: cliente, cédula o factura"
+          className="w-full sm:w-96"
+        />
         <FilterSelect
           value={payment}
           onChange={setPayment}
@@ -140,6 +164,14 @@ export default function SalesHistory() {
 
       <div className="flex flex-col lg:flex-row gap-4 items-stretch lg:items-start">
         <TableCard className="flex-1 min-w-0">
+          <TableTitle
+            title={q ? 'Resultados en todas las fechas' : 'Ventas de hoy'}
+            subtitle={
+              q
+                ? `${filtered.length} ${filtered.length === 1 ? 'venta encontrada' : 'ventas encontradas'}`
+                : new Date().toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'long' })
+            }
+          />
           <Table columns={['Factura', 'Fecha', 'Cliente', 'Prendas', 'Pago', 'Total']}>
             {pager.pageItems.map((s) => {
               const PayIcon = paymentIcons[s.metodoPago];
@@ -184,7 +216,14 @@ export default function SalesHistory() {
           </Table>
           {!loaded && loading && <LoadingState message="Cargando ventas…" />}
           {loaded && filtered.length === 0 && (
-            <EmptyState icon={ReceiptText} message="No hay ventas que coincidan con la búsqueda." />
+            <EmptyState
+              icon={ReceiptText}
+              message={
+                q
+                  ? 'No hay ventas que coincidan con la búsqueda.'
+                  : 'Hoy todavía no hay ventas. Para ver ventas de otros días, busca por cliente, cédula o factura.'
+              }
+            />
           )}
           <Pagination pager={pager} label="ventas" />
         </TableCard>

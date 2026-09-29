@@ -36,7 +36,4 @@ export async function voidSale(id, motivo) {
   return sale;
 }
 
-/** Saved customers whose document, phone or name contains `text` (at least 3 characters) */
-export const searchCustomers = (text, signal) => api(`/api/clientes?q=${encodeURIComponent(text)}`, { signal });
-
 export default useSales;

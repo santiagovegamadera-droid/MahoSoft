@@ -40,11 +40,11 @@ Para cada módulo: endpoints en el backend (con su permiso) y reemplazar su `sto
   - [ ] En producción, poner `Archivos:Carpeta` en un disco con **copia de seguridad** (las facturas no están en la base de datos).
 - [x] **Ventas / Punto de venta**
   - [x] Registrar la venta: número de factura consecutivo sin repetirse aunque dos cajas vendan a la vez, descontar el stock y guardar el costo del momento.
-  - [x] **Clientes**: buscar por documento o teléfono para no volver a escribir sus datos.
+  - [x] **Clientes**: se guardan y se reconocen por cédula o teléfono al registrar la venta (se quitó el buscador de clientes del POS a pedido).
   - [x] Pedidos con datos de entrega.
   - [x] Comprobante de transferencia (archivo, banco y referencia).
   - [x] **Anular** en lugar de borrar: pedir motivo, guardar quién y cuándo, y devolver el stock.
-- [x] **Historial de ventas** desde la API, mostrando las anuladas.
+- [x] **Historial de ventas** desde la API, mostrando las anuladas. Muestra las ventas **de hoy**; para días anteriores se busca por cliente, cédula, teléfono o factura en todas las fechas.
 - [x] **Usuarios** (permiso Usuarios)
   - [x] Crear, editar, desactivar y asignar permisos (no se borran; nadie puede desactivarse ni quitarse el permiso Usuarios a sí mismo, y siempre queda al menos uno).
   - [x] Asignar o restablecer la contraseña de un usuario.

@@ -5,7 +5,6 @@ import { Button, Field, inputClass } from '@/shared/components/Form';
 import DocumentInput, { defaultDocType } from '@/shared/components/DocumentInput';
 import { isEmail } from '@/features/pos/SendInvoice';
 import useSettings from '@/features/settings/store';
-import CustomerSearch from '@/features/pos/CustomerSearch';
 
 export const EMPTY_CUSTOMER = { nombre: '', tipoDocumento: '', documento: '', telefono: '', correo: '' };
 export const EMPTY_DELIVERY = { direccion: '', barrio: '', ciudad: '', fecha: '', envio: 0, notas: '' };
@@ -63,17 +62,6 @@ export default function CustomerModal({ isOrder, customer, delivery, onSave, onC
         }}
         className="space-y-5"
       >
-        <CustomerSearch
-          onPick={(found) =>
-            setC({
-              nombre: found.nombre,
-              tipoDocumento: found.tipoDocumento || c.tipoDocumento,
-              documento: found.documento,
-              telefono: found.telefono,
-              correo: found.correo,
-            })
-          }
-        />
         <div className="grid grid-cols-1 sm:grid-cols-[3fr_2fr] gap-3">
           <Field label="Nombre" error={touched && errors.nombre} className="sm:col-span-2">
             <input value={c.nombre} onChange={setCustomer('nombre')} className={inputClass} autoFocus />
