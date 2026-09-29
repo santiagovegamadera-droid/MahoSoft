@@ -74,8 +74,8 @@ Para cada módulo: endpoints en el backend (con su permiso) y reemplazar su `sto
 - [ ] Definir **dónde se publica**: la API, la base de datos SQL Server y el frontend.
 - [ ] En producción: clave JWT y cadena de conexión como variables de entorno (nunca en el código), HTTPS y el dominio real del frontend en `Cors:Origenes`.
 - [ ] **Copias de seguridad** automáticas de la base de datos y de la carpeta de PDF.
-- [ ] Revisar qué puede hacer cada rol en cada endpoint (Vendedora, Bodega, Administradora).
-- [ ] **Pruebas automáticas del backend** (totales de compras y ventas, stock, anulaciones). Hoy no hay ninguna.
+- [x] Revisar qué puede hacer cada rol en cada endpoint (Vendedora, Bodega, Administradora): cubierto por las pruebas de permisos.
+- [x] **Pruebas automáticas del backend** (`backend/tests/MahoSoft.Pruebas`, `dotnet test`): 29 pruebas de totales, stock, concurrencia, anulaciones, ajustes y permisos, contra una base aparte.
 
 ---
 
