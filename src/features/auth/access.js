@@ -1,4 +1,5 @@
-// Which permission (as set in Usuarios) opens each screen. Screens not listed are open to every user.
+// Which permission opens each screen. The system has a single user, the administrator, who has them all;
+// the checks stay so a screen never opens for a session without the permission.
 const VIEW_PERMISSION = {
   dashboard: 'Dashboard',
   pos: 'POS',
@@ -8,7 +9,6 @@ const VIEW_PERMISSION = {
   'product-detail': 'Compras',
   categories: 'Compras',
   suppliers: 'Proveedores',
-  users: 'Usuarios',
   reports: 'Reportes',
 };
 
@@ -22,5 +22,4 @@ export function canView(user, view) {
 
 /** Screen to land on after signing in: the first one the user may open */
 export const homeView = (user) =>
-  ['dashboard', 'pos', 'purchases', 'products', 'suppliers', 'reports', 'users'].find((v) => canView(user, v)) ??
-  'profile';
+  ['dashboard', 'pos', 'purchases', 'products', 'suppliers', 'reports'].find((v) => canView(user, v)) ?? 'profile';

@@ -46,10 +46,10 @@ export default function Login() {
       style={{ backgroundImage: `url(${fondo})` }}
     >
       {/* Left panel */}
-      <div className="hidden lg:flex flex-col justify-between gap-[2vh] w-120 xl:w-140 px-14 py-[4vh] shrink-0 backdrop-blur-md bg-linear-160 from-brand-750/86 to-brand-900/90">
+      <div className="hidden lg:flex flex-col justify-between gap-[2vh] w-120 xl:w-140 px-14 py-[4vh] shrink-0 backdrop-blur-md bg-linear-160 from-brand-800/86 to-brand-900/90">
         {/* Logo + tagline */}
         <div className="flex flex-col items-center">
-          <div className="w-[clamp(88px,17vh,160px)] aspect-square rounded-[clamp(18px,3vh,28px)] p-[1.5vh] flex items-center justify-center bg-linear-145 from-white to-brand-75 border-3 border-brand-300/90 shadow-[0_0_32px_rgba(230,180,245,0.45)]">
+          <div className="w-[clamp(88px,17vh,160px)] aspect-square rounded-[clamp(18px,3vh,28px)] p-[1.5vh] flex items-center justify-center bg-linear-145 from-white to-brand-100 border-3 border-brand-300/90 shadow-[0_0_32px_rgba(230,180,245,0.45)]">
             <img src={logoSrc} alt="Maho Boutique" className="w-full h-full object-contain" />
           </div>
           <p className="mt-[2vh] text-[clamp(9px,1.3vh,11px)] font-medium tracking-[0.4em] whitespace-nowrap text-brand-200/90">

@@ -8,7 +8,6 @@ const titles = {
   pos: 'Punto de venta',
   'sales-history': 'Historial de ventas',
   suppliers: 'Proveedores',
-  users: 'Usuarios',
   reports: 'Reportes',
   categories: 'Categorías',
   settings: 'Configuración',

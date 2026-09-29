@@ -10,20 +10,21 @@
   --font-mono: 'DM Mono', monospace;
   --font-script: 'Great Vibes', cursive;
 
-  --color-brand-900: #3a2541;
-  --color-brand-750: #5a3a64;
-  --color-brand-700: #5e2f70;
-  --color-brand-800: #503459;
-  --color-brand-600: #81638b;
-  --color-brand-500: #8a5a9b;
-  --color-brand-400: #b695c0;
-  --color-brand-300: #deb8eb;
-  --color-brand-200: #dac9df;
-  --color-brand-150: #e8dff0;
-  --color-brand-100: #f0e8f5;
-  --color-brand-75: #f3e6f7;
-  --color-brand-50: #f5f0f7;
+  /* Brand, light to dark. 25-200: backgrounds and borders; 300-400: accents and placeholders;
+     600: secondary text and icons; 800: primary text and buttons; 900: overlays and the sidebar. */
   --color-brand-25: #faf7fc;
+  --color-brand-50: #f5f0f7;
+  --color-brand-100: #f0e8f5;
+  --color-brand-150: #e8dff0;
+  --color-brand-200: #dac9df;
+  --color-brand-300: #deb8eb;
+  --color-brand-400: #b695c0;
+  --color-brand-600: #81638b;
+  --color-brand-800: #503459;
+  --color-brand-900: #3a2541;
+  /* Saturated accents, off the grey-purple scale: gradient of the main login button and highlighted prices */
+  --color-brand-500: #8a5a9b;
+  --color-brand-700: #5e2f70;
   --color-canvas: #f8f5fa;
   /* Secondary text: muted lilac grey with at least 4.5:1 contrast on white and canvas */
   --color-subtle: #7d6b85;

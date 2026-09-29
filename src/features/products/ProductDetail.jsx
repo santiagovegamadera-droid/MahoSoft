@@ -7,6 +7,7 @@ import ImageUpload from '@/features/products/ImageUpload';
 import ConfirmDialog from '@/shared/components/ConfirmDialog';
 import { ErrorAlert, LoadingState } from '@/shared/components/Feedback';
 import { Button, Field, StatusToggle, inputClass } from '@/shared/components/Form';
+import { SegmentedTabs } from '@/shared/components/Toolbar';
 
 const emptyProduct = {
   nombre: '',
@@ -131,8 +132,8 @@ function ProductForm({ existing, onBack }) {
   const sizes = sortSizes(Object.keys(form.stock), tallas);
 
   const tabs = [
-    { id: 'general', label: 'Información general' },
-    { id: 'inventario', label: 'Inventario por talla' },
+    ['general', 'Información general'],
+    ['inventario', 'Inventario por talla'],
   ];
 
   return (
@@ -144,21 +145,8 @@ function ProductForm({ existing, onBack }) {
         <ArrowLeft size={16} /> Volver a productos
       </button>
 
-      {/* Tabs */}
-      <div className="flex gap-1 mb-6 p-1 rounded-xl w-fit bg-brand-50">
-        {tabs.map((t) => (
-          <button
-            key={t.id}
-            onClick={() => setTab(t.id)}
-            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
-              tab === t.id
-                ? 'bg-white text-brand-800 shadow-[0_1px_3px_rgba(80,52,89,0.1)]'
-                : 'bg-transparent text-brand-600 shadow-none'
-            }`}
-          >
-            {t.label}
-          </button>
-        ))}
+      <div className="mb-6">
+        <SegmentedTabs value={tab} onChange={setTab} options={tabs} label="Secciones del producto" />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
