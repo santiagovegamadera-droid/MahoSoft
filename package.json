@@ -7,9 +7,11 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "format": "oxfmt"
+    "format": "prettier --write src",
+    "format:check": "prettier --check src"
   },
   "dependencies": {
+    "lucide-react": "^1.47.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "recharts": "^3.10.1"
@@ -20,7 +22,7 @@
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^6.0.0",
-    "oxfmt": "^0.2.0",
+    "prettier": "3.9.9",
     "tailwindcss": "^4.0.0",
     "vite": "^8.0.5"
   }
